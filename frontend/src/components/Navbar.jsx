@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Logo from './Logo'
 
 export default function Navbar({ currentPage, onNavigate }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -17,14 +18,9 @@ export default function Navbar({ currentPage, onNavigate }) {
           {/* Logo */}
           <button
             onClick={() => onNavigate('home')}
-            className="flex items-center gap-3 group"
+            className="flex items-center group"
           >
-            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:shadow-indigo-500/50 transition-all duration-300">
-              <i className="fa-solid fa-road text-white text-lg"></i>
-            </div>
-            <span className="text-xl font-bold bg-linear-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-              LevelUp Map
-            </span>
+            <Logo className="scale-90 origin-left" />
           </button>
 
           {/* Desktop Navigation */}

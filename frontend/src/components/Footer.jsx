@@ -1,3 +1,5 @@
+import Logo from './Logo'
+
 export default function Footer({ onNavigate }) {
   return (
     <footer className="bg-slate-950 border-t border-white/5">
@@ -5,11 +7,8 @@ export default function Footer({ onNavigate }) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                <i className="fa-solid fa-road text-white"></i>
-              </div>
-              <span className="text-xl font-bold text-white">LevelUp Map</span>
+            <div className="flex items-center mb-4">
+              <Logo />
             </div>
             <p className="text-slate-400 mb-4 max-w-md">
               Create personalized learning roadmaps with AI. Transform your goals into actionable step-by-step guides powered by LevelUp Map.
