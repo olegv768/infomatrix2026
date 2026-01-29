@@ -9,12 +9,29 @@ import Contact from './pages/Contact'
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
 
+  // Persisted state for Generator
+  const [savedData, setSavedData] = useState(null)
+  const [savedInput, setSavedInput] = useState('')
+  const [savedCompletedNodes, setSavedCompletedNodes] = useState(new Set())
+  const [savedSelectedNode, setSavedSelectedNode] = useState(null)
+
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
         return <Home onNavigate={setCurrentPage} />
       case 'generator':
-        return <Generator />
+        return (
+          <Generator
+            savedData={savedData}
+            setSavedData={setSavedData}
+            savedInput={savedInput}
+            setSavedInput={setSavedInput}
+            savedCompletedNodes={savedCompletedNodes}
+            setSavedCompletedNodes={setSavedCompletedNodes}
+            savedSelectedNode={savedSelectedNode}
+            setSavedSelectedNode={setSavedSelectedNode}
+          />
+        )
       case 'about':
         return <About onNavigate={setCurrentPage} />
       case 'contact':

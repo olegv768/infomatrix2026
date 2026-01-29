@@ -32,7 +32,7 @@ export default function Contact({ onNavigate }) {
     <div className="page-container min-h-screen">
       {/* Hero Section */}
       <section className="min-h-[70vh] flex items-center justify-center px-8 sm:px-12 lg:px-20 relative overflow-hidden">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-600/5 rounded-full blur-[120px] animate-float" style={{ animationDuration: '18s' }}></div>
 
         <div className="max-w-5xl mx-auto text-center relative z-10 px-4">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-6">
@@ -53,13 +53,11 @@ export default function Contact({ onNavigate }) {
         </div>
       </section>
 
-
-
       {/* Contact Form Section */}
       <section className="pt-10 sm:pt-16 lg:pt-20 px-8 sm:px-12 lg:px-20 flex flex-col items-center relative overflow-hidden">
         {/* Decorative background elements for the form section */}
-        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl -z-10"></div>
-        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl -z-10"></div>
+        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-80 h-80 bg-indigo-600/5 rounded-full blur-[140px] -z-10 animate-float" style={{ animationDuration: '22s', animationDelay: '-4s' }}></div>
+        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-80 h-80 bg-purple-600/5 rounded-full blur-[140px] -z-10 animate-float" style={{ animationDuration: '25s', animationDelay: '-8s' }}></div>
 
         <div className="max-w-4xl w-full mx-auto relative group">
           {/* Decorative Gradient Border Wrapper */}

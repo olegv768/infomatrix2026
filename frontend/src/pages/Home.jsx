@@ -1,6 +1,30 @@
+import React, { useEffect, useRef } from 'react'
 import Footer from '../components/Footer'
+import InteractiveHero from '../components/InteractiveHero'
+import AntigravityCards from '../components/AntigravityCards'
 
 export default function Home({ onNavigate }) {
+  const sectionRefs = useRef([])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible')
+          }
+        });
+      },
+      { threshold: 0.1 }
+    )
+
+    sectionRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref)
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
   const features = [
     {
       icon: 'fa-brain',
@@ -34,40 +58,30 @@ export default function Home({ onNavigate }) {
     }
   ]
 
-  // Background particles
-  const particles = Array.from({ length: 50 }, (_, i) => ({
-    id: i,
-    size: Math.random() * 3 + 1,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    duration: Math.random() * 20 + 10,
-    delay: Math.random() * 5,
-  }))
-
   return (
-    <div className="page-container min-h-screen">
+    <div className="page-container min-h-screen relative overflow-hidden">
+      {/* Global Atmospheric Blobs */}
+      <div className="absolute top-[20%] -left-[10%] w-[600px] h-[600px] bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none -z-10 animate-float" style={{ animationDuration: '15s' }}></div>
+      <div className="absolute top-[50%] -right-[5%] w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-[120px] pointer-events-none -z-10 animate-float" style={{ animationDuration: '20s', animationDelay: '-5s' }}></div>
+      <div className="absolute top-[80%] left-[20%] w-[700px] h-[700px] bg-indigo-500/3 rounded-full blur-[150px] pointer-events-none -z-10 animate-float" style={{ animationDuration: '25s', animationDelay: '-10s' }}></div>
+      <style>{`
+        .scroll-section {
+          opacity: 0;
+          transform: translateY(30px);
+          transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .scroll-section.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      `}</style>
+
       {/* Hero Section */}
       <section
-        className="relative overflow-hidden"
-        style={{ paddingTop: '0px', paddingBottom: '10px', paddingLeft: 'clamp(32px, 8vw, 96px)', paddingRight: 'clamp(32px, 8vw, 96px)' }}
+        className="relative overflow-hidden min-h-[70vh] flex items-center justify-center"
+        style={{ paddingLeft: 'clamp(32px, 8vw, 96px)', paddingRight: 'clamp(32px, 8vw, 96px)' }}
       >
-        {/* Background particles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {particles.map((particle) => (
-            <div
-              key={particle.id}
-              className="absolute rounded-full bg-indigo-500/30"
-              style={{
-                width: `${particle.size}px`,
-                height: `${particle.size}px`,
-                left: `${particle.x}%`,
-                top: `${particle.y}%`,
-                animation: `float ${particle.duration}s ease-in-out infinite`,
-                animationDelay: `${particle.delay}s`,
-              }}
-            />
-          ))}
-        </div>
+        <InteractiveHero />
         <div className="max-w-7xl mx-auto text-center relative z-10 px-4">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-8 animate-fade-in-up">
             <i className="fa-solid fa-sparkles"></i>
@@ -85,7 +99,8 @@ export default function Home({ onNavigate }) {
 
       {/* Features Section */}
       <section
-        className="relative"
+        ref={(el) => (sectionRefs.current[0] = el)}
+        className="relative scroll-section"
         style={{ padding: 'clamp(80px, 10vw, 112px) clamp(32px, 8vw, 80px)' }}
       >
         <div className="max-w-7xl mx-auto">
@@ -98,7 +113,7 @@ export default function Home({ onNavigate }) {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-500 group flex flex-col items-center text-center h-full"
+                className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-500 group flex flex-col items-center text-center h-full hover-lift"
               >
                 <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-6 group-hover:shadow-lg group-hover:shadow-indigo-500/30 transition-all duration-500 group-hover:-translate-y-1">
                   <i className={`fa-solid ${feature.icon} text-white text-xl`}></i>
@@ -113,31 +128,26 @@ export default function Home({ onNavigate }) {
 
       {/* How It Works */}
       <section
-        className="bg-linear-to-b from-transparent via-indigo-950/20 to-transparent"
-        style={{ padding: 'clamp(80px, 10vw, 112px) clamp(32px, 8vw, 80px)' }}
+        ref={(el) => (sectionRefs.current[1] = el)}
+        className="relative pt-24 pb-0 w-full flex flex-col items-center scroll-section"
+        style={{ paddingLeft: '110px', paddingRight: '110px' }}
       >
-        <div className="max-w-7xl mx-auto">
-          <div className="h-[70px]"></div> {/* Explicit 70px gap from top */}
-          <div className="text-center -mt-[50px]">
-            <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-2 font-['Outfit'] tracking-tight">How It Works</h2>
-            <p className="text-slate-400 text-lg">Three simple steps to your personalized roadmap</p>
+        <div className="w-full flex flex-col items-center">
+          <div className="text-center">
+            <h2 className="text-4xl sm:text-6xl font-black text-white mb-6 font-['Outfit'] tracking-tight">Process</h2>
+            <p
+              className="text-slate-400 text-xl"
+              style={{ marginBottom: '40px' }}
+            >
+              Simple steps to your AI-powered career roadmap
+            </p>
           </div>
-          <div style={{ height: '70px' }}></div> {/* Forced 70px gap */}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {[
-              { step: 1, icon: 'fa-pen', title: 'Enter Your Goal', desc: 'Type your goal in any language - career change, new skill, or project idea.' },
-              { step: 2, icon: 'fa-wand-magic-sparkles', title: 'AI Generates', desc: 'Our AI analyzes your goal and creates a detailed, step-by-step roadmap.' },
-              { step: 3, icon: 'fa-chart-line', title: 'Track Progress', desc: 'Follow the interactive roadmap and mark steps complete as you go.' },
-            ].map((item) => (
-              <div key={item.step} className="text-center group">
-                <div className="w-24 h-24 rounded-3xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mx-auto mb-8 shadow-xl shadow-indigo-500/20 transition-transform duration-500 group-hover:scale-105">
-                  <i className={`fa-solid ${item.icon} text-white text-3xl`}></i>
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-3">{item.title}</h3>
-                <p className="text-slate-400 leading-relaxed max-w-xs mx-auto">{item.desc}</p>
-              </div>
-            ))}
+          <div
+            className="w-full"
+            style={{ marginBottom: '60px' }}
+          >
+            <AntigravityCards />
           </div>
         </div>
       </section>

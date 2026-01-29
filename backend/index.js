@@ -38,7 +38,7 @@ app.post("/roadmap", async (req, res) => {
       model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     }
 
-    const prompt = `Create a detailed roadmap for achieving the goal: ${goal}
+    const prompt = `Create a comprehensive and detailed roadmap for achieving the goal: ${goal}
 
 CRITICAL INSTRUCTION: You MUST respond in the SAME LANGUAGE as the user's goal above. If the goal is in Russian, respond in Russian. If in English, respond in English. Match the user's language exactly.
 
@@ -55,25 +55,54 @@ JSON Format:
       "description": "Detailed description of the main goal",
       "category": "goal",
       "timeEstimate": "6-12 months",
-      "children": ["step1", "step2"]
+      "children": ["step1", "step2"],
+      "resources": [
+        {
+          "title": "Resource name",
+          "type": "youtube|documentation|course|article|book",
+          "url": "https://actual-real-url.com"
+        }
+      ]
     }
   ]
 }
 
 Rules:
 - id: only latin letters and numbers, no spaces
-- label: 2-4 words, short name (in user's language)
-- level: 0 (main goal), 1 (main stages), 2-3 (detailed steps)
-- description: practical description of what to do (in user's language)
-- category: one of "basics", "practice", "advanced", "goal"
-- timeEstimate: approximate time (optional)
-- children: array of child node ids
+- label: 2-5 words, short descriptive name (in user's language)
+- level: 0 (main goal), 1 (major phases), 2 (key milestones), 3 (specific tasks), 4 (micro-steps)
+- description: detailed, practical description of what to do and why (in user's language)
+- category: one of "basics", "practice", "advanced", "goal", "foundation", "intermediate"
+- timeEstimate: realistic time estimate (e.g., "1-2 weeks", "1 month", "2-3 months")
+- children: array of child node ids (each node should have 2-5 children for proper depth)
+- resources: REQUIRED! Array of 2-4 HIGH-QUALITY learning resources for this specific node
+  * Use REAL, EXISTING URLs that are currently available online
+  * Prefer: official documentation, popular YouTube channels, Coursera, Udemy, freeCodeCamp, MDN, W3Schools
+  * Types: "youtube" (video tutorials), "documentation" (official docs), "course" (online courses), "article" (blog posts/guides), "book" (online books)
+  * Each resource must be directly relevant to the specific node topic
+  * Mix different types of resources for learning variety
 
-Create 12-18 nodes with logical structure:
+Create 30-50 nodes with comprehensive logical structure:
 - 1 node at level 0 (main goal)
-- 3-5 nodes at level 1 (main stages)
-- remaining at levels 2-3 (detailed steps)
+- 4-6 nodes at level 1 (major phases/stages of learning)
+- 12-18 nodes at level 2 (key milestones and major topics)
+- 12-20 nodes at level 3 (specific tasks, subtopics, and skills)
+- 2-10 nodes at level 4 (optional micro-steps for complex topics)
 
+Ensure the roadmap covers:
+- Foundational knowledge first
+- Progressive skill building
+- Practical projects and exercises
+- Advanced topics and specializations
+- Each node should logically build on previous ones
+
+RESOURCE QUALITY GUIDELINES:
+- For YouTube: link to well-known educational channels (Traversy Media, freeCodeCamp, The Net Ninja, etc.)
+- For Documentation: use official sources (React.dev, developer.mozilla.org, python.org/docs, etc.)
+- For Courses: suggest popular platforms (Coursera, Udemy, EdX, Codecademy, freeCodeCamp)
+- Ensure all URLs are realistic and follow proper URL format
+
+Make the roadmap practical, actionable, and comprehensive enough to truly master the skill.
 Make sure all quotes are properly closed and JSON is valid!`;
 
     const result = await model.generateContent(prompt);
@@ -105,5 +134,5 @@ Make sure all quotes are properly closed and JSON is valid!`;
   }
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

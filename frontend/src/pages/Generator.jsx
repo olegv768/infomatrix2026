@@ -1,14 +1,29 @@
 import { useState, useRef, useEffect } from 'react'
 import * as d3 from 'd3'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 
-export default function Generator() {
-  const [input, setInput] = useState('')
-  const [data, setData] = useState(null)
+export default function Generator({
+  savedData,
+  setSavedData,
+  savedInput,
+  setSavedInput,
+  savedCompletedNodes,
+  setSavedCompletedNodes,
+  savedSelectedNode,
+  setSavedSelectedNode,
+}) {
+  // Use lifted state from parent for persistence
+  const [input, setInput] = [savedInput, setSavedInput]
+  const [data, setData] = [savedData, setSavedData]
+  const [completedNodes, setCompletedNodes] = [savedCompletedNodes, setSavedCompletedNodes]
+  const [selectedNode, setSelectedNode] = [savedSelectedNode, setSavedSelectedNode]
+
+  // Local state (doesn't need to persist)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [selectedNode, setSelectedNode] = useState(null)
   const [zoom, setZoom] = useState(1)
-  const [completedNodes, setCompletedNodes] = useState(new Set())
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const svgRef = useRef(null)
   const simulationRef = useRef(null)
   const zoomRef = useRef(null)
@@ -56,6 +71,7 @@ export default function Generator() {
         description: node.description || '',
         level: typeof node.level === 'number' ? node.level : 0,
         children: Array.isArray(node.children) ? node.children : [],
+        resources: Array.isArray(node.resources) ? node.resources : [],
       }))
 
       const existingIds = new Set(parsedData.nodes.map((n) => n.id))
@@ -132,6 +148,78 @@ export default function Generator() {
     return { completed, total, percentage }
   }
 
+  const exportAsPNG = async () => {
+    if (!svgRef.current) return
+
+    try {
+      // Hide controls temporarily
+      const controls = document.querySelectorAll('.export-hide')
+      controls.forEach(el => el.style.display = 'none')
+
+      // Get the SVG element and its container
+      const svgElement = svgRef.current
+      const container = svgElement.parentElement
+
+      // Capture the canvas
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#0f172a',
+        scale: 2,
+        logging: false,
+      })
+
+      // Restore controls
+      controls.forEach(el => el.style.display = '')
+
+      // Download
+      const link = document.createElement('a')
+      link.download = `${data?.title || 'roadmap'}.png`
+      link.href = canvas.toDataURL()
+      link.click()
+    } catch (error) {
+      console.error('Export failed:', error)
+      alert('Failed to export PNG. Please try again.')
+    }
+  }
+
+  const exportAsPDF = async () => {
+    if (!svgRef.current) return
+
+    try {
+      // Hide controls temporarily
+      const controls = document.querySelectorAll('.export-hide')
+      controls.forEach(el => el.style.display = 'none')
+
+      // Get the SVG element and its container
+      const svgElement = svgRef.current
+      const container = svgElement.parentElement
+
+      // Capture the canvas
+      const canvas = await html2canvas(container, {
+        backgroundColor: '#0f172a',
+        scale: 2,
+        logging: false,
+      })
+
+      // Restore controls
+      controls.forEach(el => el.style.display = '')
+
+      // Create PDF
+      const imgWidth = 210 // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      const pdf = new jsPDF({
+        orientation: imgHeight > imgWidth ? 'portrait' : 'landscape',
+        unit: 'mm',
+      })
+
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight)
+      pdf.save(`${data?.title || 'roadmap'}.pdf`)
+    } catch (error) {
+      console.error('Export failed:', error)
+      alert('Failed to export PDF. Please try again.')
+    }
+  }
+
   useEffect(() => {
     if (!data || !svgRef.current) return
 
@@ -188,12 +276,12 @@ export default function Generator() {
         d3
           .forceLink(links)
           .id((d) => d.id)
-          .distance(150)
-          .strength(0.5)
+          .distance(180)
+          .strength(0.4)
       )
-      .force('charge', d3.forceManyBody().strength(-800))
+      .force('charge', d3.forceManyBody().strength(-1000))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(80))
+      .force('collision', d3.forceCollide().radius(90))
 
     simulationRef.current = simulation
 
@@ -216,11 +304,12 @@ export default function Generator() {
         1: 'url(#gradient-blue)',
         2: 'url(#gradient-pink)',
         3: 'url(#gradient-green)',
+        4: 'url(#gradient-orange)',
       }
-      return colors[level] || colors[3]
+      return colors[level] || colors[4]
     }
 
-      ;['purple', 'blue', 'pink', 'green'].forEach((color) => {
+      ;['purple', 'blue', 'pink', 'green', 'orange'].forEach((color) => {
         const gradient = defs
           .append('linearGradient')
           .attr('id', `gradient-${color}`)
@@ -234,6 +323,7 @@ export default function Generator() {
           blue: ['#60a5fa', '#3b82f6'],
           pink: ['#f472b6', '#ec4899'],
           green: ['#34d399', '#10b981'],
+          orange: ['#fb923c', '#f97316'],
         }
 
         gradient
@@ -268,7 +358,7 @@ export default function Generator() {
 
     nodeElements
       .append('circle')
-      .attr('r', (d) => (d.level === 0 ? 45 : d.level === 1 ? 38 : 32))
+      .attr('r', (d) => (d.level === 0 ? 45 : d.level === 1 ? 38 : d.level === 2 ? 32 : d.level === 3 ? 28 : 24))
       .attr('fill', (d) =>
         completedNodes.has(d.id) ? '#10b981' : getNodeColor(d.level)
       )
@@ -414,7 +504,7 @@ export default function Generator() {
       `}</style>
 
       {/* Header */}
-      <div className="absolute top-16 left-0 right-0 p-4 z-20 bg-slate-900/90 backdrop-blur-md border-b border-slate-700/50">
+      <div className={`absolute top-20 left-4 z-20 p-4 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl transition-all duration-300 ${sidebarOpen ? 'right-[420px]' : 'right-4'}`}>
         <div className="max-w-5xl mx-auto">
           <h1 className="text-2xl font-bold mb-3 text-white tracking-tight flex items-center gap-3">
             <i className="fa-solid fa-route text-indigo-400"></i>
@@ -434,7 +524,7 @@ export default function Generator() {
             <button
               onClick={generateRoadmap}
               disabled={loading}
-              className="bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-slate-700 disabled:to-slate-700 text-white font-semibold py-3 px-8 rounded-lg transition-all shadow-lg hover:shadow-indigo-500/30 flex items-center gap-2 whitespace-nowrap"
+              className="bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-slate-700 disabled:to-slate-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors shadow-lg hover:shadow-indigo-500/30 flex items-center gap-2 whitespace-nowrap"
             >
               {loading ? (
                 <>
@@ -460,7 +550,7 @@ export default function Generator() {
 
       {/* Zoom Controls */}
       {data && (
-        <div className="absolute top-48 right-6 z-20 flex flex-col gap-2">
+        <div className={`export-hide absolute top-56 z-20 flex flex-col gap-2 transition-all duration-300 ${sidebarOpen ? 'right-[408px]' : 'right-6'}`}>
           {/* Progress indicator */}
           <div className="p-4 bg-slate-800/90 rounded-lg border border-slate-600/50 backdrop-blur shadow-lg mb-2">
             <div className="text-center mb-2">
@@ -506,11 +596,30 @@ export default function Generator() {
               {Math.round(zoom * 100)}%
             </span>
           </div>
+
+          {/* Export buttons */}
+          <div className="mt-4 pt-4 border-t border-slate-600/50">
+            <p className="text-xs text-slate-400 text-center mb-2 font-semibold">Export</p>
+            <button
+              onClick={exportAsPNG}
+              className="w-full p-3 bg-emerald-600/80 hover:bg-emerald-500/80 rounded-lg border border-emerald-500/50 backdrop-blur transition-colors shadow-lg mb-2 group"
+              title="Download as PNG"
+            >
+              <i className="fa-solid fa-image text-white group-hover:scale-110 transition-transform"></i>
+            </button>
+            <button
+              onClick={exportAsPDF}
+              className="w-full p-3 bg-rose-600/80 hover:bg-rose-500/80 rounded-lg border border-rose-500/50 backdrop-blur transition-colors shadow-lg group"
+              title="Download as PDF"
+            >
+              <i className="fa-solid fa-file-pdf text-white group-hover:scale-110 transition-transform"></i>
+            </button>
+          </div>
         </div>
       )}
 
       {/* Main canvas area */}
-      <div className="flex-1 relative z-0 mt-32">
+      <div className="flex-1 relative z-0 mt-36">
         <svg ref={svgRef} className="w-full h-full" />
         {!data && !loading && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -533,142 +642,204 @@ export default function Generator() {
       </div>
 
       {/* Sidebar */}
-      <div className="w-96 p-6 bg-slate-900/95 backdrop-blur-xl border-l border-slate-700/50 z-10 overflow-y-auto">
-        {selectedNode ? (
-          <div className="space-y-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div
-                  className="w-4 h-4 rounded-full border-2 border-white shadow-lg"
-                  style={{
-                    background:
-                      selectedNode.level === 0
-                        ? 'linear-gradient(135deg, #a78bfa, #6366f1)'
-                        : selectedNode.level === 1
-                          ? 'linear-gradient(135deg, #60a5fa, #3b82f6)'
-                          : selectedNode.level === 2
-                            ? 'linear-gradient(135deg, #f472b6, #ec4899)'
-                            : 'linear-gradient(135deg, #34d399, #10b981)',
-                  }}
-                />
-                <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">
-                  {selectedNode.category || 'Step'}
-                </span>
+      <div className={`${sidebarOpen ? 'w-96' : 'w-0'} transition-all duration-300 bg-slate-900/95 backdrop-blur-xl border-l border-slate-700/50 z-30 overflow-hidden`}>
+        {/* Close/Open Button */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="absolute right-0 top-1/2 -translate-y-1/2 -translate-x-full bg-slate-800/90 hover:bg-slate-700/90 p-3 rounded-l-lg border border-r-0 border-slate-600/50 backdrop-blur transition-colors shadow-lg z-20"
+          title={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+        >
+          <i className={`fa-solid ${sidebarOpen ? 'fa-chevron-right' : 'fa-chevron-left'} text-white`}></i>
+        </button>
+
+        <div className="h-full overflow-y-auto pt-40 px-6 pb-6">
+          {/* Physical spacer to force content down */}
+          <div className="h-20 w-full mb-8 border-b border-white/5 shadow-xs" />
+
+          {selectedNode ? (
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div
+                    className="w-4 h-4 rounded-full border-2 border-white shadow-lg"
+                    style={{
+                      background:
+                        selectedNode.level === 0
+                          ? 'linear-gradient(135deg, #a78bfa, #6366f1)'
+                          : selectedNode.level === 1
+                            ? 'linear-gradient(135deg, #60a5fa, #3b82f6)'
+                            : selectedNode.level === 2
+                              ? 'linear-gradient(135deg, #f472b6, #ec4899)'
+                              : selectedNode.level === 3
+                                ? 'linear-gradient(135deg, #34d399, #10b981)'
+                                : 'linear-gradient(135deg, #fb923c, #f97316)',
+                    }}
+                  />
+                  <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">
+                    {selectedNode.category || 'Step'}
+                  </span>
+                </div>
+                <h2 className="text-3xl font-bold bg-linear-to-r from-purple-300 via-blue-300 to-pink-300 bg-clip-text text-transparent leading-tight">
+                  {selectedNode.label}
+                </h2>
               </div>
-              <h2 className="text-3xl font-bold bg-linear-to-r from-purple-300 via-blue-300 to-pink-300 bg-clip-text text-transparent leading-tight">
-                {selectedNode.label}
-              </h2>
-            </div>
 
-            <div className="p-4 bg-white/5 rounded-lg border border-purple-500/30 backdrop-blur">
-              <p className="text-gray-200 leading-relaxed">
-                {selectedNode.description || 'No description available'}
-              </p>
-            </div>
-
-            <button
-              onClick={() => toggleNodeCompletion(selectedNode.id)}
-              className={`w-full py-3 px-4 rounded-lg font-semibold transition-all shadow-lg flex items-center justify-center gap-2 ${completedNodes.has(selectedNode.id)
-                ? 'bg-green-600 hover:bg-green-700 text-white'
-                : 'bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white'
-                }`}
-            >
-              {completedNodes.has(selectedNode.id) ? (
-                <>
-                  <i className="fa-solid fa-check"></i>
-                  Completed
-                </>
-              ) : (
-                <>
-                  <i className="fa-regular fa-circle"></i>
-                  Mark as Complete
-                </>
-              )}
-            </button>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-purple-500/20 rounded-lg border border-purple-400/30 backdrop-blur">
-                <p className="text-xs text-purple-300 mb-1">Level</p>
-                <p className="text-lg font-bold text-white">
-                  {selectedNode.level}
+              <div className="p-4 bg-white/5 rounded-lg border border-purple-500/30 backdrop-blur">
+                <p className="text-gray-200 leading-relaxed">
+                  {selectedNode.description || 'No description available'}
                 </p>
               </div>
 
-              {selectedNode.timeEstimate && (
-                <div className="p-3 bg-blue-500/20 rounded-lg border border-blue-400/30 backdrop-blur">
-                  <p className="text-xs text-blue-300 mb-1">Time</p>
+              <button
+                onClick={() => toggleNodeCompletion(selectedNode.id)}
+                className={`w-full py-3 px-4 rounded-lg font-semibold transition-all shadow-lg flex items-center justify-center gap-2 ${completedNodes.has(selectedNode.id)
+                  ? 'bg-green-600 hover:bg-green-700 text-white'
+                  : 'bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white'
+                  }`}
+              >
+                {completedNodes.has(selectedNode.id) ? (
+                  <>
+                    <i className="fa-solid fa-check"></i>
+                    Completed
+                  </>
+                ) : (
+                  <>
+                    <i className="fa-regular fa-circle"></i>
+                    Mark as Complete
+                  </>
+                )}
+              </button>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-purple-500/20 rounded-lg border border-purple-400/30 backdrop-blur">
+                  <p className="text-xs text-purple-300 mb-1">Level</p>
                   <p className="text-lg font-bold text-white">
-                    {selectedNode.timeEstimate}
+                    {selectedNode.level}
                   </p>
                 </div>
-              )}
-            </div>
 
-            {selectedNode.children && selectedNode.children.length > 0 && (
-              <div className="p-4 bg-linear-to-br from-purple-500/20 to-blue-500/20 rounded-lg border border-purple-400/40 backdrop-blur">
-                <p className="text-sm font-semibold text-purple-200 mb-2 flex items-center gap-2">
-                  <i className="fa-solid fa-arrow-right"></i>
-                  Next Steps:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {selectedNode.children
-                    .map((childId, idx) => {
-                      const childNode = data.nodes.find((n) => n.id === childId)
-                      if (!childNode) return null
+                {selectedNode.timeEstimate && (
+                  <div className="p-3 bg-blue-500/20 rounded-lg border border-blue-400/30 backdrop-blur">
+                    <p className="text-xs text-blue-300 mb-1">Time</p>
+                    <p className="text-lg font-bold text-white">
+                      {selectedNode.timeEstimate}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Learning Resources Section */}
+              {selectedNode.resources && selectedNode.resources.length > 0 && (
+                <div className="p-4 bg-linear-to-br from-indigo-500/20 to-cyan-500/20 rounded-lg border border-indigo-400/40 backdrop-blur">
+                  <p className="text-sm font-semibold text-indigo-200 mb-3 flex items-center gap-2">
+                    <i className="fa-solid fa-graduation-cap"></i>
+                    Learning Resources:
+                  </p>
+                  <div className="space-y-2">
+                    {selectedNode.resources.map((resource, idx) => {
+                      const getResourceIcon = (type) => {
+                        const icons = {
+                          youtube: 'fa-brands fa-youtube text-red-400',
+                          documentation: 'fa-solid fa-book text-blue-400',
+                          course: 'fa-solid fa-chalkboard-user text-green-400',
+                          article: 'fa-solid fa-newspaper text-yellow-400',
+                          book: 'fa-solid fa-book-open text-purple-400',
+                        }
+                        return icons[type] || 'fa-solid fa-link text-gray-400'
+                      }
+
                       return (
-                        <button
+                        <a
                           key={idx}
-                          onClick={() => setSelectedNode(childNode)}
-                          className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-xs font-medium transition-all border border-white/40 backdrop-blur shadow-lg hover:shadow-purple-500/50"
+                          href={resource.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/10 hover:border-indigo-400/50"
                         >
-                          {childNode.label}
-                        </button>
+                          <i className={`${getResourceIcon(resource.type)} text-xl`}></i>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-white truncate group-hover:text-indigo-300 transition-colors">
+                              {resource.title}
+                            </p>
+                            <p className="text-xs text-gray-400 capitalize">
+                              {resource.type}
+                            </p>
+                          </div>
+                          <i className="fa-solid fa-arrow-up-right-from-square text-gray-400 group-hover:text-indigo-400 transition-colors text-xs"></i>
+                        </a>
                       )
-                    })
-                    .filter(Boolean)}
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {selectedNode.children && selectedNode.children.length > 0 && (
+                <div className="p-4 bg-linear-to-br from-purple-500/20 to-blue-500/20 rounded-lg border border-purple-400/40 backdrop-blur">
+                  <p className="text-sm font-semibold text-purple-200 mb-2 flex items-center gap-2">
+                    <i className="fa-solid fa-arrow-right"></i>
+                    Next Steps:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedNode.children
+                      .map((childId, idx) => {
+                        const childNode = data.nodes.find((n) => n.id === childId)
+                        if (!childNode) return null
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => setSelectedNode(childNode)}
+                            className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-xs font-medium transition-all border border-white/40 backdrop-blur shadow-lg hover:shadow-purple-500/50"
+                          >
+                            {childNode.label}
+                          </button>
+                        )
+                      })
+                      .filter(Boolean)}
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-4 border-t border-purple-500/30">
+                <p className="text-xs font-semibold text-purple-300 mb-3 uppercase tracking-wider flex items-center gap-2">
+                  <i className="fa-solid fa-layer-group"></i>
+                  Levels
+                </p>
+                <div className="space-y-2">
+                  {[
+                    { level: 0, name: 'Main Goal', color: 'from-purple-400 to-indigo-500' },
+                    { level: 1, name: 'Major Phases', color: 'from-blue-400 to-blue-600' },
+                    { level: 2, name: 'Key Milestones', color: 'from-pink-400 to-pink-600' },
+                    { level: 3, name: 'Specific Tasks', color: 'from-emerald-400 to-emerald-600' },
+                    { level: 4, name: 'Micro-Steps', color: 'from-orange-400 to-orange-600' },
+                  ].map((item) => (
+                    <div key={item.level} className="flex items-center gap-2">
+                      <div
+                        className={`w-3 h-3 rounded-full bg-linear-to-br ${item.color} border border-white/50 shadow-lg`}
+                      />
+                      <span className="text-sm text-gray-300">
+                        Level {item.level}: {item.name}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            )}
-
-            <div className="pt-4 border-t border-purple-500/30">
-              <p className="text-xs font-semibold text-purple-300 mb-3 uppercase tracking-wider flex items-center gap-2">
-                <i className="fa-solid fa-layer-group"></i>
-                Levels
-              </p>
-              <div className="space-y-2">
-                {[
-                  { level: 0, name: 'Main Goal', color: 'from-purple-400 to-indigo-500' },
-                  { level: 1, name: 'Main Stages', color: 'from-blue-400 to-blue-600' },
-                  { level: 2, name: 'Detailed Steps', color: 'from-pink-400 to-pink-600' },
-                  { level: 3, name: 'Subtasks', color: 'from-emerald-400 to-emerald-600' },
-                ].map((item) => (
-                  <div key={item.level} className="flex items-center gap-2">
-                    <div
-                      className={`w-3 h-3 rounded-full bg-linear-to-br ${item.color} border border-white/50 shadow-lg`}
-                    />
-                    <span className="text-sm text-gray-300">
-                      Level {item.level}: {item.name}
-                    </span>
-                  </div>
-                ))}
+            </div>
+          ) : (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full border-2 border-purple-400/50 bg-linear-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center shadow-xl">
+                  <i className="fa-solid fa-hand-pointer text-purple-400 text-2xl"></i>
+                </div>
+                <p className="text-purple-200">
+                  Click on a node to view details
+                </p>
+                <p className="text-sm text-purple-400/70 mt-2">
+                  You can drag nodes with your mouse
+                </p>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full border-2 border-purple-400/50 bg-linear-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center shadow-xl">
-                <i className="fa-solid fa-hand-pointer text-purple-400 text-2xl"></i>
-              </div>
-              <p className="text-purple-200">
-                Click on a node to view details
-              </p>
-              <p className="text-sm text-purple-400/70 mt-2">
-                You can drag nodes with your mouse
-              </p>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   )
