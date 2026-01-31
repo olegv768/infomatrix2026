@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import ScrollReveal from './ScrollReveal';
 
 const ParticleCard = ({ title, description, stepNumber }) => {
     const canvasRef = useRef(null);
@@ -148,27 +149,35 @@ const ParticleCard = ({ title, description, stepNumber }) => {
                 />
 
                 <div className="relative z-10 p-10 h-full flex flex-col items-center justify-center text-center">
-                    <div className={`mb-6 transition-all duration-500 ${isHovered ? 'scale-110 -translate-y-2' : ''}`}>
-                        <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-indigo-500/20 to-purple-600/20 flex items-center justify-center border border-white/10 group-hover:border-indigo-500/50">
-                            <span className="text-2xl font-black text-indigo-400 font-['Outfit']">{stepNumber}</span>
+                    <ScrollReveal delay={100}>
+                        <div className={`mb-6 transition-all duration-500 ${isHovered ? 'scale-110 -translate-y-2' : ''}`}>
+                            <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-indigo-500/20 to-purple-600/20 flex items-center justify-center border border-white/10 group-hover:border-indigo-500/50">
+                                <span className="text-2xl font-black text-indigo-400 font-['Outfit']">{stepNumber}</span>
+                            </div>
                         </div>
-                    </div>
+                    </ScrollReveal>
 
-                    <h3 className={`text-2xl font-bold mb-4 transition-all duration-500 font-['Outfit'] ${isHovered ? 'text-white translate-y-[-4px]' : 'text-slate-200'
-                        }`}>
-                        {title}
-                    </h3>
+                    <ScrollReveal delay={200}>
+                        <h3 className={`text-2xl font-bold mb-4 transition-all duration-500 font-['Outfit'] ${isHovered ? 'text-white translate-y-[-4px]' : 'text-slate-200'
+                            }`}>
+                            {title}
+                        </h3>
+                    </ScrollReveal>
 
-                    <p className={`text-lg leading-relaxed transition-all duration-500 ${isHovered ? 'text-slate-200' : 'text-slate-400'
-                        }`}>
-                        {description}
-                    </p>
+                    <ScrollReveal delay={300}>
+                        <p className={`text-lg leading-relaxed transition-all duration-500 ${isHovered ? 'text-slate-200' : 'text-slate-400'
+                            }`}>
+                            {description}
+                        </p>
+                    </ScrollReveal>
 
-                    <div className={`mt-8 transition-all duration-700 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                        <span className="px-6 py-2 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 text-sm font-bold tracking-wider uppercase">
-                            Explore Tech
-                        </span>
-                    </div>
+                    <ScrollReveal delay={400}>
+                        <div className={`mt-8 transition-all duration-700 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                            <span className="px-6 py-2 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 text-sm font-bold tracking-wider uppercase">
+                                Explore Tech
+                            </span>
+                        </div>
+                    </ScrollReveal>
                 </div>
             </div>
         </div>

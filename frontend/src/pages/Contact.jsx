@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Footer from '../components/Footer'
+import ScrollReveal from '../components/ScrollReveal'
 
 export default function Contact({ onNavigate }) {
   const [formData, setFormData] = useState({
@@ -35,21 +36,27 @@ export default function Contact({ onNavigate }) {
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-600/5 rounded-full blur-[120px] animate-float" style={{ animationDuration: '18s' }}></div>
 
         <div className="max-w-5xl mx-auto text-center relative z-10 px-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-6">
-            <i className="fa-solid fa-headset"></i>
-            <span>Get In Touch</span>
-          </div>
+          <ScrollReveal delay={0}>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-6">
+              <i className="fa-solid fa-headset"></i>
+              <span>Get In Touch</span>
+            </div>
+          </ScrollReveal>
 
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black text-white mb-8 tracking-tight">
-            We'd Love to
-            <span className="block mt-4 bg-linear-to-r from-indigo-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent bg-size-[200%_auto] animate-gradient-shift">
-              Hear From You
-            </span>
-          </h1>
+          <ScrollReveal delay={200}>
+            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black text-white mb-8 tracking-tight">
+              We'd Love to
+              <span className="block mt-4 bg-linear-to-r from-indigo-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent bg-size-[200%_auto] animate-gradient-shift">
+                Hear From You
+              </span>
+            </h1>
+          </ScrollReveal>
 
-          <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-            Have a question, suggestion, or just want to say hello? We're here to help!
-          </p>
+          <ScrollReveal delay={400}>
+            <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+              Have a question, suggestion, or just want to say hello? We're here to help!
+            </p>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -65,12 +72,14 @@ export default function Contact({ onNavigate }) {
 
           {/* Contact Form Container */}
           <div className="relative p-8 sm:p-12 lg:p-16 rounded-4xl bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl">
-            <h2 className="text-3xl font-bold text-white mb-10 flex items-center justify-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                <i className="fa-solid fa-paper-plane text-white text-xl"></i>
-              </div>
-              Send Us a Message
-            </h2>
+            <ScrollReveal>
+              <h2 className="text-3xl font-bold text-white mb-10 flex items-center justify-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                  <i className="fa-solid fa-paper-plane text-white text-xl"></i>
+                </div>
+                Send Us a Message
+              </h2>
+            </ScrollReveal>
 
             {submitted ? (
               <div className="text-center py-16 animate-fade-in-up">
@@ -83,81 +92,91 @@ export default function Contact({ onNavigate }) {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-12 text-center">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <ScrollReveal delay={100} className="w-full">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider ml-1">
+                        Your Full Name
+                      </label>
+                      <div className="relative group/input">
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 hover:bg-slate-800/60"
+                          placeholder="John Doe"
+                        />
+                      </div>
+                    </div>
+                  </ScrollReveal>
+                  <ScrollReveal delay={150} className="w-full">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider ml-1">
+                        Email Address
+                      </label>
+                      <div className="relative group/input">
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 hover:bg-slate-800/60"
+                          placeholder="john@example.com"
+                        />
+                      </div>
+                    </div>
+                  </ScrollReveal>
+                </div>
+
+                <ScrollReveal delay={200}>
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider ml-1">
-                      Your Full Name
+                      Subject
                     </label>
                     <div className="relative group/input">
                       <input
                         type="text"
-                        name="name"
-                        value={formData.name}
+                        name="subject"
+                        value={formData.subject}
                         onChange={handleChange}
                         required
                         className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 hover:bg-slate-800/60"
-                        placeholder="John Doe"
+                        placeholder="How can we help you?"
                       />
                     </div>
                   </div>
+                </ScrollReveal>
+
+                <ScrollReveal delay={250}>
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider ml-1">
-                      Email Address
+                      Your Message
                     </label>
                     <div className="relative group/input">
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
+                      <textarea
+                        name="message"
+                        value={formData.message}
                         onChange={handleChange}
                         required
-                        className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 hover:bg-slate-800/60"
-                        placeholder="john@example.com"
+                        rows={12}
+                        className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 hover:bg-slate-800/60 resize-none"
+                        placeholder="Type your message here..."
                       />
                     </div>
                   </div>
-                </div>
+                </ScrollReveal>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider ml-1">
-                    Subject
-                  </label>
-                  <div className="relative group/input">
-                    <input
-                      type="text"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 hover:bg-slate-800/60"
-                      placeholder="How can we help you?"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider ml-1">
-                    Your Message
-                  </label>
-                  <div className="relative group/input">
-                    <textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      required
-                      rows={12}
-                      className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 hover:bg-slate-800/60 resize-none"
-                      placeholder="Type your message here..."
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full sm:w-auto px-12 py-5 rounded-2xl bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-size-[200%_auto] hover:bg-right text-white font-bold text-lg shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center gap-3 mx-auto"
-                >
-                  <i className="fa-solid fa-paper-plane group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
-                  Send Message
-                </button>
+                <ScrollReveal delay={300}>
+                  <button
+                    type="submit"
+                    className="w-full sm:w-auto px-12 py-5 rounded-2xl bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-size-[200%_auto] hover:bg-right text-white font-bold text-lg shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center gap-3 mx-auto"
+                  >
+                    <i className="fa-solid fa-paper-plane group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+                    Send Message
+                  </button>
+                </ScrollReveal>
               </form>
             )}
           </div>
@@ -212,7 +231,7 @@ export default function Contact({ onNavigate }) {
             </div>
 
             <div className="absolute top-[260px] left-[230px] group animate-float" style={{ animationDelay: '-2s' }}>
-              <div className="w-32 h-32 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-4 text-center transform hover:rotate-6 transition-all">
+              <div className="w-32 h-32 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-4 text-center transform hover:rotate-6 transition-all animate-pulse-slow">
                 <span className="text-purple-400 font-black text-lg mb-1 leading-tight">Deep Paths</span>
                 <span className="text-slate-500 text-[9px] font-bold uppercase tracking-widest">Unique Detailed Nodes</span>
               </div>
@@ -220,7 +239,7 @@ export default function Contact({ onNavigate }) {
 
             {/* NEW: Accurate Answers Circle */}
             <div className="absolute top-[30px] left-[30px] group animate-float" style={{ animationDelay: '-3s' }}>
-              <div className="w-28 h-28 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-3 text-center transform hover:-rotate-12 transition-all">
+              <div className="w-28 h-28 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-3 text-center transform hover:-rotate-12 transition-all animate-pulse-slow">
                 <span className="text-indigo-400 font-black text-sm mb-1 leading-tight">Exact Answers</span>
                 <span className="text-slate-500 text-[8px] font-bold uppercase tracking-widest">Tailored Per Request</span>
               </div>
@@ -257,7 +276,7 @@ export default function Contact({ onNavigate }) {
             </div>
 
             <div className="absolute top-[50px] left-[80px] group animate-float" style={{ animationDelay: '-1s' }}>
-              <div className="w-32 h-32 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-4 text-center transform hover:rotate-12 transition-all">
+              <div className="w-32 h-32 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-4 text-center transform hover:rotate-12 transition-all animate-pulse-slow">
                 <span className="text-pink-400 font-black text-lg mb-1 leading-tight">Any Topic</span>
                 <span className="text-slate-500 text-[9px] font-bold uppercase tracking-widest">Unlimited Subjects</span>
               </div>
@@ -294,7 +313,7 @@ export default function Contact({ onNavigate }) {
             </div>
 
             <div className="absolute top-[120px] left-[180px] group animate-float" style={{ animationDelay: '-4s' }}>
-              <div className="w-32 h-32 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-4 text-center transform hover:-rotate-6 transition-all">
+              <div className="w-32 h-32 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-4 text-center transform hover:-rotate-6 transition-all animate-pulse-slow">
                 <span className="text-cyan-400 font-black text-xl mb-1">&lt; 2h</span>
                 <span className="text-slate-500 text-[10px] font-bold uppercase tracking-tighter">Response Time</span>
               </div>

@@ -2,27 +2,13 @@ import React, { useEffect, useRef } from 'react'
 import Footer from '../components/Footer'
 import InteractiveHero from '../components/InteractiveHero'
 import AntigravityCards from '../components/AntigravityCards'
+import ScrollReveal from '../components/ScrollReveal'
 
 export default function Home({ onNavigate }) {
   const sectionRefs = useRef([])
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible')
-          }
-        });
-      },
-      { threshold: 0.1 }
-    )
-
-    sectionRefs.current.forEach((ref) => {
-      if (ref) observer.observe(ref)
-    })
-
-    return () => observer.disconnect()
+    // Legacy observer removed in favor of ScrollReveal
   }, [])
 
   const features = [
@@ -83,44 +69,50 @@ export default function Home({ onNavigate }) {
       >
         <InteractiveHero />
         <div className="max-w-7xl mx-auto text-center relative z-10 px-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-8 animate-fade-in-up">
-            <i className="fa-solid fa-sparkles"></i>
-            <span>Powered by Google Gemini AI</span>
-          </div>
+          <ScrollReveal delay={0}>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-8">
+              <i className="fa-solid fa-sparkles"></i>
+              <span>Powered by Google Gemini AI</span>
+            </div>
+          </ScrollReveal>
 
-          <h1 className="text-5xl md:text-7xl font-black mb-6 animate-fade-in-up font-['Outfit'] tracking-tight" style={{ animationDelay: '0.1s' }}>
-            Transform Your Goals Into
-            <span className="block mt-2 bg-linear-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
-              Actionable Roadmaps
-            </span>
-          </h1>
+          <ScrollReveal delay={200}>
+            <h1 className="text-5xl md:text-7xl font-black mb-6 font-['Outfit'] tracking-tight">
+              Transform Your Goals Into
+              <span className="block mt-2 bg-linear-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                Actionable Roadmaps
+              </span>
+            </h1>
+          </ScrollReveal>
         </div>
       </section>
 
       {/* Features Section */}
       <section
-        ref={(el) => (sectionRefs.current[0] = el)}
-        className="relative scroll-section"
+        className="relative"
         style={{ padding: 'clamp(80px, 10vw, 112px) clamp(32px, 8vw, 80px)' }}
       >
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 mt-16">
-            <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-4 font-['Outfit'] tracking-tight"
-              style={{ paddingBottom: '40px' }}>Why Choose LevelUp Map?</h2>
+            <ScrollReveal>
+              <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-4 font-['Outfit'] tracking-tight"
+                style={{ paddingBottom: '40px' }}>Why Choose LevelUp Map?</h2>
+            </ScrollReveal>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div
-                key={index}
-                className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-500 group flex flex-col items-center text-center h-full hover-lift"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-6 group-hover:shadow-lg group-hover:shadow-indigo-500/30 transition-all duration-500 group-hover:-translate-y-1">
-                  <i className={`fa-solid ${feature.icon} text-white text-xl`}></i>
+              <ScrollReveal key={index} delay={index * 100}>
+                <div
+                  className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-500 group flex flex-col items-center text-center h-full hover-lift"
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-6 group-hover:shadow-lg group-hover:shadow-indigo-500/30 transition-all duration-500 group-hover:-translate-y-1">
+                    <i className={`fa-solid ${feature.icon} text-white text-xl`}></i>
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
+                  <p className="text-slate-400 leading-relaxed">{feature.description}</p>
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-                <p className="text-slate-400 leading-relaxed">{feature.description}</p>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -128,19 +120,22 @@ export default function Home({ onNavigate }) {
 
       {/* How It Works */}
       <section
-        ref={(el) => (sectionRefs.current[1] = el)}
-        className="relative pt-24 pb-0 w-full flex flex-col items-center scroll-section"
+        className="relative pt-24 pb-0 w-full flex flex-col items-center"
         style={{ paddingLeft: '110px', paddingRight: '110px' }}
       >
         <div className="w-full flex flex-col items-center">
           <div className="text-center">
-            <h2 className="text-4xl sm:text-6xl font-black text-white mb-6 font-['Outfit'] tracking-tight">Process</h2>
-            <p
-              className="text-slate-400 text-xl"
-              style={{ marginBottom: '40px' }}
-            >
-              Simple steps to your AI-powered career roadmap
-            </p>
+            <ScrollReveal>
+              <h2 className="text-4xl sm:text-6xl font-black text-white mb-6 font-['Outfit'] tracking-tight">Process</h2>
+            </ScrollReveal>
+            <ScrollReveal delay={200}>
+              <p
+                className="text-slate-400 text-xl"
+                style={{ marginBottom: '40px' }}
+              >
+                Simple steps to your AI-powered career roadmap
+              </p>
+            </ScrollReveal>
           </div>
 
           <div
