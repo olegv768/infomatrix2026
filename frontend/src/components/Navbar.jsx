@@ -29,12 +29,12 @@ export default function Navbar({ currentPage, onNavigate }) {
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 ${currentPage === item.id
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 icon-bounce underline-slide ${currentPage === item.id
                   ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
                   : 'text-slate-300 hover:text-white hover:bg-white/5'
                   }`}
               >
-                <i className={`fa-solid ${item.icon} text-sm`}></i>
+                <i className={`fa-solid ${item.icon} text-sm transition-transform`}></i>
                 {item.label}
               </button>
             ))}

@@ -46,7 +46,7 @@ export default function Contact({ onNavigate }) {
           <ScrollReveal delay={200}>
             <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black text-white mb-8 tracking-tight">
               We'd Love to
-              <span className="block mt-4 bg-linear-to-r from-indigo-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent bg-size-[200%_auto] animate-gradient-shift">
+              <span className="block mt-4 text-shimmer">
                 Hear From You
               </span>
             </h1>
@@ -71,7 +71,7 @@ export default function Contact({ onNavigate }) {
           <div className="absolute -inset-1 bg-linear-to-r from-indigo-500/20 via-purple-500/20 to-indigo-500/20 rounded-4xl blur-sm opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
 
           {/* Contact Form Container */}
-          <div className="relative p-8 sm:p-12 lg:p-16 rounded-4xl bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl">
+          <div className="relative p-8 sm:p-12 lg:p-16 rounded-4xl bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl glow-border-subtle">
             <ScrollReveal>
               <h2 className="text-3xl font-bold text-white mb-10 flex items-center justify-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
@@ -104,7 +104,7 @@ export default function Contact({ onNavigate }) {
                           value={formData.name}
                           onChange={handleChange}
                           required
-                          className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 hover:bg-slate-800/60"
+                          className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 transition-all duration-300 hover:bg-slate-800/60 input-glow"
                           placeholder="John Doe"
                         />
                       </div>
@@ -122,7 +122,7 @@ export default function Contact({ onNavigate }) {
                           value={formData.email}
                           onChange={handleChange}
                           required
-                          className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 hover:bg-slate-800/60"
+                          className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 transition-all duration-300 hover:bg-slate-800/60 input-glow"
                           placeholder="john@example.com"
                         />
                       </div>
@@ -142,7 +142,7 @@ export default function Contact({ onNavigate }) {
                         value={formData.subject}
                         onChange={handleChange}
                         required
-                        className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 hover:bg-slate-800/60"
+                        className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 transition-all duration-300 hover:bg-slate-800/60 input-glow"
                         placeholder="How can we help you?"
                       />
                     </div>
@@ -161,7 +161,7 @@ export default function Contact({ onNavigate }) {
                         onChange={handleChange}
                         required
                         rows={12}
-                        className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 hover:bg-slate-800/60 resize-none"
+                        className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 transition-all duration-300 hover:bg-slate-800/60 resize-none input-glow"
                         placeholder="Type your message here..."
                       />
                     </div>
@@ -171,7 +171,7 @@ export default function Contact({ onNavigate }) {
                 <ScrollReveal delay={300}>
                   <button
                     type="submit"
-                    className="w-full sm:w-auto px-12 py-5 rounded-2xl bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-size-[200%_auto] hover:bg-right text-white font-bold text-lg shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center gap-3 mx-auto"
+                    className="w-full sm:w-auto px-12 py-5 rounded-2xl bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-size-[200%_auto] hover:bg-right text-white font-bold text-lg shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center gap-3 mx-auto btn-shine magnetic-hover"
                   >
                     <i className="fa-solid fa-paper-plane group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
                     Send Message
@@ -184,7 +184,7 @@ export default function Contact({ onNavigate }) {
       </section>
 
       {/* Connected Nodes Section */}
-      <section className="min-h-screen flex items-center justify-center px-8 relative overflow-hidden bg-slate-950/50">
+      <section className="min-h-screen flex items-center justify-center px-8 relative overflow-hidden">
         {/* Background Atmosphere */}
         <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/5 rounded-full blur-[120px]"></div>
         <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/5 rounded-full blur-[120px]"></div>

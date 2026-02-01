@@ -53,9 +53,6 @@ export default function About({ onNavigate }) {
     <div className="page-container min-h-screen">
       {/* Hero Section */}
       <section className="min-h-[60vh] flex items-center justify-center px-8 sm:px-12 lg:px-20 relative overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
-
         <div className="max-w-5xl mx-auto text-center relative z-10 px-4">
           <ScrollReveal delay={0}>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-6">
@@ -65,9 +62,9 @@ export default function About({ onNavigate }) {
           </ScrollReveal>
 
           <ScrollReveal delay={200}>
-            <h1 className="text-5xl font-bold text-white mb-6">
+            <h1 className="text-4xl md:text-6xl font-black text-white mb-6 font-['Outfit'] tracking-tight title-reaction">
               Empowering Your Learning
-              <span className="block mt-2 bg-linear-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+              <span className="block mt-2 text-shimmer">
                 Journey With AI
               </span>
             </h1>
@@ -110,7 +107,7 @@ export default function About({ onNavigate }) {
       </section>
 
       {/* Our Values */}
-      <section className="py-32 sm:py-48 lg:py-64 px-8 sm:px-12 lg:px-20 bg-linear-to-b from-transparent via-indigo-950/10 to-transparent flex items-center justify-center">
+      <section className="py-32 sm:py-48 lg:py-64 px-8 sm:px-12 lg:px-20 flex items-center justify-center">
         <div className="max-w-7xl mx-auto">
           <div className="h-[70px]"></div> {/* Explicit 70px gap from top */}
           <div className="text-center">
@@ -127,10 +124,10 @@ export default function About({ onNavigate }) {
             {values.map((value, index) => (
               <ScrollReveal key={index} delay={index * 100}>
                 <div
-                  className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-500/30 transition-all text-center group flex flex-col items-center h-full"
+                  className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-500/30 transition-all text-center group flex flex-col items-center h-full card-tilt glow-border"
                 >
-                  <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mx-auto mb-[70px] group-hover:shadow-lg group-hover:shadow-indigo-500/30 transition-all">
-                    <i className={`fa-solid ${value.icon} text-white text-2xl`}></i>
+                  <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mx-auto mb-[70px] group-hover:shadow-lg group-hover:shadow-indigo-500/30 transition-all icon-spin">
+                    <i className={`fa-solid ${value.icon} text-white text-2xl transition-transform`}></i>
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-2">{value.title}</h3>
                   <p className="text-slate-400 text-sm">{value.description}</p>
@@ -159,7 +156,7 @@ export default function About({ onNavigate }) {
             {team.map((member, index) => (
               <ScrollReveal key={index} delay={index * 150}>
                 <div
-                  className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-500/20 transition-all text-center group flex flex-col items-center h-full"
+                  className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-500/20 transition-all text-center group flex flex-col items-center h-full hover-lift"
                 >
                   <div className="relative inline-block mb-4">
                     <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-indigo-500/30 group-hover:border-indigo-500 transition-all">

@@ -70,16 +70,16 @@ export default function Home({ onNavigate }) {
         <InteractiveHero />
         <div className="max-w-7xl mx-auto text-center relative z-10 px-4">
           <ScrollReveal delay={0}>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-8 btn-shine magnetic-hover cursor-default">
               <i className="fa-solid fa-sparkles"></i>
               <span>Powered by Google Gemini AI</span>
             </div>
           </ScrollReveal>
 
           <ScrollReveal delay={200}>
-            <h1 className="text-5xl md:text-7xl font-black mb-6 font-['Outfit'] tracking-tight">
+            <h1 className="text-5xl md:text-7xl font-black mb-6 font-['Outfit'] tracking-tight title-reaction">
               Transform Your Goals Into
-              <span className="block mt-2 bg-linear-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              <span className="block mt-2 text-shimmer">
                 Actionable Roadmaps
               </span>
             </h1>
@@ -104,10 +104,10 @@ export default function Home({ onNavigate }) {
             {features.map((feature, index) => (
               <ScrollReveal key={index} delay={index * 100}>
                 <div
-                  className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-500 group flex flex-col items-center text-center h-full hover-lift"
+                  className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-500 group flex flex-col items-center text-center h-full card-tilt glow-border"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-6 group-hover:shadow-lg group-hover:shadow-indigo-500/30 transition-all duration-500 group-hover:-translate-y-1">
-                    <i className={`fa-solid ${feature.icon} text-white text-xl`}></i>
+                  <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-6 group-hover:shadow-lg group-hover:shadow-indigo-500/30 transition-all duration-500 group-hover:-translate-y-1 icon-spin">
+                    <i className={`fa-solid ${feature.icon} text-white text-xl transition-transform`}></i>
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
                   <p className="text-slate-400 leading-relaxed">{feature.description}</p>

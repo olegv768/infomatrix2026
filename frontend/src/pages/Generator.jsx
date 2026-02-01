@@ -27,6 +27,7 @@ export default function Generator({
   const svgRef = useRef(null)
   const simulationRef = useRef(null)
   const zoomRef = useRef(null)
+  const nodesRef = useRef(null) // Хранит массив узлов с позициями
 
   const generateRoadmap = async () => {
     if (!input.trim()) {
@@ -231,22 +232,32 @@ export default function Generator({
 
     const defs = svg.append('defs')
 
+    // Improved Glow Filter
     const glowFilter = defs
       .append('filter')
       .attr('id', 'glow')
-      .attr('x', '-50%')
-      .attr('y', '-50%')
-      .attr('width', '200%')
-      .attr('height', '200%')
+      .attr('x', '-100%')
+      .attr('y', '-100%')
+      .attr('width', '300%')
+      .attr('height', '300%')
 
     glowFilter
       .append('feGaussianBlur')
-      .attr('stdDeviation', '3')
+      .attr('stdDeviation', '4.5')
       .attr('result', 'coloredBlur')
 
     const feMerge = glowFilter.append('feMerge')
     feMerge.append('feMergeNode').attr('in', 'coloredBlur')
     feMerge.append('feMergeNode').attr('in', 'SourceGraphic')
+
+    // Soft Inner Shadow Filter for 3D effect
+    const innerShadow = defs.append('filter').attr('id', 'inner-shadow')
+    innerShadow.append('feOffset').attr('dx', 0).attr('dy', 2)
+    innerShadow.append('feGaussianBlur').attr('stdDeviation', 2).attr('result', 'offset-blur')
+    innerShadow.append('feComposite').attr('operator', 'out').attr('in', 'SourceGraphic').attr('in2', 'offset-blur').attr('result', 'inverse')
+    innerShadow.append('feFlood').attr('flood-color', 'black').attr('flood-opacity', 0.5).attr('result', 'color')
+    innerShadow.append('feComposite').attr('operator', 'in').attr('in', 'color').attr('in2', 'inverse').attr('result', 'shadow')
+    innerShadow.append('feComposite').attr('operator', 'over').attr('in', 'shadow').attr('in2', 'SourceGraphic')
 
     const container = svg.append('g').attr('class', 'zoom-container')
 
@@ -261,13 +272,22 @@ export default function Generator({
     svg.call(zoomBehavior)
     zoomRef.current = zoomBehavior
 
-    const nodes = data.nodes.map((d) => ({
-      ...d,
-      x: width / 2 + (Math.random() - 0.5) * 200,
-      y: height / 2 + (Math.random() - 0.5) * 200,
-    }))
+    // Используем сохраненные позиции из ref если они есть
+    const nodes = data.nodes.map((d) => {
+      const savedPos = nodesRef.current?.find(n => n.id === d.id)
+      return {
+        ...d,
+        x: savedPos?.x !== undefined ? savedPos.x : (d.x !== undefined ? d.x : width / 2 + (Math.random() - 0.5) * 200),
+        y: savedPos?.y !== undefined ? savedPos.y : (d.y !== undefined ? d.y : height / 2 + (Math.random() - 0.5) * 200),
+      }
+    })
+    // Сохраняем ссылку на узлы
+    nodesRef.current = nodes
 
     const links = createLinks(nodes)
+
+    // Helper for generating link IDs for gradients
+    const linkId = (d) => `link-grad-${d.source.id || d.source}-${d.target.id || d.target}`
 
     const simulation = d3
       .forceSimulation(nodes)
@@ -276,27 +296,74 @@ export default function Generator({
         d3
           .forceLink(links)
           .id((d) => d.id)
-          .distance(180)
-          .strength(0.4)
+          .distance(200)
+          .strength(0.3)
       )
-      .force('charge', d3.forceManyBody().strength(-1000))
+      .force('charge', d3.forceManyBody().strength(-1200))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(90))
+      .force('collision', d3.forceCollide().radius(100))
 
     simulationRef.current = simulation
 
     const linkGroup = container.append('g').attr('class', 'links')
     const nodeGroup = container.append('g').attr('class', 'nodes')
 
+    const getNodeBaseColor = (level) => {
+      const colors = {
+        0: '#6366f1', // Indigo
+        1: '#3b82f6', // Blue
+        2: '#ec4899', // Pink
+        3: '#10b981', // Green
+        4: '#f97316', // Orange
+      }
+      return colors[level] || colors[4]
+    }
+
+    // Generate Link Gradients
+    links.forEach(link => {
+      const sourceNode = nodes.find(n => n.id === link.source || n.id === link.source.id)
+      const targetNode = nodes.find(n => n.id === link.target || n.id === link.target.id)
+
+      if (sourceNode && targetNode) {
+        const grad = defs.append('linearGradient')
+          .attr('id', linkId(link))
+          .attr('gradientUnits', 'userSpaceOnUse')
+
+        grad.append('stop').attr('offset', '0%').attr('stop-color', getNodeBaseColor(sourceNode.level))
+        grad.append('stop').attr('offset', '100%').attr('stop-color', getNodeBaseColor(targetNode.level))
+      }
+    })
+
     const linkElements = linkGroup
-      .selectAll('line')
+      .selectAll('path')
       .data(links)
       .enter()
-      .append('line')
-      .attr('stroke', '#475569')
-      .attr('stroke-width', 2)
-      .attr('stroke-opacity', 0.4)
-      .attr('stroke-dasharray', '5,5')
+      .append('path')
+      .attr('fill', 'none')
+      .attr('stroke', (d) => `url(#${linkId(d)})`)
+      .attr('stroke-width', 2.5)
+      .attr('stroke-opacity', 0.6)
+      .attr('stroke-dasharray', '8,8')
+      .attr('class', 'animated-link')
+      .style('filter', 'drop-shadow(0 0 4px rgba(99, 102, 241, 0.3))')
+
+    // Add styles for the link animation
+    const styleSheet = document.createElement("style")
+    styleSheet.innerText = `
+      @keyframes flow {
+        from { stroke-dashoffset: 64; }
+        to { stroke-dashoffset: 0; }
+      }
+      .animated-link {
+        animation: flow 3s linear infinite;
+      }
+      .node-group:hover circle {
+        stroke-width: 5;
+        filter: brightness(1.2) url(#glow);
+        transform: scale(1.1);
+      }
+    `
+    document.head.appendChild(styleSheet)
 
     const getNodeColor = (level) => {
       const colors = {
@@ -358,33 +425,44 @@ export default function Generator({
 
     nodeElements
       .append('circle')
-      .attr('r', (d) => (d.level === 0 ? 45 : d.level === 1 ? 38 : d.level === 2 ? 32 : d.level === 3 ? 28 : 24))
+      .attr('r', (d) => (d.level === 0 ? 52 : d.level === 1 ? 44 : d.level === 2 ? 38 : d.level === 3 ? 32 : 28))
       .attr('fill', (d) =>
         completedNodes.has(d.id) ? '#10b981' : getNodeColor(d.level)
       )
       .attr('stroke', '#fff')
-      .attr('stroke-width', 3)
+      .attr('stroke-width', 2.5)
       .attr('filter', 'url(#glow)')
-      .attr('opacity', (d) => (completedNodes.has(d.id) ? 0.8 : 1))
-      .style('transition', 'all 0.3s ease')
+      .attr('opacity', (d) => (completedNodes.has(d.id) ? 0.9 : 1))
+      .style('transition', 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)')
+
+    // Add 3D Reflection Highlight
+    nodeElements
+      .append('circle')
+      .attr('r', (d) => (d.level === 0 ? 30 : d.level === 1 ? 25 : d.level === 2 ? 20 : d.level === 3 ? 15 : 12))
+      .attr('cx', (d) => (d.level === 0 ? -12 : -10))
+      .attr('cy', (d) => (d.level === 0 ? -12 : -10))
+      .attr('fill', 'rgba(255,255,255,0.2)')
+      .attr('filter', 'blur(8px)')
+      .attr('pointer-events', 'none')
 
     nodeElements.each(function (d) {
       if (completedNodes.has(d.id)) {
         const g = d3.select(this)
         g.append('circle')
-          .attr('r', 12)
+          .attr('r', 14)
           .attr('fill', '#fff')
-          .attr('cx', 20)
-          .attr('cy', -20)
+          .attr('cx', 24)
+          .attr('cy', -24)
+          .attr('filter', 'url(#glow)')
 
         g.append('text')
-          .attr('x', 20)
-          .attr('y', -20)
+          .attr('x', 24)
+          .attr('y', -24)
           .attr('text-anchor', 'middle')
           .attr('dy', '0.35em')
           .attr('fill', '#10b981')
-          .attr('font-size', '14px')
-          .attr('font-weight', 'bold')
+          .attr('font-size', '16px')
+          .attr('font-weight', '900')
           .attr('pointer-events', 'none')
           .text('✓')
       }
@@ -395,9 +473,10 @@ export default function Generator({
       .attr('text-anchor', 'middle')
       .attr('dy', '0.35em')
       .attr('fill', '#fff')
-      .attr('font-size', (d) => (d.level === 0 ? '14px' : '12px'))
-      .attr('font-weight', 'bold')
+      .attr('font-size', (d) => (d.level === 0 ? '15px' : '12px'))
+      .attr('font-weight', '800')
       .attr('pointer-events', 'none')
+      .attr('font-family', "'Outfit', sans-serif")
       .each(function (d) {
         const words = d.label.split(' ')
         const text = d3.select(this)
@@ -411,7 +490,7 @@ export default function Generator({
           text
             .append('tspan')
             .attr('x', 0)
-            .attr('dy', '-0.4em')
+            .attr('dy', '-0.5em')
             .text(words.slice(0, midpoint).join(' '))
 
           text
@@ -422,15 +501,31 @@ export default function Generator({
         }
       })
 
+    // Обновляем ref при каждом тике симуляции
+    const updateNodesRef = () => {
+      nodesRef.current = nodes.map(n => ({ ...n }))
+    }
+
+
     simulation.on('tick', () => {
       linkElements
-        .attr('x1', (d) => d.source.x)
-        .attr('y1', (d) => d.source.y)
-        .attr('x2', (d) => d.target.x)
-        .attr('y2', (d) => d.target.y)
+        .attr('d', (d) => {
+          const dx = d.target.x - d.source.x
+          const dy = d.target.y - d.source.y
+          const dr = Math.sqrt(dx * dx + dy * dy) * 1.5 // Multiplier for curve
+          return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`
+        })
+        .attr('x', (d) => {
+          // Update gradients positions on every tick
+          const grad = d3.select(`#${linkId(d)}`)
+          grad.attr('x1', d.source.x).attr('y1', d.source.y)
+            .attr('x2', d.target.x).attr('y2', d.target.y)
+          return null
+        })
 
       nodeElements.attr('transform', (d) => `translate(${d.x},${d.y})`)
     })
+
 
     function dragstarted(event, d) {
       if (!event.active) simulation.alphaTarget(0.3).restart()
@@ -447,11 +542,24 @@ export default function Generator({
       if (!event.active) simulation.alphaTarget(0)
       d.fx = null
       d.fy = null
+      // Обновляем ref без ре-рендера
+      updateNodesRef()
     }
 
     return () => {
       if (simulationRef.current) {
         simulationRef.current.stop()
+      }
+      // Сохраняем финальные позиции напрямую в savedData (мутация, не setState)
+      // Это сохранит позиции при переходе между страницами
+      if (nodesRef.current && savedData && savedData.nodes) {
+        nodesRef.current.forEach(node => {
+          const savedNode = savedData.nodes.find(n => n.id === node.id)
+          if (savedNode) {
+            savedNode.x = node.x
+            savedNode.y = node.y
+          }
+        })
       }
     }
   }, [data, completedNodes])
@@ -533,7 +641,6 @@ export default function Generator({
                 </>
               ) : (
                 <>
-                  <i className="fa-solid fa-wand-magic-sparkles"></i>
                   Create Roadmap
                 </>
               )}
@@ -641,204 +748,207 @@ export default function Generator({
         )}
       </div>
 
-      {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-96' : 'w-0'} transition-all duration-300 bg-slate-900/95 backdrop-blur-xl border-l border-slate-700/50 z-30 overflow-hidden`}>
-        {/* Close/Open Button */}
+      {/* Sidebar Section */}
+      <div className="relative flex transition-all duration-300">
+        {/* Toggle Button */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="absolute right-0 top-1/2 -translate-y-1/2 -translate-x-full bg-slate-800/90 hover:bg-slate-700/90 p-3 rounded-l-lg border border-r-0 border-slate-600/50 backdrop-blur transition-colors shadow-lg z-20"
-          title={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+          className={`absolute top-1/2 -translate-y-1/2 right-full z-40 bg-slate-800/90 hover:bg-slate-700/90 p-4 rounded-l-2xl border border-r-0 border-slate-600/50 backdrop-blur transition-all shadow-2xl group flex items-center justify-center ${sidebarOpen ? 'opacity-100' : 'opacity-100 hover:pr-6'}`}
+          title={sidebarOpen ? 'Hide Details' : 'Show Details'}
         >
-          <i className={`fa-solid ${sidebarOpen ? 'fa-chevron-right' : 'fa-chevron-left'} text-white`}></i>
+          <i className={`fa-solid ${sidebarOpen ? 'fa-chevron-right' : 'fa-chevron-left'} text-white group-hover:scale-110 transition-transform`}></i>
         </button>
 
-        <div className="h-full overflow-y-auto pt-40 px-6 pb-6">
-          {/* Physical spacer to force content down */}
-          <div className="h-20 w-full mb-8 border-b border-white/5 shadow-xs" />
+        {/* Sidebar content */}
+        <div className={`${sidebarOpen ? 'w-96 border-l' : 'w-0 border-l-0'} transition-all duration-300 bg-slate-900/95 backdrop-blur-xl border-slate-700/50 z-30 overflow-hidden relative`}>
+          <div className={`h-full overflow-y-auto pt-40 px-6 pb-6 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            {/* Physical spacer to force content down */}
+            <div className="h-20 w-full mb-8 border-b border-white/5 shadow-xs" />
 
-          {selectedNode ? (
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div
-                    className="w-4 h-4 rounded-full border-2 border-white shadow-lg"
-                    style={{
-                      background:
-                        selectedNode.level === 0
-                          ? 'linear-gradient(135deg, #a78bfa, #6366f1)'
-                          : selectedNode.level === 1
-                            ? 'linear-gradient(135deg, #60a5fa, #3b82f6)'
-                            : selectedNode.level === 2
-                              ? 'linear-gradient(135deg, #f472b6, #ec4899)'
-                              : selectedNode.level === 3
-                                ? 'linear-gradient(135deg, #34d399, #10b981)'
-                                : 'linear-gradient(135deg, #fb923c, #f97316)',
-                    }}
-                  />
-                  <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">
-                    {selectedNode.category || 'Step'}
-                  </span>
+            {selectedNode ? (
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div
+                      className="w-4 h-4 rounded-full border-2 border-white shadow-lg"
+                      style={{
+                        background:
+                          selectedNode.level === 0
+                            ? 'linear-gradient(135deg, #a78bfa, #6366f1)'
+                            : selectedNode.level === 1
+                              ? 'linear-gradient(135deg, #60a5fa, #3b82f6)'
+                              : selectedNode.level === 2
+                                ? 'linear-gradient(135deg, #f472b6, #ec4899)'
+                                : selectedNode.level === 3
+                                  ? 'linear-gradient(135deg, #34d399, #10b981)'
+                                  : 'linear-gradient(135deg, #fb923c, #f97316)',
+                      }}
+                    />
+                    <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">
+                      {selectedNode.category || 'Step'}
+                    </span>
+                  </div>
+                  <h2 className="text-3xl font-bold bg-linear-to-r from-purple-300 via-blue-300 to-pink-300 bg-clip-text text-transparent leading-tight">
+                    {selectedNode.label}
+                  </h2>
                 </div>
-                <h2 className="text-3xl font-bold bg-linear-to-r from-purple-300 via-blue-300 to-pink-300 bg-clip-text text-transparent leading-tight">
-                  {selectedNode.label}
-                </h2>
-              </div>
 
-              <div className="p-4 bg-white/5 rounded-lg border border-purple-500/30 backdrop-blur">
-                <p className="text-gray-200 leading-relaxed">
-                  {selectedNode.description || 'No description available'}
-                </p>
-              </div>
-
-              <button
-                onClick={() => toggleNodeCompletion(selectedNode.id)}
-                className={`w-full py-3 px-4 rounded-lg font-semibold transition-all shadow-lg flex items-center justify-center gap-2 ${completedNodes.has(selectedNode.id)
-                  ? 'bg-green-600 hover:bg-green-700 text-white'
-                  : 'bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white'
-                  }`}
-              >
-                {completedNodes.has(selectedNode.id) ? (
-                  <>
-                    <i className="fa-solid fa-check"></i>
-                    Completed
-                  </>
-                ) : (
-                  <>
-                    <i className="fa-regular fa-circle"></i>
-                    Mark as Complete
-                  </>
-                )}
-              </button>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-purple-500/20 rounded-lg border border-purple-400/30 backdrop-blur">
-                  <p className="text-xs text-purple-300 mb-1">Level</p>
-                  <p className="text-lg font-bold text-white">
-                    {selectedNode.level}
+                <div className="p-4 bg-white/5 rounded-lg border border-purple-500/30 backdrop-blur">
+                  <p className="text-gray-200 leading-relaxed">
+                    {selectedNode.description || 'No description available'}
                   </p>
                 </div>
 
-                {selectedNode.timeEstimate && (
-                  <div className="p-3 bg-blue-500/20 rounded-lg border border-blue-400/30 backdrop-blur">
-                    <p className="text-xs text-blue-300 mb-1">Time</p>
+                <button
+                  onClick={() => toggleNodeCompletion(selectedNode.id)}
+                  className={`w-full py-3 px-4 rounded-lg font-semibold transition-all shadow-lg flex items-center justify-center gap-2 ${completedNodes.has(selectedNode.id)
+                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    : 'bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white'
+                    }`}
+                >
+                  {completedNodes.has(selectedNode.id) ? (
+                    <>
+                      <i className="fa-solid fa-check"></i>
+                      Completed
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa-regular fa-circle"></i>
+                      Mark as Complete
+                    </>
+                  )}
+                </button>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-purple-500/20 rounded-lg border border-purple-400/30 backdrop-blur">
+                    <p className="text-xs text-purple-300 mb-1">Level</p>
                     <p className="text-lg font-bold text-white">
-                      {selectedNode.timeEstimate}
+                      {selectedNode.level}
                     </p>
                   </div>
-                )}
-              </div>
 
-              {/* Learning Resources Section */}
-              {selectedNode.resources && selectedNode.resources.length > 0 && (
-                <div className="p-4 bg-linear-to-br from-indigo-500/20 to-cyan-500/20 rounded-lg border border-indigo-400/40 backdrop-blur">
-                  <p className="text-sm font-semibold text-indigo-200 mb-3 flex items-center gap-2">
-                    <i className="fa-solid fa-graduation-cap"></i>
-                    Learning Resources:
+                  {selectedNode.timeEstimate && (
+                    <div className="p-3 bg-blue-500/20 rounded-lg border border-blue-400/30 backdrop-blur">
+                      <p className="text-xs text-blue-300 mb-1">Time</p>
+                      <p className="text-lg font-bold text-white">
+                        {selectedNode.timeEstimate}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Learning Resources Section */}
+                {selectedNode.resources && selectedNode.resources.length > 0 && (
+                  <div className="p-4 bg-linear-to-br from-indigo-500/20 to-cyan-500/20 rounded-lg border border-indigo-400/40 backdrop-blur">
+                    <p className="text-sm font-semibold text-indigo-200 mb-3 flex items-center gap-2">
+                      <i className="fa-solid fa-graduation-cap"></i>
+                      Learning Resources:
+                    </p>
+                    <div className="space-y-2">
+                      {selectedNode.resources.map((resource, idx) => {
+                        const getResourceIcon = (type) => {
+                          const icons = {
+                            youtube: 'fa-brands fa-youtube text-red-400',
+                            documentation: 'fa-solid fa-book text-blue-400',
+                            course: 'fa-solid fa-chalkboard-user text-green-400',
+                            article: 'fa-solid fa-newspaper text-yellow-400',
+                            book: 'fa-solid fa-book-open text-purple-400',
+                          }
+                          return icons[type] || 'fa-solid fa-link text-gray-400'
+                        }
+
+                        return (
+                          <a
+                            key={idx}
+                            href={resource.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/10 hover:border-indigo-400/50"
+                          >
+                            <i className={`${getResourceIcon(resource.type)} text-xl`}></i>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-white truncate group-hover:text-indigo-300 transition-colors">
+                                {resource.title}
+                              </p>
+                              <p className="text-xs text-gray-400 capitalize">
+                                {resource.type}
+                              </p>
+                            </div>
+                            <i className="fa-solid fa-arrow-up-right-from-square text-gray-400 group-hover:text-indigo-400 transition-colors text-xs"></i>
+                          </a>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {selectedNode.children && selectedNode.children.length > 0 && (
+                  <div className="p-4 bg-linear-to-br from-purple-500/20 to-blue-500/20 rounded-lg border border-purple-400/40 backdrop-blur">
+                    <p className="text-sm font-semibold text-purple-200 mb-2 flex items-center gap-2">
+                      <i className="fa-solid fa-arrow-right"></i>
+                      Next Steps:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedNode.children
+                        .map((childId, idx) => {
+                          const childNode = data.nodes.find((n) => n.id === childId)
+                          if (!childNode) return null
+                          return (
+                            <button
+                              key={idx}
+                              onClick={() => setSelectedNode(childNode)}
+                              className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-xs font-medium transition-all border border-white/40 backdrop-blur shadow-lg hover:shadow-purple-500/50"
+                            >
+                              {childNode.label}
+                            </button>
+                          )
+                        })
+                        .filter(Boolean)}
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-4 border-t border-purple-500/30">
+                  <p className="text-xs font-semibold text-purple-300 mb-3 uppercase tracking-wider flex items-center gap-2">
+                    <i className="fa-solid fa-layer-group"></i>
+                    Levels
                   </p>
                   <div className="space-y-2">
-                    {selectedNode.resources.map((resource, idx) => {
-                      const getResourceIcon = (type) => {
-                        const icons = {
-                          youtube: 'fa-brands fa-youtube text-red-400',
-                          documentation: 'fa-solid fa-book text-blue-400',
-                          course: 'fa-solid fa-chalkboard-user text-green-400',
-                          article: 'fa-solid fa-newspaper text-yellow-400',
-                          book: 'fa-solid fa-book-open text-purple-400',
-                        }
-                        return icons[type] || 'fa-solid fa-link text-gray-400'
-                      }
-
-                      return (
-                        <a
-                          key={idx}
-                          href={resource.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/10 hover:border-indigo-400/50"
-                        >
-                          <i className={`${getResourceIcon(resource.type)} text-xl`}></i>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-white truncate group-hover:text-indigo-300 transition-colors">
-                              {resource.title}
-                            </p>
-                            <p className="text-xs text-gray-400 capitalize">
-                              {resource.type}
-                            </p>
-                          </div>
-                          <i className="fa-solid fa-arrow-up-right-from-square text-gray-400 group-hover:text-indigo-400 transition-colors text-xs"></i>
-                        </a>
-                      )
-                    })}
+                    {[
+                      { level: 0, name: 'Main Goal', color: 'from-purple-400 to-indigo-500' },
+                      { level: 1, name: 'Major Phases', color: 'from-blue-400 to-blue-600' },
+                      { level: 2, name: 'Key Milestones', color: 'from-pink-400 to-pink-600' },
+                      { level: 3, name: 'Specific Tasks', color: 'from-emerald-400 to-emerald-600' },
+                      { level: 4, name: 'Micro-Steps', color: 'from-orange-400 to-orange-600' },
+                    ].map((item) => (
+                      <div key={item.level} className="flex items-center gap-2">
+                        <div
+                          className={`w-3 h-3 rounded-full bg-linear-to-br ${item.color} border border-white/50 shadow-lg`}
+                        />
+                        <span className="text-sm text-gray-300">
+                          Level {item.level}: {item.name}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              )}
-
-              {selectedNode.children && selectedNode.children.length > 0 && (
-                <div className="p-4 bg-linear-to-br from-purple-500/20 to-blue-500/20 rounded-lg border border-purple-400/40 backdrop-blur">
-                  <p className="text-sm font-semibold text-purple-200 mb-2 flex items-center gap-2">
-                    <i className="fa-solid fa-arrow-right"></i>
-                    Next Steps:
+              </div>
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full border-2 border-purple-400/50 bg-linear-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center shadow-xl">
+                    <i className="fa-solid fa-hand-pointer text-purple-400 text-2xl"></i>
+                  </div>
+                  <p className="text-purple-200">
+                    Click on a node to view details
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedNode.children
-                      .map((childId, idx) => {
-                        const childNode = data.nodes.find((n) => n.id === childId)
-                        if (!childNode) return null
-                        return (
-                          <button
-                            key={idx}
-                            onClick={() => setSelectedNode(childNode)}
-                            className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-xs font-medium transition-all border border-white/40 backdrop-blur shadow-lg hover:shadow-purple-500/50"
-                          >
-                            {childNode.label}
-                          </button>
-                        )
-                      })
-                      .filter(Boolean)}
-                  </div>
-                </div>
-              )}
-
-              <div className="pt-4 border-t border-purple-500/30">
-                <p className="text-xs font-semibold text-purple-300 mb-3 uppercase tracking-wider flex items-center gap-2">
-                  <i className="fa-solid fa-layer-group"></i>
-                  Levels
-                </p>
-                <div className="space-y-2">
-                  {[
-                    { level: 0, name: 'Main Goal', color: 'from-purple-400 to-indigo-500' },
-                    { level: 1, name: 'Major Phases', color: 'from-blue-400 to-blue-600' },
-                    { level: 2, name: 'Key Milestones', color: 'from-pink-400 to-pink-600' },
-                    { level: 3, name: 'Specific Tasks', color: 'from-emerald-400 to-emerald-600' },
-                    { level: 4, name: 'Micro-Steps', color: 'from-orange-400 to-orange-600' },
-                  ].map((item) => (
-                    <div key={item.level} className="flex items-center gap-2">
-                      <div
-                        className={`w-3 h-3 rounded-full bg-linear-to-br ${item.color} border border-white/50 shadow-lg`}
-                      />
-                      <span className="text-sm text-gray-300">
-                        Level {item.level}: {item.name}
-                      </span>
-                    </div>
-                  ))}
+                  <p className="text-sm text-purple-400/70 mt-2">
+                    You can drag nodes with your mouse
+                  </p>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full border-2 border-purple-400/50 bg-linear-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center shadow-xl">
-                  <i className="fa-solid fa-hand-pointer text-purple-400 text-2xl"></i>
-                </div>
-                <p className="text-purple-200">
-                  Click on a node to view details
-                </p>
-                <p className="text-sm text-purple-400/70 mt-2">
-                  You can drag nodes with your mouse
-                </p>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
