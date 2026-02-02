@@ -296,12 +296,12 @@ export default function Generator({
         d3
           .forceLink(links)
           .id((d) => d.id)
-          .distance(200)
+          .distance(180)
           .strength(0.3)
       )
-      .force('charge', d3.forceManyBody().strength(-1200))
+      .force('charge', d3.forceManyBody().strength(-1000))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(100))
+      .force('collision', d3.forceCollide().radius(90))
 
     simulationRef.current = simulation
 
@@ -611,45 +611,63 @@ export default function Generator({
         }
       `}</style>
 
-      {/* Header */}
-      <div className={`absolute top-20 left-4 z-20 p-4 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl transition-all duration-300 ${sidebarOpen ? 'right-[420px]' : 'right-4'}`}>
-        <div className="max-w-5xl mx-auto">
-          <h1 className="text-2xl font-bold mb-3 text-white tracking-tight flex items-center gap-3">
-            <i className="fa-solid fa-route text-indigo-400"></i>
-            {data?.title || 'AI Roadmap Generator'}
-          </h1>
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && !loading && generateRoadmap()}
-              placeholder="Enter your goal (e.g., become a frontend developer, learn machine learning)..."
-              className="flex-1 px-5 py-3 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/30 transition-all"
-              disabled={loading}
-            />
+      {/* Header - Fully Adaptive & Premium */}
+      <div className={`absolute top-20 left-6 z-20 p-6 bg-slate-900/80 backdrop-blur-2xl border border-white/5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 ease-in-out ${sidebarOpen ? 'right-[500px]' : 'right-6'}`}>
+        <div className="w-full flex flex-col gap-4">
+          <div className="relative flex items-center justify-center">
+            <h1 className="text-xl font-black text-white tracking-widest uppercase flex items-center gap-3 font-outfit text-center">
+              <span className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
+                <i className="fa-solid fa-wand-magic-sparkles text-indigo-400 text-sm"></i>
+              </span>
+              {data?.title || 'AI Roadmap Architect'}
+            </h1>
+
+          </div>
+
+          <div className="flex gap-4">
+            <div className="relative flex-1 group">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && !loading && generateRoadmap()}
+                placeholder="What is your next big goal? (e.g. Master Python, Product Design...)"
+                className="w-full px-6 py-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all text-lg font-medium"
+                disabled={loading}
+              />
+              <div className="absolute inset-0 rounded-2xl border border-indigo-500/0 group-focus-within:border-indigo-500/30 pointer-events-none transition-all"></div>
+            </div>
 
             <button
               onClick={generateRoadmap}
               disabled={loading}
-              className="bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-slate-700 disabled:to-slate-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors shadow-lg hover:shadow-indigo-500/30 flex items-center gap-2 whitespace-nowrap"
+              className={`relative overflow-hidden group min-w-[200px] px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 shadow-2xl ${loading
+                ? 'bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700/50'
+                : 'bg-linear-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white hover:shadow-indigo-500/40'
+                }`}
             >
               {loading ? (
                 <>
-                  <i className="fa-solid fa-spinner animate-spin"></i>
-                  Generating...
+                  <div className="w-5 h-5 border-2 border-indigo-500/30 border-t-indigo-400 rounded-full animate-spin"></div>
+                  <span className="animate-pulse">Analyzing...</span>
                 </>
               ) : (
                 <>
-                  Create Roadmap
+                  <span className="relative z-10">Create Roadmap</span>
+                  <i className="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform relative z-10"></i>
+                  {/* Decorative glow */}
+                  <div className="absolute inset-0 bg-linear-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:animate-shimmer"></div>
                 </>
               )}
             </button>
           </div>
+
           {error && (
-            <div className="mt-2 p-3 bg-red-500/10 border border-red-500/30 rounded-lg backdrop-blur flex items-center gap-2">
-              <i className="fa-solid fa-circle-exclamation text-red-400"></i>
-              <p className="text-red-300 text-sm">{error}</p>
+            <div className="mt-2 p-4 bg-red-500/5 border border-red-500/20 rounded-2xl backdrop-blur-xl flex items-center gap-3 animate-slide-up">
+              <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center">
+                <i className="fa-solid fa-triangle-exclamation text-red-400 text-sm"></i>
+              </div>
+              <p className="text-red-300 text-sm font-bold uppercase tracking-wider">{error}</p>
             </div>
           )}
         </div>
@@ -657,23 +675,52 @@ export default function Generator({
 
       {/* Zoom Controls */}
       {data && (
-        <div className={`export-hide absolute top-56 z-20 flex flex-col gap-2 transition-all duration-300 ${sidebarOpen ? 'right-[408px]' : 'right-6'}`}>
-          {/* Progress indicator */}
-          <div className="p-4 bg-slate-800/90 rounded-lg border border-slate-600/50 backdrop-blur shadow-lg mb-2">
-            <div className="text-center mb-2">
-              <div className="text-2xl font-bold text-white">
-                {getCompletionStats().percentage}%
+        <div className={`export-hide absolute top-56 z-20 flex flex-col gap-2 transition-all duration-300 ${sidebarOpen ? 'right-[504px]' : 'right-6'}`}>
+          {/* Futuristic Circular Progress */}
+          <div className="relative group mb-4">
+            <div className="absolute -inset-1 bg-linear-to-r from-indigo-500 to-purple-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+            <div className="relative p-5 bg-slate-900/90 backdrop-blur-3xl rounded-3xl border border-white/10 shadow-2xl flex flex-col items-center">
+              <div className="relative w-24 h-24 flex items-center justify-center mb-3">
+                <svg className="w-full h-full -rotate-90">
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="38"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.03)"
+                    strokeWidth="8"
+                  />
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="38"
+                    fill="none"
+                    stroke="url(#progress-gradient-float)"
+                    strokeWidth="8"
+                    strokeDasharray={2 * Math.PI * 38}
+                    strokeDashoffset={2 * Math.PI * 38 * (1 - getCompletionStats().percentage / 100)}
+                    strokeLinecap="round"
+                    className="transition-all duration-1000 ease-out"
+                  />
+                  <defs>
+                    <linearGradient id="progress-gradient-float" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#818cf8" />
+                      <stop offset="100%" stopColor="#c084fc" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-black text-white leading-none tracking-tighter">
+                    {getCompletionStats().percentage}<span className="text-[10px] text-indigo-400 ml-0.5">%</span>
+                  </span>
+                </div>
               </div>
-              <div className="text-xs text-slate-400">Progress</div>
-            </div>
-            <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-linear-to-r from-green-500 to-emerald-500 transition-all duration-500"
-                style={{ width: `${getCompletionStats().percentage}%` }}
-              />
-            </div>
-            <div className="text-xs text-slate-400 text-center mt-2">
-              {getCompletionStats().completed} / {getCompletionStats().total}
+              <div className="text-center">
+                <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Current Progress</p>
+                <p className="text-[11px] font-bold text-white tracking-widest bg-white/5 px-2 py-0.5 rounded-full border border-white/5 uppercase">
+                  {getCompletionStats().completed} / {getCompletionStats().total} <span className="text-slate-500 text-[10px] ml-1">Steps</span>
+                </p>
+              </div>
             </div>
           </div>
 
@@ -698,11 +745,7 @@ export default function Generator({
           >
             <i className="fa-solid fa-expand text-white"></i>
           </button>
-          <div className="mt-2 p-2 bg-slate-800/80 rounded-lg border border-slate-600/50 backdrop-blur text-center shadow-lg">
-            <span className="text-xs text-slate-300 font-semibold">
-              {Math.round(zoom * 100)}%
-            </span>
-          </div>
+
 
           {/* Export buttons */}
           <div className="mt-4 pt-4 border-t border-slate-600/50">
@@ -760,18 +803,22 @@ export default function Generator({
         </button>
 
         {/* Sidebar content */}
-        <div className={`${sidebarOpen ? 'w-96 border-l' : 'w-0 border-l-0'} transition-all duration-300 bg-slate-900/95 backdrop-blur-xl border-slate-700/50 z-30 overflow-hidden relative`}>
-          <div className={`h-full overflow-y-auto pt-40 px-6 pb-6 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <div className={`${sidebarOpen ? 'w-[480px] border-l' : 'w-0 border-l-0'} transition-all duration-300 bg-slate-900/95 backdrop-blur-xl border-slate-700/50 z-30 overflow-hidden relative`}>
+          <div className={`h-full overflow-y-auto pt-40 px-10 pb-10 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
             {/* Physical spacer to force content down */}
             <div className="h-20 w-full mb-8 border-b border-white/5 shadow-xs" />
 
             {selectedNode ? (
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '50px' }}>
+                <div style={{ marginBottom: '20px' }}>
+                  <div className="flex items-center gap-3 mb-4">
                     <div
-                      className="w-4 h-4 rounded-full border-2 border-white shadow-lg"
                       style={{
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '50%',
+                        border: '2px solid white',
+                        boxShadow: '0 0 10px rgba(167, 139, 250, 0.5)',
                         background:
                           selectedNode.level === 0
                             ? 'linear-gradient(135deg, #a78bfa, #6366f1)'
@@ -784,77 +831,111 @@ export default function Generator({
                                   : 'linear-gradient(135deg, #fb923c, #f97316)',
                       }}
                     />
-                    <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">
+                    <span className="text-sm font-bold text-purple-300 uppercase tracking-[0.2em]">
                       {selectedNode.category || 'Step'}
                     </span>
                   </div>
-                  <h2 className="text-3xl font-bold bg-linear-to-r from-purple-300 via-blue-300 to-pink-300 bg-clip-text text-transparent leading-tight">
+                  <h2 className="text-4xl font-extrabold bg-linear-to-r from-purple-200 via-blue-200 to-pink-200 bg-clip-text text-transparent leading-tight" style={{ letterSpacing: '-0.02em' }}>
                     {selectedNode.label}
                   </h2>
                 </div>
 
-                <div className="p-4 bg-white/5 rounded-lg border border-purple-500/30 backdrop-blur">
-                  <p className="text-gray-200 leading-relaxed">
-                    {selectedNode.description || 'No description available'}
-                  </p>
+                {/* Description Area - Premium Layout */}
+                <div className="relative group rounded-3xl my-8">
+                  {/* Glowing border effect */}
+                  <div className="absolute -inset-px bg-linear-to-r from-indigo-500/40 via-purple-500/40 to-indigo-500/40 rounded-3xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-700"></div>
+
+                  <div className="relative p-10 bg-slate-900/60 backdrop-blur-xl rounded-3xl border border-white/5 shadow-2xl overflow-hidden group-hover:bg-slate-900/80 transition-colors duration-500">
+                    {/* Decorative Elements */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
+                    <div className="relative z-10">
+
+                      <div
+                        className="text-lg leading-loose text-slate-200 font-light tracking-wide space-y-6"
+                        style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}
+                      >
+                        {(selectedNode.description || 'No description available')
+                          .split(/[.\n]/)
+                          .filter(p => p.trim().length > 0)
+                          .map((paragraph, i) => (
+                            <p key={i}>
+                              {paragraph.trim()}.
+                            </p>
+                          ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <button
                   onClick={() => toggleNodeCompletion(selectedNode.id)}
-                  className={`w-full py-3 px-4 rounded-lg font-semibold transition-all shadow-lg flex items-center justify-center gap-2 ${completedNodes.has(selectedNode.id)
-                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                    : 'bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white'
-                    }`}
+                  style={{
+                    width: '100%',
+                    padding: '24px',
+                    borderRadius: '16px',
+                    fontWeight: '800',
+                    fontSize: '1.1rem',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '15px',
+                    transition: 'all 0.3s ease',
+                    background: completedNodes.has(selectedNode.id)
+                      ? '#10b981'
+                      : 'linear-gradient(to right, #7c3aed, #2563eb)'
+                  }}
                 >
                   {completedNodes.has(selectedNode.id) ? (
                     <>
-                      <i className="fa-solid fa-check"></i>
-                      Completed
+                      <i className="fa-solid fa-check-circle" style={{ fontSize: '1.4rem' }}></i>
+                      <span>Task Completed</span>
                     </>
                   ) : (
                     <>
-                      <i className="fa-regular fa-circle"></i>
-                      Mark as Complete
+                      <i className="fa-regular fa-circle" style={{ fontSize: '1.4rem' }}></i>
+                      <span>Mark as Completed</span>
                     </>
                   )}
                 </button>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-purple-500/20 rounded-lg border border-purple-400/30 backdrop-blur">
-                    <p className="text-xs text-purple-300 mb-1">Level</p>
-                    <p className="text-lg font-bold text-white">
+                <div className="grid grid-cols-2 gap-6 mt-2">
+                  <div className="p-6 bg-purple-500/10 rounded-2xl border border-purple-500/20 hover:bg-purple-500/20 hover:border-purple-400 hover:shadow-[0_0_20px_rgba(168,85,247,0.2)] transition-all duration-300 group cursor-default">
+                    <p className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-2 group-hover:text-purple-300 transition-colors">Complexity Level</p>
+                    <p className="text-3xl font-black text-white group-hover:scale-110 transition-transform origin-left">
                       {selectedNode.level}
                     </p>
                   </div>
 
                   {selectedNode.timeEstimate && (
-                    <div className="p-3 bg-blue-500/20 rounded-lg border border-blue-400/30 backdrop-blur">
-                      <p className="text-xs text-blue-300 mb-1">Time</p>
-                      <p className="text-lg font-bold text-white">
+                    <div className="p-6 bg-blue-500/10 rounded-2xl border border-blue-500/20 hover:bg-blue-500/20 hover:border-blue-400 hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] transition-all duration-300 group cursor-default">
+                      <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2 group-hover:text-blue-300 transition-colors">Time Estimate</p>
+                      <p className="text-3xl font-black text-white group-hover:scale-110 transition-transform origin-left">
                         {selectedNode.timeEstimate}
                       </p>
                     </div>
                   )}
                 </div>
 
-                {/* Learning Resources Section */}
+                {/* Resources */}
                 {selectedNode.resources && selectedNode.resources.length > 0 && (
-                  <div className="p-4 bg-linear-to-br from-indigo-500/20 to-cyan-500/20 rounded-lg border border-indigo-400/40 backdrop-blur">
-                    <p className="text-sm font-semibold text-indigo-200 mb-3 flex items-center gap-2">
+                  <div style={{ padding: '30px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <p style={{ fontSize: '1rem', fontWeight: '700', color: '#818cf8', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <i className="fa-solid fa-graduation-cap"></i>
-                      Learning Resources:
+                      Learning Materials
                     </p>
-                    <div className="space-y-2">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                       {selectedNode.resources.map((resource, idx) => {
                         const getResourceIcon = (type) => {
                           const icons = {
-                            youtube: 'fa-brands fa-youtube text-red-400',
-                            documentation: 'fa-solid fa-book text-blue-400',
-                            course: 'fa-solid fa-chalkboard-user text-green-400',
-                            article: 'fa-solid fa-newspaper text-yellow-400',
-                            book: 'fa-solid fa-book-open text-purple-400',
+                            youtube: 'fa-brands fa-youtube',
+                            documentation: 'fa-solid fa-book',
+                            course: 'fa-solid fa-chalkboard-user',
+                            article: 'fa-solid fa-newspaper',
+                            book: 'fa-solid fa-book-open',
                           }
-                          return icons[type] || 'fa-solid fa-link text-gray-400'
+                          return icons[type] || 'fa-solid fa-link'
                         }
 
                         return (
@@ -863,18 +944,14 @@ export default function Generator({
                             href={resource.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-lg transition-all group border border-white/10 hover:border-indigo-400/50"
+                            className="flex items-center gap-5 p-5 bg-slate-900/40 rounded-2xl border border-white/5 hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:shadow-[0_5px_20px_rgba(99,102,241,0.15)] transition-all group"
                           >
-                            <i className={`${getResourceIcon(resource.type)} text-xl`}></i>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-white truncate group-hover:text-indigo-300 transition-colors">
-                                {resource.title}
-                              </p>
-                              <p className="text-xs text-gray-400 capitalize">
-                                {resource.type}
-                              </p>
+                            <i className={getResourceIcon(resource.type)} style={{ fontSize: '1.6rem', color: '#6366f1' }}></i>
+                            <div style={{ flex: 1 }}>
+                              <p style={{ fontSize: '1rem', fontWeight: '600', color: 'white', marginBottom: '4px' }}>{resource.title}</p>
+                              <p style={{ fontSize: '0.8rem', color: '#94a3b8', textTransform: 'capitalize' }}>{resource.type}</p>
                             </div>
-                            <i className="fa-solid fa-arrow-up-right-from-square text-gray-400 group-hover:text-indigo-400 transition-colors text-xs"></i>
+                            <i className="fa-solid fa-external-link" style={{ fontSize: '0.9rem', color: '#475569' }}></i>
                           </a>
                         )
                       })}
@@ -882,51 +959,55 @@ export default function Generator({
                   </div>
                 )}
 
+                {/* Sub-steps */}
                 {selectedNode.children && selectedNode.children.length > 0 && (
-                  <div className="p-4 bg-linear-to-br from-purple-500/20 to-blue-500/20 rounded-lg border border-purple-400/40 backdrop-blur">
-                    <p className="text-sm font-semibold text-purple-200 mb-2 flex items-center gap-2">
+                  <div style={{ padding: '30px', backgroundColor: 'rgba(139, 92, 246, 0.05)', borderRadius: '24px', border: '1px solid rgba(139, 92, 246, 0.1)' }}>
+                    <p style={{ fontSize: '1rem', fontWeight: '700', color: '#a78bfa', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <i className="fa-solid fa-arrow-right"></i>
-                      Next Steps:
+                      Next Milestones
                     </p>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedNode.children
-                        .map((childId, idx) => {
-                          const childNode = data.nodes.find((n) => n.id === childId)
-                          if (!childNode) return null
-                          return (
-                            <button
-                              key={idx}
-                              onClick={() => setSelectedNode(childNode)}
-                              className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-xs font-medium transition-all border border-white/40 backdrop-blur shadow-lg hover:shadow-purple-500/50"
-                            >
-                              {childNode.label}
-                            </button>
-                          )
-                        })
-                        .filter(Boolean)}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                      {selectedNode.children.map((childId, idx) => {
+                        const childNode = data.nodes.find((n) => n.id === childId)
+                        if (!childNode) return null
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => setSelectedNode(childNode)}
+                            className="px-6 py-3 bg-indigo-500/10 hover:bg-indigo-500 hover:text-white border border-indigo-500/20 hover:border-indigo-400 rounded-xl text-indigo-300 text-xs font-black tracking-widest uppercase transition-all shadow-sm hover:shadow-[0_0_15px_rgba(99,102,241,0.5)] active:scale-95"
+                          >
+                            {childNode.label}
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
 
-                <div className="pt-4 border-t border-purple-500/30">
-                  <p className="text-xs font-semibold text-purple-300 mb-3 uppercase tracking-wider flex items-center gap-2">
-                    <i className="fa-solid fa-layer-group"></i>
-                    Levels
+                <div style={{ paddingTop: '40px', borderTop: '1px solid rgba(255,255,255,0.1)', marginBottom: '40px' }}>
+                  <p style={{ fontSize: '0.9rem', fontWeight: '800', color: '#6366f1', marginBottom: '25px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Roadmap Legend
                   </p>
-                  <div className="space-y-2">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                     {[
-                      { level: 0, name: 'Main Goal', color: 'from-purple-400 to-indigo-500' },
-                      { level: 1, name: 'Major Phases', color: 'from-blue-400 to-blue-600' },
-                      { level: 2, name: 'Key Milestones', color: 'from-pink-400 to-pink-600' },
-                      { level: 3, name: 'Specific Tasks', color: 'from-emerald-400 to-emerald-600' },
-                      { level: 4, name: 'Micro-Steps', color: 'from-orange-400 to-orange-600' },
+                      { level: 0, name: 'Main Goal', color: 'linear-gradient(135deg, #a78bfa, #6366f1)' },
+                      { level: 1, name: 'Major Phases', color: 'linear-gradient(135deg, #60a5fa, #3b82f6)' },
+                      { level: 2, name: 'Key Milestones', color: 'linear-gradient(135deg, #f472b6, #ec4899)' },
+                      { level: 3, name: 'Specific Tasks', color: 'linear-gradient(135deg, #34d399, #10b981)' },
+                      { level: 4, name: 'Micro-Steps', color: 'linear-gradient(135deg, #fb923c, #f97316)' },
                     ].map((item) => (
-                      <div key={item.level} className="flex items-center gap-2">
+                      <div key={item.level} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                         <div
-                          className={`w-3 h-3 rounded-full bg-linear-to-br ${item.color} border border-white/50 shadow-lg`}
+                          style={{
+                            width: '16px',
+                            height: '16px',
+                            borderRadius: '50%',
+                            background: item.color,
+                            border: '2px solid rgba(255,255,255,0.3)'
+                          }}
                         />
-                        <span className="text-sm text-gray-300">
-                          Level {item.level}: {item.name}
+                        <span style={{ fontSize: '1rem', color: '#cbd5e1', fontWeight: '500' }}>
+                          Level {item.level}: <span style={{ color: 'white' }}>{item.name}</span>
                         </span>
                       </div>
                     ))}
@@ -934,17 +1015,13 @@ export default function Generator({
                 </div>
               </div>
             ) : (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full border-2 border-purple-400/50 bg-linear-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center shadow-xl">
-                    <i className="fa-solid fa-hand-pointer text-purple-400 text-2xl"></i>
+              <div style={{ height: '70%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ width: '80px', height: '80px', margin: '0 auto 30px', borderRadius: '50%', border: '2px dashed rgba(167,139,250,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <i className="fa-solid fa-hand-pointer" style={{ fontSize: '2.5rem', color: '#a78bfa' }}></i>
                   </div>
-                  <p className="text-purple-200">
-                    Click on a node to view details
-                  </p>
-                  <p className="text-sm text-purple-400/70 mt-2">
-                    You can drag nodes with your mouse
-                  </p>
+                  <p style={{ fontSize: '1.4rem', fontWeight: '700', color: 'white', marginBottom: '10px' }}>Select a Step</p>
+                  <p style={{ color: '#94a3b8' }}>Click on a node to view the action plan</p>
                 </div>
               </div>
             )}
