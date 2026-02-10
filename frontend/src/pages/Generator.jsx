@@ -12,6 +12,7 @@ export default function Generator({
   setSavedCompletedNodes,
   savedSelectedNode,
   setSavedSelectedNode,
+  setActiveHistoryId,
 }) {
   // Use lifted state from parent for persistence
   const [input, setInput] = [savedInput, setSavedInput]
@@ -56,7 +57,8 @@ export default function Generator({
       })
 
       if (!response.ok) {
-        throw new Error('Server error. Make sure the backend is running on port 5001')
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.details || `Server error (${response.status})`)
       }
 
       const parsedData = await response.json()
@@ -81,7 +83,72 @@ export default function Generator({
         children: node.children.filter((childId) => existingIds.has(childId)),
       }))
 
+      // Auto-correct levels to ensure strict hierarchy (Parent L -> Child L+1)
+      const nodeIds = new Map(parsedData.nodes.map(n => [n.id, n]))
+      // Find root: explicitly level 0, or the first one if missing
+      const rootNode = parsedData.nodes.find(n => n.level === 0) || parsedData.nodes[0]
+
+      if (rootNode) {
+        const queue = [{ id: rootNode.id, depth: 0 }]
+        let corrections = 0
+        const visited = new Set([rootNode.id])
+
+        while (queue.length > 0) {
+          const { id, depth } = queue.shift()
+          const node = nodeIds.get(id)
+
+          if (node) {
+            // Force level to match depth
+            if (node.level !== depth) {
+              node.level = depth
+              corrections++
+            }
+
+            // Check children
+            if (node.children && node.children.length > 0) {
+              node.children.forEach(childId => {
+                if (!visited.has(childId)) {
+                  visited.add(childId)
+                  queue.push({ id: childId, depth: depth + 1 })
+                }
+              })
+            }
+          }
+        }
+
+        if (corrections > 0) {
+          console.warn(`🛡️ Roadmap Auto-Healed: Corrected levels for ${corrections} nodes.`)
+        }
+
+        // Attach orphans to root to prevent floating nodes
+        parsedData.nodes.forEach(node => {
+          if (!visited.has(node.id)) {
+            console.warn(`🛡️ Orphaned node rescued: ${node.label}`)
+            node.level = 1
+            if (!rootNode.children.includes(node.id)) {
+              rootNode.children.push(node.id)
+            }
+          }
+        })
+      }
+
       setData(parsedData)
+
+      const newId = Date.now().toString()
+      if (setActiveHistoryId) setActiveHistoryId(newId)
+
+      // Save to history
+      const historyItem = {
+        id: newId,
+        timestamp: Date.now(),
+        data: parsedData,
+        completedNodes: []
+      }
+      const existingHistory = JSON.parse(localStorage.getItem('roadmap_history') || '[]')
+      existingHistory.unshift(historyItem)
+      // Keep only last 20 items
+      const trimmedHistory = existingHistory.slice(0, 20)
+      localStorage.setItem('roadmap_history', JSON.stringify(trimmedHistory))
     } catch (err) {
       console.error('Error:', err)
       setError(err.message || 'An error occurred during generation')
@@ -132,11 +199,30 @@ export default function Generator({
   const toggleNodeCompletion = (nodeId) => {
     setCompletedNodes((prev) => {
       const newSet = new Set(prev)
-      if (newSet.has(nodeId)) {
-        newSet.delete(nodeId)
-      } else {
-        newSet.add(nodeId)
+      const isCompleting = !newSet.has(nodeId)
+
+      // Recursive function to find all descendant IDs
+      const updateDescendants = (id) => {
+        const node = data.nodes.find((n) => n.id === id)
+        if (node && node.children) {
+          node.children.forEach((childId) => {
+            if (isCompleting) {
+              newSet.add(childId)
+            } else {
+              newSet.delete(childId)
+            }
+            updateDescendants(childId)
+          })
+        }
       }
+
+      if (isCompleting) {
+        newSet.add(nodeId)
+      } else {
+        newSet.delete(nodeId)
+      }
+
+      updateDescendants(nodeId)
       return newSet
     })
   }
@@ -575,7 +661,7 @@ export default function Generator({
   }))
 
   return (
-    <div className="fixed inset-0 w-screen h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden flex pt-16">
+    <div className="fixed inset-0 w-screen h-screen bg-main text-white overflow-hidden flex pt-16">
       {/* Background particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {particles.map((particle) => (
@@ -612,7 +698,7 @@ export default function Generator({
       `}</style>
 
       {/* Header - Fully Adaptive & Premium */}
-      <div className={`absolute top-20 left-6 z-20 p-6 bg-slate-900/80 backdrop-blur-2xl border border-white/5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 ease-in-out ${sidebarOpen ? 'right-[500px]' : 'right-6'}`}>
+      <div className={`absolute top-20 left-6 z-20 p-6 bg-slate-900/40 backdrop-blur-2xl rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 ease-in-out ${sidebarOpen ? 'right-[500px]' : 'right-6'}`}>
         <div className="w-full flex flex-col gap-4">
           <div className="relative flex items-center justify-center">
             <h1 className="text-xl font-black text-white tracking-widest uppercase flex items-center gap-3 font-outfit text-center">
@@ -803,7 +889,7 @@ export default function Generator({
         </button>
 
         {/* Sidebar content */}
-        <div className={`${sidebarOpen ? 'w-[480px] border-l' : 'w-0 border-l-0'} transition-all duration-300 bg-slate-900/95 backdrop-blur-xl border-slate-700/50 z-30 overflow-hidden relative`}>
+        <div className={`${sidebarOpen ? 'w-[480px]' : 'w-0'} transition-all duration-300 bg-slate-900/40 backdrop-blur-xl z-30 overflow-hidden relative`}>
           <div className={`h-full overflow-y-auto pt-40 px-10 pb-10 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
             {/* Physical spacer to force content down */}
             <div className="h-20 w-full mb-8 border-b border-white/5 shadow-xs" />

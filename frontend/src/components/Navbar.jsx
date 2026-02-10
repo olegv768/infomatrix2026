@@ -7,12 +7,13 @@ export default function Navbar({ currentPage, onNavigate }) {
   const navItems = [
     { id: 'home', label: 'Home', icon: 'fa-house' },
     { id: 'generator', label: 'Generator', icon: 'fa-route' },
+    { id: 'history', label: 'History', icon: 'fa-clock-rotate-left' },
     { id: 'about', label: 'About Us', icon: 'fa-users' },
     { id: 'contact', label: 'Contact', icon: 'fa-envelope' },
   ]
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-white/10">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/40 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-20">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}

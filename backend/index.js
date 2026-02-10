@@ -95,6 +95,7 @@ Ensure the roadmap covers:
 - Practical projects and exercises
 - Advanced topics and specializations
 - Each node should logically build on previous ones
+- STRICT RULE: Child nodes MUST be exactly one level deeper than their parent (e.g., Level 2 parent -> Level 3 children). Do NOT skip levels (e.g., Level 2 -> Level 4 is FORBIDDEN).
 
 RESOURCE QUALITY GUIDELINES:
 - For YouTube: link to well-known educational channels (Traversy Media, freeCodeCamp, The Net Ninja, etc.)
@@ -114,12 +115,21 @@ Make sure all quotes are properly closed and JSON is valid!`;
     }
 
     // Clean up markdown code blocks if present
-    roadmapText = roadmapText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const jsonMatch = roadmapText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      roadmapText = jsonMatch[0];
+    } else {
+      // Fallback cleanup if regex fails
+      roadmapText = roadmapText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    }
 
     const roadmapJson = JSON.parse(roadmapText);
     res.json(roadmapJson);
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error generating roadmap:", error);
+    if (error instanceof SyntaxError) {
+      console.error("Raw Invalid JSON:", roadmapText);
+    }
 
     if (error.status === 429 || (error.message && error.message.includes("429"))) {
       return res.status(429).json({
