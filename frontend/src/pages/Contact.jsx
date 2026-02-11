@@ -10,15 +10,48 @@ export default function Contact({ onNavigate }) {
     message: ''
   })
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Simulate form submission
-    setSubmitted(true)
-    setTimeout(() => {
+    setLoading(true)
+    setError('')
+
+    try {
+      // Используем бесплатный сервис FormSubmit (не требует настройки бэкенда)
+      const apiUrl = 'https://formsubmit.co/ajax/levelupmap121@gmail.com';
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          ...formData,
+          _subject: `New Message: ${formData.subject}`
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to send message')
+      }
+
+      setSubmitted(true)
       setFormData({ name: '', email: '', subject: '', message: '' })
-      setSubmitted(false)
-    }, 3000)
+
+      // Keep success message for 5 seconds
+      setTimeout(() => {
+        setSubmitted(false)
+      }, 5000)
+    } catch (err) {
+      console.error('Error:', err)
+      setError(err.message || 'Something went wrong. Please try again later.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleChange = (e) => {
@@ -82,19 +115,124 @@ export default function Contact({ onNavigate }) {
             </ScrollReveal>
 
             {submitted ? (
-              <div className="text-center py-16 animate-fade-in-up">
-                <div className="w-24 h-24 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6 border border-green-500/30">
-                  <i className="fa-solid fa-check text-green-400 text-4xl"></i>
+              <div className="text-center py-10 sm:py-24 animate-scale-in relative w-full flex items-center justify-center overflow-visible">
+                {/* Advanced Cosmic Success Scene */}
+                <div className="relative z-10 flex flex-col items-center justify-center w-full">
+
+                  {/* Central Glow Node Assembly */}
+                  <div className="relative w-40 h-40 sm:w-56 sm:h-56 mb-16 group flex items-center justify-center">
+
+                    {/* Multi-layered Spherical Glows */}
+                    <div className="absolute inset-0 rounded-full bg-green-500/10 blur-3xl animate-pulse"></div>
+                    <div className="absolute -inset-10 rounded-full bg-indigo-500/5 blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+
+                    {/* Orbital Satellites - Node-like elements floating around */}
+                    <div className="absolute inset-[-40%] animate-[spin_12s_linear_infinite]">
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-indigo-400 shadow-[0_0_15px_rgba(129,140,248,0.8)] border border-white/20"></div>
+                    </div>
+                    <div className="absolute inset-[-60%] animate-[spin_18s_linear_infinite_reverse]">
+                      <div className="absolute top-1/4 right-0 w-3 h-3 rounded-full bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] border border-white/20"></div>
+                    </div>
+                    <div className="absolute inset-[-30%] animate-[spin_25s_linear_infinite]">
+                      <div className="absolute bottom-0 left-1/4 w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.8)] border border-white/20"></div>
+                    </div>
+
+                    {/* SVG Orbital Complex */}
+                    <svg className="absolute inset-x-[-80%] inset-y-[-80%] w-[260%] h-[260%] pointer-events-none overflow-visible opacity-40" viewBox="0 0 200 200">
+                      <circle cx="100" cy="100" r="90" fill="none" stroke="url(#cosmicGrad1)" strokeWidth="0.5" strokeDasharray="1,6" className="animate-[spin_40s_linear_infinite]" />
+                      <circle cx="100" cy="100" r="75" fill="none" stroke="url(#cosmicGrad2)" strokeWidth="1" strokeDasharray="10,20" className="animate-[spin_30s_linear_infinite_reverse]" />
+                      <circle cx="100" cy="100" r="60" fill="none" stroke="#10b981" strokeWidth="0.2" strokeOpacity="0.3" />
+                      <defs>
+                        <linearGradient id="cosmicGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#6366f1" />
+                          <stop offset="100%" stopColor="#10b981" />
+                        </linearGradient>
+                        <linearGradient id="cosmicGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="#8b5cf6" />
+                          <stop offset="100%" stopColor="#06b6d4" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+
+                    {/* The Core Node */}
+                    <div className="absolute inset-0 rounded-full bg-linear-to-br from-green-400 via-emerald-500 to-indigo-600 p-1.5 shadow-[0_0_60px_rgba(16,185,129,0.5)] transform group-hover:scale-105 transition-all duration-700 hover:rotate-6">
+                      <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center relative overflow-hidden ring-1 ring-white/10">
+                        <div className="absolute inset-0 bg-radial-gradient from-emerald-500/20 via-transparent to-transparent"></div>
+
+                        {/* 3D Reflection Surface */}
+                        <div className="absolute top-0 left-0 w-full h-1/2 bg-linear-to-b from-white/10 to-transparent"></div>
+
+                        <i className="fa-solid fa-check text-green-400 text-6xl sm:text-7xl relative z-10 animate-bounce-in drop-shadow-[0_0_15px_rgba(74,222,128,0.5)]"></i>
+
+                        {/* Internal Sparkles */}
+                        <div className="absolute inset-0">
+                          {Array.from({ length: 6 }).map((_, i) => (
+                            <div
+                              key={i}
+                              className="absolute bg-white rounded-full animate-pulse"
+                              style={{
+                                width: Math.random() * 2 + 1 + 'px',
+                                height: Math.random() * 2 + 1 + 'px',
+                                top: Math.random() * 100 + '%',
+                                left: Math.random() * 100 + '%',
+                                animationDelay: Math.random() * 2 + 's',
+                                opacity: Math.random() * 0.5 + 0.2
+                              }}
+                            ></div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Enhanced Typography */}
+                  <div className="space-y-8 flex flex-col items-center text-center w-full relative">
+                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-px h-10 bg-linear-to-b from-transparent via-green-500/50 to-transparent"></div>
+
+                    <div className="space-y-2">
+                      <span className="text-green-500 text-xs font-black uppercase tracking-[0.3em] animate-pulse">Connection Established</span>
+                      <h3 className="text-5xl sm:text-7xl font-black text-white tracking-tighter text-center leading-[1.1]">
+                        Data Transmission
+                        <span className="block text-shimmer bg-linear-to-r from-green-400 via-emerald-400 to-indigo-400">Complete</span>
+                      </h3>
+                    </div>
+
+                    <p className="text-xl text-slate-400 max-w-lg mx-auto leading-relaxed text-center font-medium">
+                      Your message has been successfully beamed through the digital ether.
+                      Our team will decipher the signal and respond within one solar cycle.
+                    </p>
+                  </div>
+
+                  {/* Advanced Navigation Button */}
+                  <button
+                    onClick={() => setSubmitted(false)}
+                    className="group mt-16 relative p-px rounded-2xl overflow-hidden transition-all duration-500 hover:scale-105 active:scale-95"
+                  >
+                    <div className="absolute inset-0 bg-linear-to-r from-indigo-500 via-purple-500 to-green-500 animate-gradient-shift opacity-50 group-hover:opacity-100"></div>
+                    <div className="relative px-10 py-4 bg-slate-900 rounded-[15px] flex items-center gap-3 text-white font-bold tracking-wide transition-colors group-hover:bg-slate-900/80">
+                      <i className="fa-solid fa-redo-alt text-green-400 group-hover:rotate-180 transition-transform duration-700"></i>
+                      <span>Send New Signal</span>
+                    </div>
+                  </button>
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">Message Sent Successfully!</h3>
-                <p className="text-slate-400 text-lg">Thank you for reaching out. We'll get back to you within 24 hours.</p>
+
+                {/* Vast Background Nebula Gloom */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] sm:w-[800px] sm:h-[800px] bg-indigo-600/5 rounded-full blur-[120px] -z-10"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] sm:w-[600px] sm:h-[600px] bg-green-500/5 rounded-full blur-[100px] -z-10 animate-pulse-slow"></div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-12 text-center">
+                {error && (
+                  <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 font-medium">
+                    <i className="fa-solid fa-circle-exclamation mr-2"></i>
+                    {error}
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <ScrollReveal delay={100} className="w-full">
                     <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider ml-1">
+                      <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider text-center">
                         Your Full Name
                       </label>
                       <div className="relative group/input">
@@ -104,7 +242,8 @@ export default function Contact({ onNavigate }) {
                           value={formData.name}
                           onChange={handleChange}
                           required
-                          className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 transition-all duration-300 hover:bg-slate-800/60 input-glow"
+                          disabled={loading}
+                          className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 transition-all duration-300 hover:bg-slate-800/60 input-glow disabled:opacity-50 disabled:cursor-not-allowed"
                           placeholder="John Doe"
                         />
                       </div>
@@ -112,7 +251,7 @@ export default function Contact({ onNavigate }) {
                   </ScrollReveal>
                   <ScrollReveal delay={150} className="w-full">
                     <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider ml-1">
+                      <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider text-center">
                         Email Address
                       </label>
                       <div className="relative group/input">
@@ -122,7 +261,8 @@ export default function Contact({ onNavigate }) {
                           value={formData.email}
                           onChange={handleChange}
                           required
-                          className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 transition-all duration-300 hover:bg-slate-800/60 input-glow"
+                          disabled={loading}
+                          className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 transition-all duration-300 hover:bg-slate-800/60 input-glow disabled:opacity-50 disabled:cursor-not-allowed"
                           placeholder="john@example.com"
                         />
                       </div>
@@ -132,7 +272,7 @@ export default function Contact({ onNavigate }) {
 
                 <ScrollReveal delay={200}>
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider ml-1">
+                    <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider text-center">
                       Subject
                     </label>
                     <div className="relative group/input">
@@ -142,7 +282,8 @@ export default function Contact({ onNavigate }) {
                         value={formData.subject}
                         onChange={handleChange}
                         required
-                        className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 transition-all duration-300 hover:bg-slate-800/60 input-glow"
+                        disabled={loading}
+                        className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 transition-all duration-300 hover:bg-slate-800/60 input-glow disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="How can we help you?"
                       />
                     </div>
@@ -151,7 +292,7 @@ export default function Contact({ onNavigate }) {
 
                 <ScrollReveal delay={250}>
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider ml-1">
+                    <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider text-center">
                       Your Message
                     </label>
                     <div className="relative group/input">
@@ -160,23 +301,32 @@ export default function Contact({ onNavigate }) {
                         value={formData.message}
                         onChange={handleChange}
                         required
+                        disabled={loading}
                         rows={12}
-                        className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 transition-all duration-300 hover:bg-slate-800/60 resize-none input-glow"
+                        className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 transition-all duration-300 hover:bg-slate-800/60 resize-none input-glow disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="Type your message here..."
                       />
                     </div>
                   </div>
                 </ScrollReveal>
 
-                <ScrollReveal delay={300}>
-                  <button
-                    type="submit"
-                    className="w-full sm:w-auto px-12 py-5 rounded-2xl bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-size-[200%_auto] hover:bg-right text-white font-bold text-lg shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center gap-3 mx-auto btn-shine magnetic-hover"
-                  >
-                    <i className="fa-solid fa-paper-plane group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
-                    Send Message
-                  </button>
-                </ScrollReveal>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full sm:w-auto px-12 py-5 rounded-2xl bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-size-[200%_auto] hover:bg-right text-white font-bold text-lg shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transform hover:-translate-y-1 transition-all duration-500 flex items-center justify-center gap-3 mx-auto btn-shine disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Sending...</span>
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa-solid fa-paper-plane"></i>
+                      Send Message
+                    </>
+                  )}
+                </button>
               </form>
             )}
           </div>
