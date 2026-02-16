@@ -45,7 +45,7 @@ export default function Generator({
       // Пытаемся взять URL из переменных окружения, иначе используем стандартные пути
       const apiBase = import.meta.env.VITE_API_URL || '';
       const apiUrl = import.meta.env.PROD
-        ? `${apiBase}/api/roadmap`
+        ? `${apiBase}/roadmap`
         : 'http://localhost:5001/roadmap';
 
       const response = await fetch(apiUrl, {
