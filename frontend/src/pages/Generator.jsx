@@ -701,7 +701,7 @@ export default function Generator({
       `}</style>
 
       {/* Header - Fully Adaptive & Premium */}
-      <div className={`absolute top-20 left-6 z-20 p-6 bg-slate-900/40 backdrop-blur-2xl rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 ease-in-out ${sidebarOpen ? 'right-[500px]' : 'right-6'}`}>
+      <div className={`absolute top-20 left-4 right-4 md:left-6 z-20 p-4 md:p-6 bg-slate-900/40 backdrop-blur-2xl rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 ease-in-out ${sidebarOpen ? 'md:right-[500px]' : 'md:right-6'}`}>
         <div className="w-full flex flex-col gap-4">
           <div className="relative flex items-center justify-center">
             <h1 className="text-xl font-black text-white tracking-widest uppercase flex items-center gap-3 font-outfit text-center">
@@ -713,7 +713,7 @@ export default function Generator({
 
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col md:flex-row gap-3 md:gap-4">
             <div className="relative flex-1 group">
               <input
                 type="text"
@@ -730,7 +730,7 @@ export default function Generator({
             <button
               onClick={generateRoadmap}
               disabled={loading}
-              className={`relative overflow-hidden group min-w-[200px] px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 shadow-2xl ${loading
+              className={`relative overflow-hidden group w-full md:min-w-[200px] px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 shadow-2xl ${loading
                 ? 'bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700/50'
                 : 'bg-linear-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white hover:shadow-indigo-500/40'
                 }`}
@@ -764,7 +764,7 @@ export default function Generator({
 
       {/* Zoom Controls */}
       {data && (
-        <div className={`export-hide absolute top-56 z-20 flex flex-col gap-2 transition-all duration-300 ${sidebarOpen ? 'right-[504px]' : 'right-6'}`}>
+        <div className={`export-hide absolute bottom-10 md:top-56 right-6 z-20 flex flex-col gap-2 transition-all duration-300 ${sidebarOpen ? 'md:right-[504px]' : 'md:right-6'} ${window.innerWidth < 768 && sidebarOpen ? 'hidden' : 'flex'}`}>
           {/* Futuristic Circular Progress */}
           <div className="relative group mb-4">
             <div className="absolute -inset-1 bg-linear-to-r from-indigo-500 to-purple-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
@@ -858,7 +858,7 @@ export default function Generator({
       )}
 
       {/* Main canvas area */}
-      <div className="flex-1 relative z-0 mt-36">
+      <div className="flex-1 relative z-0 mt-48 md:mt-36">
         <svg ref={svgRef} className="w-full h-full" />
         {!data && !loading && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -885,15 +885,25 @@ export default function Generator({
         {/* Toggle Button */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className={`absolute top-1/2 -translate-y-1/2 right-full z-40 bg-slate-800/90 hover:bg-slate-700/90 p-4 rounded-l-2xl border border-r-0 border-slate-600/50 backdrop-blur transition-all shadow-2xl group flex items-center justify-center ${sidebarOpen ? 'opacity-100' : 'opacity-100 hover:pr-6'}`}
+          className={`absolute top-1/2 -translate-y-1/2 right-full z-40 bg-slate-800/90 hover:bg-slate-700/90 p-4 rounded-l-2xl border border-r-0 border-slate-600/50 backdrop-blur transition-all shadow-2xl group flex items-center justify-center ${sidebarOpen ? 'opacity-100' : 'opacity-100 md:hover:pr-6'} ${window.innerWidth < 768 && !sidebarOpen ? 'hidden md:flex' : 'flex'}`}
           title={sidebarOpen ? 'Hide Details' : 'Show Details'}
         >
           <i className={`fa-solid ${sidebarOpen ? 'fa-chevron-right' : 'fa-chevron-left'} text-white group-hover:scale-110 transition-transform`}></i>
         </button>
 
+        {/* Mobile Close Button */}
+        {sidebarOpen && window.innerWidth < 768 && (
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="fixed top-24 right-6 z-50 w-12 h-12 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-white shadow-2xl"
+          >
+            <i className="fa-solid fa-xmark text-xl"></i>
+          </button>
+        )}
+
         {/* Sidebar content */}
-        <div className={`${sidebarOpen ? 'w-[480px]' : 'w-0'} transition-all duration-300 bg-slate-900/40 backdrop-blur-xl z-30 overflow-hidden relative`}>
-          <div className={`h-full overflow-y-auto pt-40 px-10 pb-10 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <div className={`${sidebarOpen ? 'fixed inset-0 md:relative md:w-[480px]' : 'w-0'} transition-all duration-300 bg-slate-900/95 md:bg-slate-900/40 backdrop-blur-xl z-30 overflow-hidden`}>
+          <div className={`h-full overflow-y-auto pt-32 md:pt-40 px-6 md:px-10 pb-10 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
             {/* Physical spacer to force content down */}
             <div className="h-20 w-full mb-8 border-b border-white/5 shadow-xs" />
 
