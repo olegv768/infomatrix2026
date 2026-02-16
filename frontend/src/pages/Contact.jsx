@@ -30,7 +30,7 @@ export default function Contact({ onNavigate }) {
         },
         body: JSON.stringify({
           ...formData,
-          access_key: 'a946675e-f728-4e62-bafa-1f41af953e87',
+          access_key: '02645203-ee8a-4c3d-883e-baf58660a35d',
           from_name: 'Roadmap AI',
           subject: formData.subject
         }),
