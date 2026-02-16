@@ -128,7 +128,8 @@ const InteractiveHero = () => {
         const init = () => {
             particles = [];
             const count = (canvas.height * canvas.width) / 6000;
-            const finalCount = Math.min(count, 350);
+            const isMobile = window.innerWidth < 768;
+            const finalCount = Math.min(count, isMobile ? 80 : 350);
 
             for (let i = 0; i < finalCount; i++) {
                 const layer = Math.floor(Math.random() * 3) + 1; // 1, 2, or 3

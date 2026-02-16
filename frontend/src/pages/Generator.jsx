@@ -652,10 +652,11 @@ export default function Generator({
     }
   }, [data, completedNodes])
 
-  // Background particles
-  const particles = Array.from({ length: 50 }, (_, i) => ({
+  // Background particles - reduced count on mobile
+  const particleCount = window.innerWidth < 768 ? 20 : 50;
+  const particles = Array.from({ length: particleCount }, (_, i) => ({
     id: i,
-    size: Math.random() * 3 + 1,
+    size: Math.random() * (window.innerWidth < 768 ? 2 : 3) + 1,
     x: Math.random() * 100,
     y: Math.random() * 100,
     duration: Math.random() * 20 + 10,
