@@ -42,8 +42,10 @@ export default function Generator({
     setCompletedNodes(new Set())
 
     try {
+      // Пытаемся взять URL из переменных окружения, иначе используем стандартные пути
+      const apiBase = import.meta.env.VITE_API_URL || '';
       const apiUrl = import.meta.env.PROD
-        ? '/api/roadmap'
+        ? `${apiBase}/api/roadmap`
         : 'http://localhost:5001/roadmap';
 
       const response = await fetch(apiUrl, {

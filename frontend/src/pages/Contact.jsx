@@ -19,8 +19,8 @@ export default function Contact({ onNavigate }) {
     setError('')
 
     try {
-      // Используем бесплатный сервис FormSubmit (не требует настройки бэкенда)
-      const apiUrl = 'https://formsubmit.co/ajax/levelupmap121@gmail.com';
+      // Используем сервис Web3Forms для надежной отправки без активации
+      const apiUrl = 'https://api.web3forms.com/submit';
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -30,13 +30,15 @@ export default function Contact({ onNavigate }) {
         },
         body: JSON.stringify({
           ...formData,
-          _subject: `New Message: ${formData.subject}`
+          access_key: 'a946675e-f728-4e62-bafa-1f41af953e87',
+          from_name: 'Roadmap AI',
+          subject: formData.subject
         }),
       })
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to send message')
+        throw new Error(errorData.message || 'Failed to send message')
       }
 
       setSubmitted(true)
