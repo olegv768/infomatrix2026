@@ -19,35 +19,32 @@ export default function Contact({ onNavigate }) {
     setError('')
 
     try {
-      // Используем сервис Web3Forms для надежной отправки без активации
-      const apiUrl = 'https://api.web3forms.com/submit';
+      const formDataToSend = new FormData()
+      formDataToSend.append('access_key', '02645203-ee8a-4c3d-883e-baf58660a35d')
+      formDataToSend.append('name', formData.name)
+      formDataToSend.append('email', formData.email)
+      formDataToSend.append('subject', formData.subject)
+      formDataToSend.append('message', formData.message)
+      formDataToSend.append('from_name', 'Roadmap AI')
 
-      const response = await fetch(apiUrl, {
+      const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          ...formData,
-          access_key: '02645203-ee8a-4c3d-883e-baf58660a35d',
-          from_name: 'Roadmap AI',
-          subject: formData.subject
-        }),
+        body: formDataToSend
       })
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to send message')
+      const data = await response.json()
+
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to send message')
       }
 
       setSubmitted(true)
       setFormData({ name: '', email: '', subject: '', message: '' })
 
-      // Keep success message for 5 seconds
+      // Keep success message for 10 seconds or until user resets
       setTimeout(() => {
         setSubmitted(false)
-      }, 5000)
+      }, 10000)
     } catch (err) {
       console.error('Error:', err)
       setError(err.message || 'Something went wrong. Please try again later.')
