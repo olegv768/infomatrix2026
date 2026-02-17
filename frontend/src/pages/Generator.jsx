@@ -703,18 +703,17 @@ export default function Generator({
       {/* Header - Fully Adaptive & Premium */}
       <div className={`absolute top-20 left-4 right-4 md:left-6 z-20 p-4 md:p-6 bg-slate-900/40 backdrop-blur-2xl rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 ease-in-out ${sidebarOpen ? 'md:right-[500px]' : 'md:right-6'}`}>
         <div className="w-full flex flex-col gap-4">
-          <div className="relative flex items-center justify-center">
-            <h1 className="text-xl font-black text-white tracking-widest uppercase flex items-center gap-3 font-outfit text-center">
-              <span className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
+          <div className="flex flex-col items-center justify-center">
+            <h1 className="text-lg md:text-xl font-black text-white tracking-widest uppercase flex items-center justify-center gap-3 font-outfit text-center w-full">
+              <span className="shrink-0 w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
                 <i className="fa-solid fa-wand-magic-sparkles text-indigo-400 text-sm"></i>
               </span>
-              {data?.title || 'AI Roadmap Architect'}
+              <span className="truncate max-w-[80%]">{data?.title || 'AI Roadmap Architect'}</span>
             </h1>
-
           </div>
 
-          <div className="flex flex-col md:flex-row gap-3 md:gap-4">
-            <div className="relative flex-1 group">
+          <div className="flex flex-col lg:flex-row gap-3 md:gap-4">
+            <div className="relative flex-1 group min-w-[200px]">
               <input
                 type="text"
                 value={input}
@@ -730,7 +729,7 @@ export default function Generator({
             <button
               onClick={generateRoadmap}
               disabled={loading}
-              className={`relative overflow-hidden group w-full md:min-w-[200px] px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 shadow-2xl ${loading
+              className={`relative overflow-hidden group w-full lg:w-auto lg:min-w-[220px] px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 shadow-2xl ${loading
                 ? 'bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700/50'
                 : 'bg-linear-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white hover:shadow-indigo-500/40'
                 }`}
