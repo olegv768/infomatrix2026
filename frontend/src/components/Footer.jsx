@@ -14,9 +14,6 @@ export default function Footer({ onNavigate }) {
               Create personalized learning roadmaps with AI. Transform your goals into actionable step-by-step guides powered by LevelUp Map.
             </p>
             <div className="flex gap-4">
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-white/5 hover:bg-indigo-500/20 flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-all" title="GitHub">
-                <i className="fa-brands fa-github"></i>
-              </a>
               <a href="mailto:levelupmap121@gmail.com" className="w-10 h-10 rounded-lg bg-white/5 hover:bg-indigo-500/20 flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-all" title="Email Us">
                 <i className="fa-solid fa-envelope"></i>
               </a>

@@ -7,22 +7,19 @@ export default function About({ onNavigate }) {
       name: 'Aslan Abdulayev',
       role: 'Full-stack developer',
       image: 'Aslan.jpg',
-      bio: 'He love for clean code. The website works because of its code.',
-      github: '#'
+      bio: 'He love for clean code. The website works because of its code.'
     },
     {
       name: 'Oleg Volosov',
       role: 'Frontend developer / D3.js',
       image: 'Oleg_v2.png',
-      bio: 'Invented the roadmap and fully built the entire visual part of the website.',
-      github: '#'
+      bio: 'Invented the roadmap and fully built the entire visual part of the website.'
     },
     {
       name: 'Danial Kabylkan',
       role: 'Frontend/Web3',
       image: 'Danial.jpg',
-      bio: 'React, Node.js, Solana. 2nd place at Solana Day, sponsored by Decentrathon.',
-      github: '#'
+      bio: 'React, Node.js, Solana. 2nd place at Solana Day, sponsored by Decentrathon.'
     }
   ]
 
@@ -174,11 +171,6 @@ export default function About({ onNavigate }) {
                   <h3 className="text-xl font-semibold text-white">{member.name}</h3>
                   <p className="text-indigo-400 mb-2">{member.role}</p>
                   <p className="text-slate-400 text-sm mb-4">{member.bio}</p>
-                  <div className="flex justify-center gap-3">
-                    <a href={member.github} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-lg bg-white/5 hover:bg-indigo-500/20 flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-all">
-                      <i className="fa-brands fa-github text-sm"></i>
-                    </a>
-                  </div>
                 </div>
               </ScrollReveal>
             ))}
