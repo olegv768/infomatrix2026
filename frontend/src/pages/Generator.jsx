@@ -360,16 +360,23 @@ export default function Generator({
     svg.call(zoomBehavior)
     zoomRef.current = zoomBehavior
 
-    // Используем сохраненные позиции из ref если они есть
+    // Intelligent initial placement to prevent tangling
     const nodes = data.nodes.map((d) => {
       const savedPos = nodesRef.current?.find(n => n.id === d.id)
+      if (savedPos?.x !== undefined) {
+        return { ...d, x: savedPos.x, y: savedPos.y }
+      }
+
+      // Spread nodes vertically by level and horizontally by their position in that level
+      const levelNodes = data.nodes.filter(n => n.level === d.level)
+      const indexInLevel = levelNodes.findIndex(n => n.id === d.id)
+
       return {
         ...d,
-        x: savedPos?.x !== undefined ? savedPos.x : (d.x !== undefined ? d.x : width / 2 + (Math.random() - 0.5) * 200),
-        y: savedPos?.y !== undefined ? savedPos.y : (d.y !== undefined ? d.y : height / 2 + (Math.random() - 0.5) * 200),
+        x: width / 2 + (indexInLevel - (levelNodes.length - 1) / 2) * 200 + (Math.random() - 0.5) * 50,
+        y: height / 2 + (d.level * 200) - 300 // Offset upward so it grows down
       }
     })
-    // Сохраняем ссылку на узлы
     nodesRef.current = nodes
 
     const links = createLinks(nodes)
@@ -729,22 +736,31 @@ export default function Generator({
             <button
               onClick={generateRoadmap}
               disabled={loading}
-              className={`relative overflow-hidden group w-full lg:w-auto lg:min-w-[220px] px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 shadow-2xl ${loading
-                ? 'bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700/50'
-                : 'bg-linear-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white hover:shadow-indigo-500/40'
+              className={`relative overflow-hidden group w-full lg:w-auto lg:min-w-[240px] px-8 py-5 rounded-3xl font-black text-sm uppercase tracking-[0.2em] transition-all duration-500 active:scale-95 flex items-center justify-center gap-4 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] ${loading
+                ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
+                : 'bg-linear-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white hover:shadow-[0_20px_50px_rgba(99,102,241,0.4)] hover:-translate-y-1'
                 }`}
             >
               {loading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-indigo-500/30 border-t-indigo-400 rounded-full animate-spin"></div>
-                  <span className="animate-pulse">Analyzing...</span>
+                  <span className="animate-pulse">Architecting...</span>
                 </>
               ) : (
                 <>
+                  {/* Luxury Shine Effect */}
+                  <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
+
+                  {/* Internal Glow */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.2),transparent_70%)] transition-opacity duration-700"></div>
+
                   <span className="relative z-10">Create Roadmap</span>
-                  <i className="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform relative z-10"></i>
-                  {/* Decorative glow */}
-                  <div className="absolute inset-0 bg-linear-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:animate-shimmer"></div>
+                  <div className="relative z-10 w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                    <i className="fa-solid fa-bolt-lightning text-[10px] text-indigo-200 group-hover:text-white transition-transform group-hover:scale-110"></i>
+                  </div>
+
+                  {/* Animated Border bottom */}
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-white/40 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
                 </>
               )}
             </button>
@@ -890,35 +906,43 @@ export default function Generator({
           <i className={`fa-solid ${sidebarOpen ? 'fa-chevron-right' : 'fa-chevron-left'} text-white group-hover:scale-110 transition-transform`}></i>
         </button>
 
-        {/* Innovative Reopen Social Button for Mobile ONLY - Luxury Obsidian Edition */}
+        {/* Luxury Obsidian FAB - Mobile Exclusive */}
         {!sidebarOpen && (
           <button
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden fixed bottom-10 right-8 z-50 w-20 h-20 rounded-full flex items-center justify-center text-white animate-bounce-in group/fab"
+            className="md:hidden fixed bottom-12 right-6 z-50 w-20 h-20 rounded-full flex items-center justify-center text-white animate-bounce-in group/fab active:scale-90 transition-transform duration-500"
           >
-            {/* Outer Ambient Glow */}
-            <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-2xl animate-pulse"></div>
+            {/* Multi-layered Pulsing Aura */}
+            <div className="absolute inset-0 bg-indigo-500/30 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute -inset-2 bg-purple-500/10 rounded-full blur-xl animate-pulse-slow"></div>
 
-            {/* Obsidian Glass Base */}
-            <div className="absolute inset-0 bg-slate-950 rounded-full border border-white/20 shadow-[0_0_30px_rgba(0,0,0,0.8),inset_0_0_20px_rgba(99,102,241,0.2)] overflow-hidden">
-              {/* Shine Sweep animation */}
-              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover/fab:translate-x-full transition-transform duration-1000"></div>
+            {/* Obsidian Mirror Base */}
+            <div className="absolute inset-0 bg-slate-950 rounded-full border border-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.6),inset_0_0_25px_rgba(99,102,241,0.3)] overflow-hidden">
+              {/* Liquid Shine Sweep */}
+              <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer" style={{ animationDuration: '3s' }}></div>
+
+              {/* Internal Diamond Spark */}
+              <div className="absolute top-2 right-4 w-1 h-1 bg-white rounded-full blur-[1px] opacity-80 animate-pulse"></div>
             </div>
 
-            {/* Orbiting Energy Mote */}
-            <div className="absolute inset-0 animate-spin" style={{ animationDuration: '4s' }}>
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-indigo-400 rounded-full shadow-[0_0_12px_#6366f1]"></div>
+            {/* Primary Orbiting Photon (Indigo) */}
+            <div className="absolute inset-0 animate-spin" style={{ animationDuration: '3s' }}>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-indigo-200 rounded-full shadow-[0_0_15px_#6366f1,0_0_30px_#6366f1]"></div>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1.5 h-8 bg-linear-to-b from-indigo-500 to-transparent blur-xs opacity-40"></div>
             </div>
 
-            {/* Inner Jewel Core */}
-            <div className="relative z-10 w-14 h-14 rounded-full bg-linear-to-br from-indigo-500 via-purple-600 to-slate-900 flex flex-col items-center justify-center border border-white/30 shadow-[0_0_20px_rgba(99,102,241,0.5)] group-hover/fab:scale-110 transition-transform duration-500">
-              <i className="fa-solid fa-brain text-white text-xl"></i>
-              <span className="text-[6px] font-black uppercase tracking-[0.2em] mt-1 text-white/70">Plan</span>
+            {/* Secondary Orbiting Photon (Purple/Magenta) - Reverse & Tilted */}
+            <div className="absolute inset-0 animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }}>
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-purple-300 rounded-full shadow-[0_0_12px_#a855f7,0_0_25px_#a855f7]"></div>
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-6 bg-linear-to-t from-purple-500 to-transparent blur-xs opacity-30"></div>
             </div>
 
-            {/* Decorative Static Rings */}
-            <div className="absolute inset-2 rounded-full border border-white/5 pointer-events-none"></div>
-            <div className="absolute inset-4 rounded-full border border-white/5 pointer-events-none"></div>
+            {/* Inner Jewel Core - Refined */}
+            <div className="relative z-10 w-14 h-14 rounded-full bg-linear-to-br from-indigo-500 via-purple-600 to-indigo-950 flex flex-col items-center justify-center border border-white/40 shadow-[0_0_30px_rgba(99,102,241,0.6)]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.3),transparent_70%)] rounded-full"></div>
+              <i className="fa-solid fa-brain text-white text-xl drop-shadow-lg"></i>
+              <span className="text-[6px] font-black uppercase tracking-[0.3em] mt-1 text-white drop-shadow-md">Plan</span>
+            </div>
           </button>
         )}
 
