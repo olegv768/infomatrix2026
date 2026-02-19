@@ -22,6 +22,7 @@ export default function Generator({
 
   // Local state (doesn't need to persist)
   const [loading, setLoading] = useState(false)
+  const [loadingProgress, setLoadingProgress] = useState(0)
   const [error, setError] = useState('')
   const [zoom, setZoom] = useState(1)
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -37,6 +38,7 @@ export default function Generator({
     }
 
     setLoading(true)
+    setLoadingProgress(0)
     setError('')
     setSelectedNode(null)
     setCompletedNodes(new Set())
@@ -133,6 +135,11 @@ export default function Generator({
           }
         })
       }
+
+      setLoadingProgress(100)
+
+      // Small delay to let the user see 100% before transitioning
+      await new Promise(resolve => setTimeout(resolve, 300))
 
       setData(parsedData)
 
@@ -452,6 +459,20 @@ export default function Generator({
       .animated-link {
         animation: flow 3s linear infinite;
       }
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+      @keyframes scan {
+        from { transform: translateY(-100%); }
+        to { transform: translateY(400%); }
+      }
+      .animate-shimmer {
+        animation: shimmer 3s infinite linear;
+      }
+      .animate-scan {
+        animation: scan 2s infinite linear;
+      }
       .node-group:hover circle {
         stroke-width: 5;
         filter: brightness(1.2) url(#glow);
@@ -659,6 +680,25 @@ export default function Generator({
     }
   }, [data, completedNodes])
 
+  // Simulated progress logic
+  useEffect(() => {
+    let interval;
+    if (loading) {
+      setLoadingProgress(0);
+      interval = setInterval(() => {
+        setLoadingProgress((prev) => {
+          if (prev < 40) return prev + Math.random() * 1.2;
+          if (prev < 75) return prev + Math.random() * 0.6;
+          if (prev < 99) return prev + 0.05;
+          return prev;
+        });
+      }, 200);
+    } else {
+      setLoadingProgress(0);
+    }
+    return () => clearInterval(interval);
+  }, [loading]);
+
   // Background particles - reduced count on mobile
   const particleCount = window.innerWidth < 768 ? 20 : 50;
   const particles = Array.from({ length: particleCount }, (_, i) => ({
@@ -736,16 +776,79 @@ export default function Generator({
             <button
               onClick={generateRoadmap}
               disabled={loading}
-              className={`relative overflow-hidden group w-full lg:w-auto lg:min-w-[240px] px-8 py-5 rounded-3xl font-black text-sm uppercase tracking-[0.2em] transition-all duration-500 active:scale-95 flex items-center justify-center gap-4 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] ${loading
-                ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
+              className={`relative overflow-hidden group w-full lg:w-auto lg:min-w-[280px] px-8 py-5 rounded-3xl font-black text-sm uppercase tracking-[0.2em] transition-all duration-500 active:scale-95 flex items-center justify-center gap-4 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] ${loading
+                ? 'bg-slate-900/80 text-white cursor-not-allowed border border-white/5'
                 : 'bg-linear-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white hover:shadow-[0_20px_50px_rgba(99,102,241,0.4)] hover:-translate-y-1'
                 }`}
             >
               {loading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-indigo-500/30 border-t-indigo-400 rounded-full animate-spin"></div>
-                  <span className="animate-pulse">Architecting...</span>
-                </>
+                <div className="relative w-full h-full flex flex-col items-center justify-center py-2 px-4 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
+                  {/* Progress Bar Background */}
+                  <div className="absolute inset-0 bg-slate-950/80 overflow-hidden">
+                    {/* Animated Grid Pattern */}
+                    <div className="absolute inset-0 opacity-10 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-size-[20px_20px]"></div>
+
+                    {/* Primary Progress Fill */}
+                    <div
+                      className="absolute inset-y-0 left-0 bg-linear-to-r from-indigo-600 via-indigo-400 to-purple-500 bg-size-[200%_100%] animate-shimmer shadow-[0_0_30px_rgba(99,102,241,0.8)]"
+                      style={{
+                        width: `${loadingProgress}%`,
+                        transition: 'width 0.5s cubic-bezier(0.1, 0.7, 0.1, 1)',
+                      }}
+                    >
+                      {/* Internal Highlight / White Shine edge */}
+                      <div className="absolute right-0 top-0 bottom-0 w-8 bg-linear-to-r from-transparent to-white/30 blur-sm"></div>
+                    </div>
+
+                    {/* Holographic Scanline */}
+                    <div className="absolute inset-x-0 h-1 pointer-events-none opacity-20 bg-linear-to-r from-transparent via-white to-transparent animate-scan"></div>
+                  </div>
+
+                  {/* Content Overlay */}
+                  <div className="relative z-10 flex items-center justify-between w-full gap-2">
+                    <div className="flex flex-col items-start overflow-hidden">
+                      <div className="flex items-center gap-1.5 md:gap-2 mb-0.5">
+                        <div className="flex gap-0.5 shrink-0">
+                          {[0, 1, 2].map(i => (
+                            <div
+                              key={i}
+                              className="w-0.5 md:w-1 h-2 md:h-3 rounded-full bg-indigo-400 animate-pulse"
+                              style={{ animationDelay: `${i * 0.2}s` }}
+                            ></div>
+                          ))}
+                        </div>
+                        <span className="text-[11px] sm:text-[12px] text-indigo-300 font-bold tracking-widest uppercase truncate">
+                          {loadingProgress < 30 ? 'Analyzing' :
+                            loadingProgress < 60 ? 'Synthesizing' :
+                              loadingProgress < 90 ? 'Mapping' : 'Polishing'} <span className="hidden sm:inline">nodes</span>
+                        </span>
+                      </div>
+                      <div className="text-[10px] sm:text-[11px] text-slate-400 font-medium tracking-wider flex items-center gap-1.5 sm:gap-2">
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping"></span>
+                        NEURAL ACTIVE
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-end shrink-0">
+                      <div className="flex items-baseline gap-0.5 sm:gap-1">
+                        <span className="text-2xl sm:text-3xl font-outfit font-black tabular-nums text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+                          {Math.round(loadingProgress)}
+                        </span>
+                        <span className="text-xs sm:text-sm text-indigo-400 font-bold">%</span>
+                      </div>
+                      <div className="h-0.5 sm:h-1 w-8 sm:w-12 bg-white/10 rounded-full mt-0.5 sm:mt-1 overflow-hidden">
+                        <div
+                          className="h-full bg-indigo-500 transition-all duration-300"
+                          style={{ width: `${loadingProgress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Top & Bottom Glass Borders */}
+                  <div className="absolute top-0 left-0 right-0 h-px bg-white/20"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-px bg-white/5"></div>
+                </div>
               ) : (
                 <>
                   {/* Luxury Shine Effect */}
