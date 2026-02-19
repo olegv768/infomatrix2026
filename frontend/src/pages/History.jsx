@@ -57,10 +57,10 @@ export default function History({ onNavigate, onLoadRoadmap }) {
     }
 
     return (
-        <div className="page-container min-h-screen bg-transparent">
+        <div className="page-container min-h-screen bg-transparent overflow-x-hidden">
             {/* Hero Section */}
-            <section className="min-h-[60vh] flex items-center justify-center px-8 sm:px-12 lg:px-20 relative">
-                <div className="max-w-5xl mx-auto text-center relative z-10 px-4">
+            <section className="min-h-[60vh] flex items-center justify-center px-4 sm:px-12 lg:px-20 relative overflow-hidden">
+                <div className="max-w-5xl mx-auto text-center relative z-10">
                     <ScrollReveal delay={0}>
                         <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-sm font-jakarta font-bold tracking-widest uppercase mb-8 backdrop-blur-md">
                             <i className="fa-solid fa-clock-rotate-left text-xs"></i>
@@ -69,7 +69,7 @@ export default function History({ onNavigate, onLoadRoadmap }) {
                     </ScrollReveal>
 
                     <ScrollReveal delay={200}>
-                        <h1 className="text-6xl sm:text-8xl lg:text-9xl font-outfit font-black text-white mb-10 tracking-tight leading-[0.9]">
+                        <h1 className="text-5xl sm:text-8xl lg:text-9xl font-outfit font-black text-white mb-8 sm:mb-10 tracking-tight leading-[0.9]">
                             Roadmap
                             <span className="block mt-2 text-shimmer">
                                 History
@@ -78,7 +78,7 @@ export default function History({ onNavigate, onLoadRoadmap }) {
                     </ScrollReveal>
 
                     <ScrollReveal delay={400}>
-                        <p className="text-xl sm:text-2xl text-slate-400 max-w-2xl mx-auto font-light leading-relaxed">
+                        <p className="text-lg sm:text-2xl text-slate-400 max-w-2xl mx-auto font-light leading-relaxed px-4">
                             Browse and revisit your previously generated learning paths. Your progress is saved automatically.
                         </p>
                     </ScrollReveal>
@@ -89,7 +89,7 @@ export default function History({ onNavigate, onLoadRoadmap }) {
             <section className="py-16 px-8 sm:px-12 lg:px-20 relative">
                 <div className="max-w-7xl mx-auto relative z-10">
                     {history.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20 text-center translate-x-[120px]">
+                        <div className="flex flex-col items-center justify-center py-10 sm:py-20 text-center">
                             {/* Cosmic 3D Sphere System */}
                             <div className="relative group mb-16 h-96 flex items-center justify-center">
                                 {/* Back Glow Layers */}
@@ -105,7 +105,7 @@ export default function History({ onNavigate, onLoadRoadmap }) {
                                 </div>
 
                                 {/* Main 3D Node Sphere */}
-                                <div className="relative w-72 h-72 rounded-full bg-linear-to-br from-indigo-600 via-indigo-950 to-slate-950 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.7),inset_0_-20px_40px_rgba(0,0,0,0.6),inset_0_20px_40px_rgba(255,255,255,0.1)] flex flex-col items-center justify-center p-12 border border-white/5 overflow-hidden animate-float">
+                                <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-full bg-linear-to-br from-indigo-600 via-indigo-950 to-slate-950 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.7),inset_0_-20px_40px_rgba(0,0,0,0.6),inset_0_20px_40px_rgba(255,255,255,0.1)] flex flex-col items-center justify-center p-8 sm:p-12 border border-white/5 overflow-hidden animate-float">
                                     {/* Procedural Shine */}
                                     <div className="absolute -top-[10%] -left-[10%] w-[120%] h-[120%] bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.1),transparent_60%)] pointer-events-none"></div>
 
@@ -137,7 +137,7 @@ export default function History({ onNavigate, onLoadRoadmap }) {
 
                             <button
                                 onClick={() => onNavigate('generator')}
-                                className="group relative px-12 py-6 rounded-2xl bg-slate-900/40 backdrop-blur-xl border border-white/10 text-white font-outfit font-black text-xl transition-all duration-500 hover:scale-[1.05] active:scale-[0.98] overflow-hidden shadow-2xl hover:shadow-indigo-500/20"
+                                className="group relative px-8 sm:px-12 py-4 sm:py-6 rounded-2xl bg-slate-900/40 backdrop-blur-xl border border-white/10 text-white font-outfit font-black text-lg sm:text-xl transition-all duration-500 hover:scale-[1.05] active:scale-[0.98] overflow-hidden shadow-2xl hover:shadow-indigo-500/20"
                             >
                                 <div className="absolute inset-0 bg-linear-to-r from-indigo-600/10 to-purple-600/10 transition-opacity group-hover:opacity-100"></div>
                                 <div className="absolute bottom-0 left-0 w-full h-[2px] bg-linear-to-r from-transparent via-indigo-500 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700"></div>
@@ -153,13 +153,13 @@ export default function History({ onNavigate, onLoadRoadmap }) {
                             {/* Header with Clear Button */}
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-6 relative z-20">
                                 <ScrollReveal>
-                                    <h2 className="text-4xl font-outfit font-bold text-white flex items-center gap-5">
-                                        <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-xl shadow-purple-500/30 animate-float" style={{ animationDuration: '4s' }}>
-                                            <i className="fa-solid fa-layer-group text-2xl text-white"></i>
+                                    <h2 className="text-3xl sm:text-4xl font-outfit font-bold text-white flex items-center gap-4 sm:gap-5">
+                                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-linear-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-xl shadow-purple-500/30 animate-float" style={{ animationDuration: '4s' }}>
+                                            <i className="fa-solid fa-layer-group text-xl sm:text-2xl text-white"></i>
                                         </div>
                                         <div className="flex flex-col">
                                             <span>Your Roadmaps</span>
-                                            <span className="text-sm font-jakarta font-medium text-slate-500 tracking-wider uppercase mt-1">
+                                            <span className="text-xs sm:text-sm font-jakarta font-medium text-slate-500 tracking-wider uppercase mt-1">
                                                 Collection ({history.length})
                                             </span>
                                         </div>
@@ -183,7 +183,7 @@ export default function History({ onNavigate, onLoadRoadmap }) {
                                     <ScrollReveal key={item.id} delay={index * 100}>
                                         <div
                                             onClick={() => setSelectedItem(selectedItem?.id === item.id ? null : item)}
-                                            className={`group relative p-8 rounded-[32px] glass-premium transition-all duration-700 cursor-pointer hover-lift ${selectedItem?.id === item.id
+                                            className={`group relative p-6 sm:p-8 rounded-[32px] glass-premium transition-all duration-700 cursor-pointer hover-lift ${selectedItem?.id === item.id
                                                 ? 'border-indigo-500/50 ring-2 ring-indigo-500/20 bg-indigo-500/5'
                                                 : 'border-white/5 hover:border-indigo-500/30'
                                                 }`}
@@ -238,14 +238,14 @@ export default function History({ onNavigate, onLoadRoadmap }) {
                                             </h3>
 
                                             {/* Meta Info */}
-                                            <div className="flex items-center justify-center gap-5 text-sm font-medium text-slate-500 mb-6">
-                                                <span className="flex items-center gap-2 group-hover:text-slate-400 transition-colors">
-                                                    <i className="fa-solid fa-diagram-project text-xs text-indigo-500/70"></i>
+                                            <div className="flex items-center justify-center gap-3 sm:gap-5 text-[12px] sm:text-sm font-medium text-slate-500 mb-6">
+                                                <span className="flex items-center gap-1.5 sm:gap-2 group-hover:text-slate-400 transition-colors">
+                                                    <i className="fa-solid fa-diagram-project text-[10px] sm:text-xs text-indigo-500/70"></i>
                                                     {item.data?.nodes?.length || 0} Levels
                                                 </span>
-                                                <span className="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
-                                                <span className="flex items-center gap-2 group-hover:text-slate-400 transition-colors">
-                                                    <i className="fa-regular fa-calendar text-xs text-purple-500/70"></i>
+                                                <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-slate-700"></span>
+                                                <span className="flex items-center gap-1.5 sm:gap-2 group-hover:text-slate-400 transition-colors">
+                                                    <i className="fa-regular fa-calendar text-[10px] sm:text-xs text-purple-500/70"></i>
                                                     {formatDate(item.timestamp)}
                                                 </span>
                                             </div>

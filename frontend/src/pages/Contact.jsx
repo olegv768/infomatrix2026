@@ -23,9 +23,11 @@ export default function Contact({ onNavigate }) {
       formDataToSend.append('access_key', '02645203-ee8a-4c3d-883e-baf58660a35d')
       formDataToSend.append('name', formData.name)
       formDataToSend.append('email', formData.email)
-      formDataToSend.append('subject', formData.subject)
+      formDataToSend.append('reply_to', formData.email) // This allows you to reply directly to the sender
+      formDataToSend.append('subject', formData.subject || 'New Contact Form Submission')
       formDataToSend.append('message', formData.message)
       formDataToSend.append('from_name', 'Roadmap AI')
+      formDataToSend.append('botcheck', '') // Honeypot field for spam protection
 
       const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
