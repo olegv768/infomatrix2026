@@ -884,27 +884,72 @@ export default function Generator({
         {/* Toggle Button */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className={`absolute top-1/2 -translate-y-1/2 right-full z-40 bg-slate-800/90 hover:bg-slate-700/90 p-4 rounded-l-2xl border border-r-0 border-slate-600/50 backdrop-blur transition-all shadow-2xl group flex items-center justify-center ${sidebarOpen ? 'opacity-100' : 'opacity-100 md:hover:pr-6'} ${window.innerWidth < 768 && !sidebarOpen ? 'hidden md:flex' : 'flex'}`}
+          className={`absolute top-1/2 -translate-y-1/2 right-full z-40 bg-slate-800/90 hover:bg-slate-700/90 p-4 rounded-l-2xl border border-r-0 border-slate-600/50 backdrop-blur transition-all shadow-2xl group hidden md:flex ${sidebarOpen ? 'opacity-100' : 'opacity-100 hover:pr-6'}`}
           title={sidebarOpen ? 'Hide Details' : 'Show Details'}
         >
           <i className={`fa-solid ${sidebarOpen ? 'fa-chevron-right' : 'fa-chevron-left'} text-white group-hover:scale-110 transition-transform`}></i>
         </button>
 
-        {/* Mobile Close Button */}
-        {sidebarOpen && window.innerWidth < 768 && (
+        {/* Innovative Reopen Social Button for Mobile ONLY - Luxury Obsidian Edition */}
+        {!sidebarOpen && (
           <button
-            onClick={() => setSidebarOpen(false)}
-            className="fixed top-24 right-6 z-50 w-12 h-12 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-white shadow-2xl"
+            onClick={() => setSidebarOpen(true)}
+            className="md:hidden fixed bottom-10 right-8 z-50 w-20 h-20 rounded-full flex items-center justify-center text-white animate-bounce-in group/fab"
           >
-            <i className="fa-solid fa-xmark text-xl"></i>
+            {/* Outer Ambient Glow */}
+            <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-2xl animate-pulse"></div>
+
+            {/* Obsidian Glass Base */}
+            <div className="absolute inset-0 bg-slate-950 rounded-full border border-white/20 shadow-[0_0_30px_rgba(0,0,0,0.8),inset_0_0_20px_rgba(99,102,241,0.2)] overflow-hidden">
+              {/* Shine Sweep animation */}
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover/fab:translate-x-full transition-transform duration-1000"></div>
+            </div>
+
+            {/* Orbiting Energy Mote */}
+            <div className="absolute inset-0 animate-spin" style={{ animationDuration: '4s' }}>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-indigo-400 rounded-full shadow-[0_0_12px_#6366f1]"></div>
+            </div>
+
+            {/* Inner Jewel Core */}
+            <div className="relative z-10 w-14 h-14 rounded-full bg-linear-to-br from-indigo-500 via-purple-600 to-slate-900 flex flex-col items-center justify-center border border-white/30 shadow-[0_0_20px_rgba(99,102,241,0.5)] group-hover/fab:scale-110 transition-transform duration-500">
+              <i className="fa-solid fa-brain text-white text-xl"></i>
+              <span className="text-[6px] font-black uppercase tracking-[0.2em] mt-1 text-white/70">Plan</span>
+            </div>
+
+            {/* Decorative Static Rings */}
+            <div className="absolute inset-2 rounded-full border border-white/5 pointer-events-none"></div>
+            <div className="absolute inset-4 rounded-full border border-white/5 pointer-events-none"></div>
           </button>
         )}
 
-        {/* Sidebar content */}
-        <div className={`${sidebarOpen ? 'fixed inset-0 md:relative md:w-[480px]' : 'w-0'} transition-all duration-300 bg-slate-900/95 md:bg-slate-900/40 backdrop-blur-xl z-30 overflow-hidden`}>
-          <div className={`h-full overflow-y-auto pt-32 md:pt-40 px-6 md:px-10 pb-10 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        {/* Premium Mobile Close Button - Refined Iconography */}
+        {sidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden fixed top-28 right-8 z-50 w-12 h-12 rounded-xl bg-slate-900/60 border border-white/20 flex items-center justify-center text-white shadow-2xl backdrop-blur-2xl ring-1 ring-white/10 active:scale-90 transition-transform"
+          >
+            <i className="fa-solid fa-chevron-down text-lg animate-bounce-slow"></i>
+          </button>
+        )}
+
+        {/* Sidebar content - Specialized Mobile UI vs Desktop UI */}
+        <div className={`${sidebarOpen
+          ? 'fixed inset-x-4 bottom-4 top-24 md:top-0 md:inset-x-auto md:relative md:inset-y-0 md:right-0 md:w-[480px] rounded-[40px] md:rounded-none'
+          : 'w-0'} transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1) bg-slate-900/98 md:bg-slate-900/40 backdrop-blur-3xl z-40 overflow-hidden border border-white/10 md:border-none shadow-[0_50px_100px_rgba(0,0,0,0.8)] md:shadow-none`}>
+
+          {/* Mobile Drag Handle Decor */}
+          <div className="md:hidden absolute top-4 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/10 rounded-full"></div>
+
+          {/* Internal Cosmic Glow for Mobile */}
+          <div className="md:hidden absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.1),transparent_70%)] pointer-events-none"></div>
+
+          <div className={`h-full overflow-y-auto pt-12 md:pt-40 px-6 md:px-10 pb-10 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
             {/* Physical spacer to force content down */}
-            <div className="h-20 w-full mb-8 border-b border-white/5 shadow-xs" />
+            <div className="h-16 w-full mb-8 border-b border-white/5 shadow-xs flex items-end justify-between pb-4 md:hidden">
+              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Detail Explorer</span>
+              <i className="fa-solid fa-microchip text-indigo-500/30 text-xs"></i>
+            </div>
+            <div className="hidden md:block h-20 w-full mb-8 border-b border-white/5 shadow-xs" />
 
             {selectedNode ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '50px' }}>
