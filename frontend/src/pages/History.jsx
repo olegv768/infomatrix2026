@@ -89,7 +89,7 @@ export default function History({ onNavigate, onLoadRoadmap }) {
             <section className="py-16 px-8 sm:px-12 lg:px-20 relative">
                 <div className="max-w-7xl mx-auto relative z-10">
                     {history.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-10 sm:py-20 text-center">
+                        <div className="flex flex-col items-center justify-center py-10 sm:py-20 text-center md:translate-x-[135px]">
                             {/* Cosmic 3D Sphere System */}
                             <div className="relative group mb-16 h-96 flex items-center justify-center">
                                 {/* Back Glow Layers */}
