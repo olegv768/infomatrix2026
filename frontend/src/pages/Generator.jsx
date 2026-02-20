@@ -13,6 +13,10 @@ export default function Generator({
   savedSelectedNode,
   setSavedSelectedNode,
   setActiveHistoryId,
+  generateRoadmap,
+  isGenerating,
+  generationProgress,
+  generationError,
 }) {
   // Use lifted state from parent for persistence
   const [input, setInput] = [savedInput, setSavedInput]
@@ -20,9 +24,11 @@ export default function Generator({
   const [completedNodes, setCompletedNodes] = [savedCompletedNodes, setSavedCompletedNodes]
   const [selectedNode, setSelectedNode] = [savedSelectedNode, setSavedSelectedNode]
 
+  // Alias for cleaner code
+  const loading = isGenerating
+  const loadingProgress = generationProgress
+
   // Local state (doesn't need to persist)
-  const [loading, setLoading] = useState(false)
-  const [loadingProgress, setLoadingProgress] = useState(0)
   const [error, setError] = useState('')
   const [zoom, setZoom] = useState(1)
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -31,139 +37,13 @@ export default function Generator({
   const zoomRef = useRef(null)
   const nodesRef = useRef(null) // Хранит массив узлов с позициями
 
-  const generateRoadmap = async () => {
+  const handleGenerate = () => {
     if (!input.trim()) {
       setError('Please enter a goal or topic')
       return
     }
-
-    setLoading(true)
-    setLoadingProgress(0)
     setError('')
-    setSelectedNode(null)
-    setCompletedNodes(new Set())
-
-    try {
-      // Пытаемся взять URL из переменных окружения, иначе используем стандартные пути
-      const apiBase = import.meta.env.VITE_API_URL || '';
-      const apiUrl = import.meta.env.PROD
-        ? `${apiBase}/roadmap`
-        : 'http://localhost:5001/roadmap';
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          goal: input,
-        }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || errorData.details || `Server error (${response.status})`)
-      }
-
-      const parsedData = await response.json()
-
-      if (!parsedData.nodes || !Array.isArray(parsedData.nodes)) {
-        throw new Error('Server returned invalid data format')
-      }
-
-      parsedData.nodes = parsedData.nodes.map((node) => ({
-        ...node,
-        id: node.id || `node_${Math.random().toString(36).substr(2, 9)}`,
-        label: node.label || 'Node',
-        description: node.description || '',
-        level: typeof node.level === 'number' ? node.level : 0,
-        children: Array.isArray(node.children) ? node.children : [],
-        resources: Array.isArray(node.resources) ? node.resources : [],
-      }))
-
-      const existingIds = new Set(parsedData.nodes.map((n) => n.id))
-      parsedData.nodes = parsedData.nodes.map((node) => ({
-        ...node,
-        children: node.children.filter((childId) => existingIds.has(childId)),
-      }))
-
-      // Auto-correct levels to ensure strict hierarchy (Parent L -> Child L+1)
-      const nodeIds = new Map(parsedData.nodes.map(n => [n.id, n]))
-      // Find root: explicitly level 0, or the first one if missing
-      const rootNode = parsedData.nodes.find(n => n.level === 0) || parsedData.nodes[0]
-
-      if (rootNode) {
-        const queue = [{ id: rootNode.id, depth: 0 }]
-        let corrections = 0
-        const visited = new Set([rootNode.id])
-
-        while (queue.length > 0) {
-          const { id, depth } = queue.shift()
-          const node = nodeIds.get(id)
-
-          if (node) {
-            // Force level to match depth
-            if (node.level !== depth) {
-              node.level = depth
-              corrections++
-            }
-
-            // Check children
-            if (node.children && node.children.length > 0) {
-              node.children.forEach(childId => {
-                if (!visited.has(childId)) {
-                  visited.add(childId)
-                  queue.push({ id: childId, depth: depth + 1 })
-                }
-              })
-            }
-          }
-        }
-
-        if (corrections > 0) {
-          console.warn(`🛡️ Roadmap Auto-Healed: Corrected levels for ${corrections} nodes.`)
-        }
-
-        // Attach orphans to root to prevent floating nodes
-        parsedData.nodes.forEach(node => {
-          if (!visited.has(node.id)) {
-            console.warn(`🛡️ Orphaned node rescued: ${node.label}`)
-            node.level = 1
-            if (!rootNode.children.includes(node.id)) {
-              rootNode.children.push(node.id)
-            }
-          }
-        })
-      }
-
-      setLoadingProgress(100)
-
-      // Small delay to let the user see 100% before transitioning
-      await new Promise(resolve => setTimeout(resolve, 300))
-
-      setData(parsedData)
-
-      const newId = Date.now().toString()
-      if (setActiveHistoryId) setActiveHistoryId(newId)
-
-      // Save to history
-      const historyItem = {
-        id: newId,
-        timestamp: Date.now(),
-        data: parsedData,
-        completedNodes: []
-      }
-      const existingHistory = JSON.parse(localStorage.getItem('roadmap_history') || '[]')
-      existingHistory.unshift(historyItem)
-      // Keep only last 20 items
-      const trimmedHistory = existingHistory.slice(0, 20)
-      localStorage.setItem('roadmap_history', JSON.stringify(trimmedHistory))
-    } catch (err) {
-      console.error('Error:', err)
-      setError(err.message || 'An error occurred during generation')
-    } finally {
-      setLoading(false)
-    }
+    generateRoadmap(input)
   }
 
   const createLinks = (nodes) => {
@@ -680,24 +560,12 @@ export default function Generator({
     }
   }, [data, completedNodes])
 
-  // Simulated progress logic
+  // Show generation error from App level
   useEffect(() => {
-    let interval;
-    if (loading) {
-      setLoadingProgress(0);
-      interval = setInterval(() => {
-        setLoadingProgress((prev) => {
-          if (prev < 40) return prev + Math.random() * 1.2;
-          if (prev < 75) return prev + Math.random() * 0.6;
-          if (prev < 99) return prev + 0.05;
-          return prev;
-        });
-      }, 200);
-    } else {
-      setLoadingProgress(0);
+    if (generationError) {
+      setError(generationError)
     }
-    return () => clearInterval(interval);
-  }, [loading]);
+  }, [generationError]);
 
   // Background particles - reduced count on mobile
   const particleCount = window.innerWidth < 768 ? 20 : 50;
@@ -765,7 +633,7 @@ export default function Generator({
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && !loading && generateRoadmap()}
+                onKeyPress={(e) => e.key === 'Enter' && !loading && handleGenerate()}
                 placeholder="What is your next big goal? (e.g. Master Python, Product Design...)"
                 className="w-full px-6 py-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all text-lg font-medium"
                 disabled={loading}
@@ -774,7 +642,7 @@ export default function Generator({
             </div>
 
             <button
-              onClick={generateRoadmap}
+              onClick={handleGenerate}
               disabled={loading}
               className={`relative overflow-hidden group w-full lg:w-auto lg:min-w-[280px] px-8 py-5 rounded-3xl font-black text-sm uppercase tracking-[0.2em] transition-all duration-500 active:scale-95 flex items-center justify-center gap-4 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] ${loading
                 ? 'bg-slate-900/80 text-white cursor-not-allowed border border-white/5'
@@ -954,24 +822,7 @@ export default function Generator({
           </button>
 
 
-          {/* Export buttons */}
-          <div className="mt-4 pt-4 border-t border-slate-600/50">
-            <p className="text-xs text-slate-400 text-center mb-2 font-semibold">Export</p>
-            <button
-              onClick={exportAsPNG}
-              className="w-full p-3 bg-emerald-600/80 hover:bg-emerald-500/80 rounded-lg border border-emerald-500/50 backdrop-blur transition-colors shadow-lg mb-2 group"
-              title="Download as PNG"
-            >
-              <i className="fa-solid fa-image text-white group-hover:scale-110 transition-transform"></i>
-            </button>
-            <button
-              onClick={exportAsPDF}
-              className="w-full p-3 bg-rose-600/80 hover:bg-rose-500/80 rounded-lg border border-rose-500/50 backdrop-blur transition-colors shadow-lg group"
-              title="Download as PDF"
-            >
-              <i className="fa-solid fa-file-pdf text-white group-hover:scale-110 transition-transform"></i>
-            </button>
-          </div>
+
         </div>
       )}
 

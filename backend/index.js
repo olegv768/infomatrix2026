@@ -73,15 +73,6 @@ app.post("/roadmap", async (req, res) => {
   }
 
   try {
-    // Attempt to use the latest model, with a fallback
-    let model;
-    try {
-      model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
-    } catch (e) {
-      console.warn("Gemini 3 not available, falling back to Gemini 1.5 Flash");
-      model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    }
-
     const prompt = `Create a comprehensive and detailed roadmap for achieving the goal: ${goal}
 
 CRITICAL INSTRUCTION: You MUST respond in the SAME LANGUAGE as the user's goal above. If the goal is in Russian, respond in Russian. If in English, respond in English. Match the user's language exactly.
@@ -150,7 +141,32 @@ RESOURCE QUALITY GUIDELINES:
 Make the roadmap practical, actionable, and comprehensive enough to truly master the skill.
 Make sure all quotes are properly closed and JSON is valid!`;
 
-    const result = await model.generateContent(prompt);
+    // Use only Gemini 2.5 Flash as requested
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    // Implement retry logic for rate limits
+    let result;
+    let maxRetries = 2;
+    let retryCount = 0;
+    let baseDelay = 3000;
+
+    while (retryCount <= maxRetries) {
+      try {
+        result = await model.generateContent(prompt);
+        break;
+      } catch (error) {
+        const isRateLimit = error.status === 429 || (error.message && error.message.includes("429"));
+        if (isRateLimit && retryCount < maxRetries) {
+          retryCount++;
+          console.log(`Rate limit reached, retrying in ${baseDelay / 1000}s... (Attempt ${retryCount}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, baseDelay));
+          baseDelay *= 2; // Exponential backoff
+        } else {
+          throw error;
+        }
+      }
+    }
+
     const response = await result.response;
     let roadmapText = response.text();
 
@@ -171,20 +187,27 @@ Make sure all quotes are properly closed and JSON is valid!`;
     res.json(roadmapJson);
   } catch (error) {
     console.error("Error generating roadmap:", error);
-    if (error instanceof SyntaxError) {
-      console.error("Raw Invalid JSON:", roadmapText);
-    }
 
-    if (error.status === 429 || (error.message && error.message.includes("429"))) {
+    const isRateLimit = error.status === 429 || (error.message && error.message.includes("429"));
+
+    if (isRateLimit) {
       return res.status(429).json({
         error: "AI Service is busy. Please try again in 30 seconds.",
-        details: "Quota limit reached for the free tier."
+        details: "The AI service is currently experiencing high demand. We've attempted retries, but the limit persists. Please wait a moment before trying again."
+      });
+    }
+
+    if (error instanceof SyntaxError) {
+      console.error("Raw Invalid JSON:", roadmapText);
+      return res.status(500).json({
+        error: "Invalid Roadmap Format",
+        details: "The AI generated an invalid roadmap structure. Please try a more specific goal."
       });
     }
 
     res
       .status(500)
-      .json({ error: "Internal Server Error", details: error.message });
+      .json({ error: "Generation Failed", details: error.message });
   }
 });
 
