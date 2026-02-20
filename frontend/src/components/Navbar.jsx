@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import Logo from './Logo'
 
 export default function Navbar({ currentPage, onNavigate }) {
@@ -41,41 +42,59 @@ export default function Navbar({ currentPage, onNavigate }) {
             ))}
           </div>
 
-
-
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+            className="md:hidden relative group p-4 rounded-2xl bg-slate-900/60 border border-white/10 shadow-2xl backdrop-blur-xl transition-all active:scale-90"
           >
-            <i className={`fa-solid ${mobileMenuOpen ? 'fa-xmark' : 'fa-bars'} text-xl`}></i>
+            {/* Ambient Glow */}
+            <div className={`absolute inset-0 bg-indigo-500/20 rounded-2xl blur-xl transition-opacity duration-500 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'}`}></div>
+
+            <div className="relative w-7 h-5 flex flex-col justify-between items-center overflow-hidden">
+              <span className={`w-full h-1 bg-white rounded-full transform transition-all duration-500 ease-spring ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+              <span className={`w-full h-1 bg-white rounded-full transition-all duration-300 ${mobileMenuOpen ? 'opacity-0 -translate-x-full' : ''}`}></span>
+              <span className={`w-full h-1 bg-white rounded-full transform transition-all duration-500 ease-spring ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+            </div>
           </button>
         </div>
       </div>
 
       {/* Mobile Navigation */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-white/10 bg-slate-900/95 backdrop-blur-xl">
-          <div className="px-4 py-3 space-y-1">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  onNavigate(item.id)
-                  setMobileMenuOpen(false)
-                }}
-                className={`w-full px-4 py-3 rounded-lg font-medium transition-all flex items-center gap-3 ${currentPage === item.id
-                  ? 'bg-indigo-500/20 text-indigo-400'
-                  : 'text-slate-300 hover:bg-white/5'
-                  }`}
-              >
-                <i className={`fa-solid ${item.icon}`}></i>
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="md:hidden border-t border-white/10 bg-slate-900/98 backdrop-blur-3xl overflow-hidden"
+          >
+            <div className="px-6 py-8 space-y-3">
+              {navItems.map((item, idx) => (
+                <motion.button
+                  key={item.id}
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: idx * 0.05 }}
+                  onClick={() => {
+                    onNavigate(item.id)
+                    setMobileMenuOpen(false)
+                  }}
+                  className={`w-full px-6 py-4 rounded-2xl font-bold transition-all flex items-center gap-4 text-lg ${currentPage === item.id
+                    ? 'bg-linear-to-r from-indigo-500/20 to-purple-500/20 text-indigo-400 border border-indigo-500/20 shadow-lg shadow-indigo-500/5'
+                    : 'text-slate-300 hover:bg-white/5'
+                    }`}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${currentPage === item.id ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'bg-white/5 text-slate-400'}`}>
+                    <i className={`fa-solid ${item.icon}`}></i>
+                  </div>
+                  {item.label}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   )
 }
