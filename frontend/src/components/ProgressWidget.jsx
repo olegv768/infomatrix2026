@@ -56,9 +56,11 @@ const ProgressWidget = ({
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - (displayProgress / 100) * circumference;
 
+    const isPC = window.innerWidth > 768;
+
     return (
         <motion.div
-            drag
+            drag={!isPC}
             dragMomentum={false}
             dragElastic={0.1}
             dragConstraints={{
@@ -70,10 +72,10 @@ const ProgressWidget = ({
             whileDrag={{ scale: 1.1, cursor: 'grabbing' }}
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="fixed bottom-8 right-8 z-50 transition-opacity duration-700"
+            className={`fixed bottom-8 right-8 z-50 transition-opacity duration-700 ${!isPC ? '' : 'pointer-events-auto'}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            style={{ touchAction: 'none' }} // Critical for mobile dragging
+            style={{ touchAction: !isPC ? 'none' : 'auto' }} // Critical for mobile dragging
         >
             <style>{`
                 @keyframes pulse-glow {

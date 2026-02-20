@@ -750,7 +750,7 @@ export default function Generator({
 
       {/* Zoom Controls */}
       {data && (
-        <div className={`export-hide absolute bottom-10 md:top-56 right-6 z-20 flex flex-col gap-2 transition-all duration-300 ${sidebarOpen ? 'md:right-[504px]' : 'md:right-6'} ${window.innerWidth < 768 && sidebarOpen ? 'hidden' : 'flex'}`}>
+        <div className={`export-hide absolute bottom-36 md:top-56 right-6 z-20 flex flex-col gap-2 transition-all duration-300 ${sidebarOpen ? 'md:right-[504px]' : 'md:right-6'} ${window.innerWidth < 768 && sidebarOpen ? 'hidden' : 'flex'}`}>
           {/* Futuristic Circular Progress */}
           <div className="relative group mb-4">
             <div className="absolute -inset-1 bg-linear-to-r from-indigo-500 to-purple-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
