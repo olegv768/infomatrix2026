@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 
 const ProgressWidget = ({
     data,
@@ -11,6 +12,7 @@ const ProgressWidget = ({
     visible
 }) => {
     const [isHovered, setIsHovered] = useState(false);
+    const containerRef = useRef(null);
 
     // Hide if on Generator page (provided by visible prop) 
     // OR if there's no active generation/data to track
@@ -55,10 +57,23 @@ const ProgressWidget = ({
     const offset = circumference - (displayProgress / 100) * circumference;
 
     return (
-        <div
-            className="fixed bottom-8 right-8 z-50 transition-all duration-700 animate-in fade-in zoom-in"
+        <motion.div
+            drag
+            dragMomentum={false}
+            dragElastic={0.1}
+            dragConstraints={{
+                top: -window.innerHeight + 150,
+                bottom: 50,
+                left: -window.innerWidth + 150,
+                right: 50
+            }}
+            whileDrag={{ scale: 1.1, cursor: 'grabbing' }}
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="fixed bottom-8 right-8 z-50 transition-opacity duration-700"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            style={{ touchAction: 'none' }} // Critical for mobile dragging
         >
             <style>{`
                 @keyframes pulse-glow {
@@ -178,7 +193,7 @@ const ProgressWidget = ({
                     <div className={`absolute inset-0 border border-dashed border-white/10 rounded-full scale-[1.18] pointer-events-none opacity-20 ${isGenerating ? 'animate-[rotate-slow_10s_linear_infinite]' : ''}`}></div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 
