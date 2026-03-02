@@ -15,48 +15,52 @@ export default function Navbar({ currentPage, onNavigate }) {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/40 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-20">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <button
-            onClick={() => onNavigate('home')}
-            className="flex items-center group"
-          >
-            <Logo className="scale-90 origin-left" />
-          </button>
+      {/* Use position:relative so we can absolutely place the nav items */}
+      <div className="relative w-full px-8 sm:px-12 lg:px-20 h-16 flex items-center">
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => onNavigate(item.id)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 icon-bounce underline-slide ${currentPage === item.id
-                  ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
-                  }`}
-              >
-                <i className={`fa-solid ${item.icon} text-sm transition-transform`}></i>
-                {item.label}
-              </button>
-            ))}
-          </div>
+        {/* Logo — stays on the left */}
+        <button
+          onClick={() => onNavigate('home')}
+          className="flex items-center group"
+        >
+          <Logo className="scale-90 origin-left" />
+        </button>
 
-          {/* Mobile menu button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden relative group p-4 rounded-2xl bg-slate-900/60 border border-white/10 shadow-2xl backdrop-blur-xl transition-all active:scale-90"
-          >
-            {/* Ambient Glow */}
-            <div className={`absolute inset-0 bg-indigo-500/20 rounded-2xl blur-xl transition-opacity duration-500 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'}`}></div>
-
-            <div className="relative w-7 h-5 flex flex-col justify-between items-center overflow-hidden">
-              <span className={`w-full h-1 bg-white rounded-full transform transition-all duration-500 ease-spring ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-              <span className={`w-full h-1 bg-white rounded-full transition-all duration-300 ${mobileMenuOpen ? 'opacity-0 -translate-x-full' : ''}`}></span>
-              <span className={`w-full h-1 bg-white rounded-full transform transition-all duration-500 ease-spring ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
-            </div>
-          </button>
+        {/* Desktop Navigation — HARD pinned to right edge */}
+        <div
+          className="hidden md:flex items-center gap-1"
+          style={{ position: 'absolute', right: '32px', top: '50%', transform: 'translateY(-50%)' }}
+        >
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => onNavigate(item.id)}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 icon-bounce underline-slide ${currentPage === item.id
+                ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
+                }`}
+            >
+              <i className={`fa-solid ${item.icon} text-sm transition-transform`}></i>
+              {item.label}
+            </button>
+          ))}
         </div>
+
+        {/* Mobile menu button */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden relative group p-4 rounded-2xl bg-slate-900/60 border border-white/10 shadow-2xl backdrop-blur-xl transition-all active:scale-90 ml-auto"
+        >
+          {/* Ambient Glow */}
+          <div className={`absolute inset-0 bg-indigo-500/20 rounded-2xl blur-xl transition-opacity duration-500 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'}`}></div>
+
+          <div className="relative w-7 h-5 flex flex-col justify-between items-center overflow-hidden">
+            <span className={`w-full h-1 bg-white rounded-full transform transition-all duration-500 ease-spring ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+            <span className={`w-full h-1 bg-white rounded-full transition-all duration-300 ${mobileMenuOpen ? 'opacity-0 -translate-x-full' : ''}`}></span>
+            <span className={`w-full h-1 bg-white rounded-full transform transition-all duration-500 ease-spring ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+          </div>
+        </button>
+
       </div>
 
       {/* Mobile Navigation */}
