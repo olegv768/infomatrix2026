@@ -9,6 +9,7 @@ export default function Navbar({ currentPage, onNavigate }) {
     { id: 'home', label: 'Home', icon: 'fa-house' },
     { id: 'generator', label: 'Generator', icon: 'fa-route' },
     { id: 'history', label: 'History', icon: 'fa-clock-rotate-left' },
+    { id: 'profile', label: 'Profile', icon: 'fa-gamepad' },
     { id: 'about', label: 'About Us', icon: 'fa-users' },
     { id: 'contact', label: 'Contact', icon: 'fa-envelope' },
   ]

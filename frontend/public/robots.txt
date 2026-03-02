@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /profile
+Disallow: /history
+
+Sitemap: https://roadmap-ai.vercel.app/sitemap.xml

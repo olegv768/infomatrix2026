@@ -66,6 +66,7 @@ export default function Features() {
     cyan: 'from-cyan-500 to-cyan-600',
     teal: 'from-teal-500 to-teal-600',
     rose: 'from-rose-500 to-rose-600',
+    amber: 'from-amber-500 to-amber-600',
   }
 
   return (

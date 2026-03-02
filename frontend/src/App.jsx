@@ -6,6 +6,7 @@ import Generator from './pages/Generator'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import History from './pages/History'
+import Profile from './pages/Profile'
 import ProgressWidget from './components/ProgressWidget'
 
 function App() {
@@ -224,6 +225,26 @@ function App() {
     }
 
     const renderPage = () => {
+        // Dynamic SEO Update
+        const titles = {
+            home: 'RoadmapAI — Transform Your Goals into Actionable Learning Paths',
+            generator: 'AI Generator — Create Your Personalized Learning Roadmap',
+            history: 'My Roadmaps — Progress History | RoadmapAI',
+            profile: 'My Profile — Level & Stats | RoadmapAI',
+            about: 'About Us — The Mission of RoadmapAI',
+            contact: 'Contact Us — Get in touch with RoadmapAI Team'
+        }
+        const descriptions = {
+            home: 'Use AI to generate personalized step-by-step career roadmaps and learning paths. Powered by Gemini AI.',
+            generator: 'Enter your goal and our AI will create a comprehensive learning roadmap with resources and tasks.',
+            about: 'Learn more about the team behind RoadmapAI and how we use AI to democratize learning.',
+            contact: 'Reach out for support, feedback, or collaboration opportunities.'
+        }
+
+        document.title = titles[currentPage] || 'RoadmapAI'
+        const metaDesc = document.querySelector('meta[name="description"]')
+        if (metaDesc) metaDesc.setAttribute('content', descriptions[currentPage] || descriptions.home)
+
         switch (currentPage) {
             case 'home':
                 return <Home onNavigate={setCurrentPage} />
@@ -247,6 +268,8 @@ function App() {
                 )
             case 'history':
                 return <History onNavigate={setCurrentPage} onLoadRoadmap={handleLoadRoadmap} />
+            case 'profile':
+                return <Profile onNavigate={setCurrentPage} />
             case 'about':
                 return <About onNavigate={setCurrentPage} />
             case 'contact':
