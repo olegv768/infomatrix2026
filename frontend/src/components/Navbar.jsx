@@ -16,7 +16,7 @@ export default function Navbar({ currentPage, onNavigate }) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/40 backdrop-blur-md">
       {/* Use position:relative so we can absolutely place the nav items */}
-      <div className="relative w-full px-8 sm:px-12 lg:px-20 h-16 flex items-center">
+      <div className="relative w-full px-8 sm:px-12 lg:px-20 h-16 flex items-center justify-between">
 
         {/* Logo — stays on the left */}
         <button
@@ -49,7 +49,7 @@ export default function Navbar({ currentPage, onNavigate }) {
         {/* Mobile menu button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden relative group p-4 rounded-2xl bg-slate-900/60 border border-white/10 shadow-2xl backdrop-blur-xl transition-all active:scale-90 ml-auto"
+          className="md:hidden relative group p-4 rounded-2xl bg-slate-900/60 border border-white/10 shadow-2xl backdrop-blur-xl transition-all active:scale-90"
         >
           {/* Ambient Glow */}
           <div className={`absolute inset-0 bg-indigo-500/20 rounded-2xl blur-xl transition-opacity duration-500 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'}`}></div>
