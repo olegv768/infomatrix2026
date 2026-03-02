@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://roadmap-ai.vercel.app/</loc>
+    <loc>https://levelupmap26.vercel.app/</loc>
     <lastmod>2026-03-02</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://roadmap-ai.vercel.app/generator</loc>
+    <loc>https://levelupmap26.vercel.app/generator</loc>
     <lastmod>2026-03-02</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://roadmap-ai.vercel.app/about</loc>
+    <loc>https://levelupmap26.vercel.app/about</loc>
     <lastmod>2026-03-02</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://roadmap-ai.vercel.app/contact</loc>
+    <loc>https://levelupmap26.vercel.app/contact</loc>
     <lastmod>2026-03-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://roadmap-ai.vercel.app/profile</loc>
+    <loc>https://levelupmap26.vercel.app/profile</loc>
     <lastmod>2026-03-02</lastmod>
     <priority>0.4</priority>
   </url>

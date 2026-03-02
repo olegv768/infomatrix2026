@@ -3,4 +3,4 @@ Allow: /
 Disallow: /profile
 Disallow: /history
 
-Sitemap: https://roadmap-ai.vercel.app/sitemap.xml
+Sitemap: https://levelupmap26.vercel.app/sitemap.xml
