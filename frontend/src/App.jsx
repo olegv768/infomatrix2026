@@ -6,7 +6,6 @@ import Generator from './pages/Generator'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import History from './pages/History'
-import Profile from './pages/Profile'
 import ProgressWidget from './components/ProgressWidget'
 
 function App() {
@@ -230,7 +229,6 @@ function App() {
             home: 'Level Up Map — Transform Your Goals into Actionable Learning Paths',
             generator: 'AI Generator — Create Your Personalized Learning Roadmap',
             history: 'My Roadmaps — Progress History | Level Up Map',
-            profile: 'My Profile — Level & Stats | Level Up Map',
             about: 'About Us — The Mission of Level Up Map',
             contact: 'Contact Us — Get in touch with Level Up Map Team'
         }
@@ -268,8 +266,6 @@ function App() {
                 )
             case 'history':
                 return <History onNavigate={setCurrentPage} onLoadRoadmap={handleLoadRoadmap} />
-            case 'profile':
-                return <Profile onNavigate={setCurrentPage} />
             case 'about':
                 return <About onNavigate={setCurrentPage} />
             case 'contact':
