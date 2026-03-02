@@ -227,21 +227,21 @@ function App() {
     const renderPage = () => {
         // Dynamic SEO Update
         const titles = {
-            home: 'RoadmapAI — Transform Your Goals into Actionable Learning Paths',
+            home: 'Level Up Map — Transform Your Goals into Actionable Learning Paths',
             generator: 'AI Generator — Create Your Personalized Learning Roadmap',
-            history: 'My Roadmaps — Progress History | RoadmapAI',
-            profile: 'My Profile — Level & Stats | RoadmapAI',
-            about: 'About Us — The Mission of RoadmapAI',
-            contact: 'Contact Us — Get in touch with RoadmapAI Team'
+            history: 'My Roadmaps — Progress History | Level Up Map',
+            profile: 'My Profile — Level & Stats | Level Up Map',
+            about: 'About Us — The Mission of Level Up Map',
+            contact: 'Contact Us — Get in touch with Level Up Map Team'
         }
         const descriptions = {
             home: 'Use AI to generate personalized step-by-step career roadmaps and learning paths. Powered by Gemini AI.',
             generator: 'Enter your goal and our AI will create a comprehensive learning roadmap with resources and tasks.',
-            about: 'Learn more about the team behind RoadmapAI and how we use AI to democratize learning.',
+            about: 'Learn more about the team behind Level Up Map and how we use AI to democratize learning.',
             contact: 'Reach out for support, feedback, or collaboration opportunities.'
         }
 
-        document.title = titles[currentPage] || 'RoadmapAI'
+        document.title = titles[currentPage] || 'Level Up Map'
         const metaDesc = document.querySelector('meta[name="description"]')
         if (metaDesc) metaDesc.setAttribute('content', descriptions[currentPage] || descriptions.home)
 
