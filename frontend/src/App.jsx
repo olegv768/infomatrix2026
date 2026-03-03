@@ -11,6 +11,17 @@ import ProgressWidget from './components/ProgressWidget'
 function App() {
     const [currentPage, setCurrentPage] = useState('home')
 
+    // Handle initial routing and browser navigation
+    useEffect(() => {
+        const path = window.location.pathname.replace('/', '')
+        const validPages = ['home', 'generator', 'about', 'contact', 'history']
+        if (validPages.includes(path)) {
+            setCurrentPage(path)
+        } else if (path === '') {
+            setCurrentPage('home')
+        }
+    }, [])
+
     // Persisted state for Generator
     const [savedData, setSavedData] = useState(null)
     const [savedInput, setSavedInput] = useState('')
