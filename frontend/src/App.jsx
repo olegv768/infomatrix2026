@@ -243,6 +243,16 @@ function App() {
         const metaDesc = document.querySelector('meta[name="description"]')
         if (metaDesc) metaDesc.setAttribute('content', descriptions[currentPage] || descriptions.home)
 
+        // Dynamic Canonical link
+        let link = document.querySelector("link[rel='canonical']")
+        if (!link) {
+            link = document.createElement('link')
+            link.setAttribute('rel', 'canonical')
+            document.head.appendChild(link)
+        }
+        const path = currentPage === 'home' ? '' : currentPage
+        link.setAttribute('href', `https://levelupmap26.vercel.app/${path}`)
+
         switch (currentPage) {
             case 'home':
                 return <Home onNavigate={setCurrentPage} />
