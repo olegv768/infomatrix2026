@@ -6,7 +6,6 @@ export default function Contact({ onNavigate }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    subject: '',
     message: ''
   })
   const [submitted, setSubmitted] = useState(false)
@@ -20,14 +19,10 @@ export default function Contact({ onNavigate }) {
 
     try {
       const formDataToSend = new FormData()
-      formDataToSend.append('access_key', '02645203-ee8a-4c3d-883e-baf58660a35d')
+      formDataToSend.append('access_key', '0ac74031-e855-4f2d-b00b-61aca1c1ca7a')
       formDataToSend.append('name', formData.name)
       formDataToSend.append('email', formData.email)
-      formDataToSend.append('reply_to', formData.email) // This allows you to reply directly to the sender
-      formDataToSend.append('subject', formData.subject || 'New Contact Form Submission')
       formDataToSend.append('message', formData.message)
-      formDataToSend.append('from_name', 'Level Up Map')
-      formDataToSend.append('botcheck', '') // Honeypot field for spam protection
 
       const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
@@ -41,7 +36,7 @@ export default function Contact({ onNavigate }) {
       }
 
       setSubmitted(true)
-      setFormData({ name: '', email: '', subject: '', message: '' })
+      setFormData({ name: '', email: '', message: '' })
 
       // Keep success message for 10 seconds or until user resets
       setTimeout(() => {
@@ -271,25 +266,7 @@ export default function Contact({ onNavigate }) {
                   </ScrollReveal>
                 </div>
 
-                <ScrollReveal delay={200}>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-slate-300 uppercase tracking-wider text-center">
-                      Subject
-                    </label>
-                    <div className="relative group/input">
-                      <input
-                        type="text"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleChange}
-                        required
-                        disabled={loading}
-                        className="w-full px-6 py-4 bg-slate-800/40 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-center focus:outline-none focus:border-indigo-500/50 transition-all duration-300 hover:bg-slate-800/60 input-glow disabled:opacity-50 disabled:cursor-not-allowed"
-                        placeholder="How can we help you?"
-                      />
-                    </div>
-                  </div>
-                </ScrollReveal>
+
 
                 <ScrollReveal delay={250}>
                   <div className="space-y-2">
