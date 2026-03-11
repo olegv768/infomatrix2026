@@ -312,15 +312,15 @@ export default function Contact({ onNavigate }) {
       </section>
 
       {/* Connected Nodes Section */}
-      <section className="min-h-screen flex items-center justify-center px-8 relative overflow-hidden">
+      <section className="min-h-screen flex items-center justify-center px-4 sm:px-8 relative overflow-hidden">
         {/* Background Atmosphere */}
-        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/5 rounded-full blur-[120px]"></div>
-        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/5 rounded-full blur-[120px]"></div>
+        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-indigo-600/5 rounded-full blur-[80px] md:blur-[120px]"></div>
+        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-purple-600/5 rounded-full blur-[80px] md:blur-[120px]"></div>
 
-        <div className="max-w-7xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-48 lg:gap-24">
+        <div className="max-w-7xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-24 md:gap-48 lg:gap-24">
 
           {/* Node Pair 1: Community */}
-          <div className="relative flex items-center justify-center h-[400px]">
+          <div className="relative flex items-center justify-center h-[350px] md:h-[400px]">
             <svg className="absolute w-full h-full pointer-events-none overflow-visible" viewBox="0 0 400 400">
               {/* Path to Deep Paths */}
               <path
@@ -350,32 +350,32 @@ export default function Contact({ onNavigate }) {
 
             <div className="group relative z-20">
               <div className="absolute inset-0 bg-indigo-500 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-              <div className="w-40 h-40 rounded-full bg-slate-900 border border-indigo-500/30 flex flex-col items-center justify-center cursor-pointer transform hover:scale-110 transition-all duration-500 shadow-2xl relative z-10">
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-3 group-hover:bg-indigo-500/20 transition-colors">
-                  <i className="fa-solid fa-microchip text-2xl text-indigo-400"></i>
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-slate-900 border border-indigo-500/30 flex flex-col items-center justify-center cursor-pointer transform hover:scale-110 transition-all duration-500 shadow-2xl relative z-10">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-2 md:mb-3 group-hover:bg-indigo-500/20 transition-colors">
+                  <i className="fa-solid fa-microchip text-xl md:text-2xl text-indigo-400"></i>
                 </div>
-                <span className="text-white font-bold text-sm tracking-widest uppercase">Precision</span>
+                <span className="text-white font-bold text-xs md:text-sm tracking-widest uppercase">Precision</span>
               </div>
             </div>
 
-            <div className="absolute top-[260px] left-[230px] group animate-float" style={{ animationDelay: '-2s' }}>
-              <div className="w-32 h-32 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-4 text-center transform hover:rotate-6 transition-all animate-pulse-slow">
-                <span className="text-purple-400 font-black text-lg mb-1 leading-tight">Deep Paths</span>
-                <span className="text-slate-500 text-[9px] font-bold uppercase tracking-widest">Unique Detailed Nodes</span>
+            <div className="absolute top-[230px] right-[-10px] md:left-[230px] group animate-float" style={{ animationDelay: '-2s' }}>
+              <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-3 md:p-4 text-center transform hover:rotate-6 transition-all animate-pulse-slow">
+                <span className="text-purple-400 font-black text-base md:text-lg mb-1 leading-tight">Deep Paths</span>
+                <span className="text-slate-500 text-[8px] md:text-[9px] font-bold uppercase tracking-widest">Unique Detailed Nodes</span>
               </div>
             </div>
 
-            {/* NEW: Accurate Answers Circle */}
-            <div className="absolute top-[30px] left-[30px] group animate-float" style={{ animationDelay: '-3s' }}>
-              <div className="w-28 h-28 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-3 text-center transform hover:-rotate-12 transition-all animate-pulse-slow">
-                <span className="text-indigo-400 font-black text-sm mb-1 leading-tight">Exact Answers</span>
-                <span className="text-slate-500 text-[8px] font-bold uppercase tracking-widest">Tailored Per Request</span>
+            {/* Accurate Answers Circle */}
+            <div className="absolute top-[20px] left-0 md:left-[30px] group animate-float" style={{ animationDelay: '-3s' }}>
+              <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-2 md:p-3 text-center transform hover:-rotate-12 transition-all animate-pulse-slow">
+                <span className="text-indigo-400 font-black text-xs md:text-sm mb-1 leading-tight">Exact Answers</span>
+                <span className="text-slate-500 text-[7px] md:text-[8px] font-bold uppercase tracking-widest">Tailored Per Request</span>
               </div>
             </div>
           </div>
 
           {/* Node Pair 2: Roadmaps */}
-          <div className="relative flex items-center justify-center h-[400px]">
+          <div className="relative flex items-center justify-center h-[350px] md:h-[400px]">
             <svg className="absolute w-full h-full pointer-events-none overflow-visible" viewBox="0 0 400 400">
               <path
                 d="M 200 200 Q 150 180 120 120"
@@ -395,24 +395,24 @@ export default function Contact({ onNavigate }) {
 
             <div className="group relative z-20">
               <div className="absolute inset-0 bg-pink-500 rounded-full blur-2xl opacity-10 group-hover:opacity-30 transition-opacity"></div>
-              <div className="w-40 h-40 rounded-full bg-slate-900 border border-pink-500/30 flex flex-col items-center justify-center cursor-pointer transform hover:scale-110 transition-all duration-500 shadow-2xl relative z-10">
-                <div className="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-3 group-hover:bg-pink-500/20 transition-colors">
-                  <i className="fa-solid fa-map text-2xl text-pink-400"></i>
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-slate-900 border border-pink-500/30 flex flex-col items-center justify-center cursor-pointer transform hover:scale-110 transition-all duration-500 shadow-2xl relative z-10">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-2 md:mb-3 group-hover:bg-pink-500/20 transition-colors">
+                  <i className="fa-solid fa-map text-xl md:text-2xl text-pink-400"></i>
                 </div>
-                <span className="text-white font-bold text-sm tracking-widest uppercase">Roadmaps</span>
+                <span className="text-white font-bold text-xs md:text-sm tracking-widest uppercase">Roadmaps</span>
               </div>
             </div>
 
-            <div className="absolute top-[50px] left-[80px] group animate-float" style={{ animationDelay: '-1s' }}>
-              <div className="w-32 h-32 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-4 text-center transform hover:rotate-12 transition-all animate-pulse-slow">
-                <span className="text-pink-400 font-black text-lg mb-1 leading-tight">Any Topic</span>
-                <span className="text-slate-500 text-[9px] font-bold uppercase tracking-widest">Unlimited Subjects</span>
+            <div className="absolute top-[40px] left-[20px] md:left-[80px] group animate-float" style={{ animationDelay: '-1s' }}>
+              <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-3 md:p-4 text-center transform hover:rotate-12 transition-all animate-pulse-slow">
+                <span className="text-pink-400 font-black text-base md:text-lg mb-1 leading-tight">Any Topic</span>
+                <span className="text-slate-500 text-[8px] md:text-[9px] font-bold uppercase tracking-widest">Unlimited Subjects</span>
               </div>
             </div>
           </div>
 
           {/* Node Pair 3: Support */}
-          <div className="relative flex items-center justify-center h-[400px]">
+          <div className="relative flex items-center justify-center h-[350px] md:h-[400px]">
             <svg className="absolute w-full h-full pointer-events-none overflow-visible" viewBox="0 0 400 400">
               <path
                 d="M 200 200 Q 230 190 240 180"
@@ -432,18 +432,18 @@ export default function Contact({ onNavigate }) {
 
             <div className="group relative z-20">
               <div className="absolute inset-0 bg-purple-500 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-              <div className="w-40 h-40 rounded-full bg-slate-900 border border-purple-500/30 flex flex-col items-center justify-center cursor-pointer transform hover:scale-110 transition-all duration-500 shadow-2xl relative z-10">
-                <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-3 group-hover:bg-purple-500/20 transition-colors">
-                  <i className="fa-solid fa-headset text-2xl text-purple-400"></i>
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-slate-900 border border-purple-500/30 flex flex-col items-center justify-center cursor-pointer transform hover:scale-110 transition-all duration-500 shadow-2xl relative z-10">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-2 md:mb-3 group-hover:bg-purple-500/20 transition-colors">
+                  <i className="fa-solid fa-headset text-xl md:text-2xl text-purple-400"></i>
                 </div>
-                <span className="text-white font-bold text-sm tracking-widest uppercase">Support</span>
+                <span className="text-white font-bold text-xs md:text-sm tracking-widest uppercase">Support</span>
               </div>
             </div>
 
-            <div className="absolute top-[120px] left-[180px] group animate-float" style={{ animationDelay: '-4s' }}>
-              <div className="w-32 h-32 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-4 text-center transform hover:-rotate-6 transition-all animate-pulse-slow">
-                <span className="text-cyan-400 font-black text-xl mb-1">&lt; 2h</span>
-                <span className="text-slate-500 text-[10px] font-bold uppercase tracking-tighter">Response Time</span>
+            <div className="absolute top-[250px] right-[-10px] md:top-[120px] md:left-[180px] group animate-float" style={{ animationDelay: '-4s' }}>
+              <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-3 md:p-4 text-center transform hover:-rotate-6 transition-all animate-pulse-slow">
+                <span className="text-cyan-400 font-black text-lg md:text-xl mb-1">&lt; 2h</span>
+                <span className="text-slate-500 text-[9px] md:text-[10px] font-bold uppercase tracking-tighter">Response Time</span>
               </div>
             </div>
           </div>

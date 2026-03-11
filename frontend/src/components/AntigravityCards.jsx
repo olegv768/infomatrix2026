@@ -13,7 +13,8 @@ const ParticleCard = ({ title, description, stepNumber }) => {
 
         const isMobile = window.innerWidth < 768;
         let particles = [];
-        const particleCount = isMobile ? 40 : 100;
+        // Increase particle density when hovered/active for a richer "wow" effect
+        const particleCount = isMobile ? (isHovered ? 85 : 40) : (isHovered ? 85 : 60);
 
         // Target points for the "morphed" state (a rectangle/frame)
         const targets = [];
