@@ -192,12 +192,23 @@ body::before {
 }
 
 .bg-main {
-  background: #020617;
+  background-color: #020617;
+  position: relative;
+  z-index: 0;
+}
+
+.bg-main::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   background-image:
     radial-gradient(circle at 0% 0%, rgba(30, 27, 75, 0.4) 0%, transparent 50%),
     radial-gradient(circle at 100% 100%, rgba(15, 23, 42, 0.4) 0%, transparent 50%),
     radial-gradient(circle at 50% 50%, rgba(2, 6, 23, 1) 0%, rgba(2, 6, 23, 1) 100%);
-  background-attachment: fixed;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .glass-premium {
@@ -617,4 +628,17 @@ body::before {
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* ===== iOS Safari Viewport Jump Fix ===== */
+/* This prevents elements from resizing and content jumping when the URL bar appears/disappears */
+@supports (min-height: 100svh) {
+  @media (max-width: 768px) {
+    .min-h-screen {
+      min-height: 100svh !important;
+    }
+    .h-screen {
+      height: 100svh !important;
+    }
+  }
 }
