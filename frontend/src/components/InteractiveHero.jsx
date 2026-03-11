@@ -129,7 +129,7 @@ const InteractiveHero = () => {
             particles = [];
             const count = (canvas.height * canvas.width) / 6000;
             const isMobile = window.innerWidth < 768;
-            const finalCount = Math.min(count, isMobile ? 80 : 350);
+            const finalCount = Math.min(count, isMobile ? 40 : 350);
 
             for (let i = 0; i < finalCount; i++) {
                 const layer = Math.floor(Math.random() * 3) + 1; // 1, 2, or 3
@@ -144,6 +144,9 @@ const InteractiveHero = () => {
         };
 
         const drawConnectors = () => {
+            const isMobile = window.innerWidth < 768;
+            if (isMobile) return; // Skip expensive line drawing on mobile
+
             ctx.shadowBlur = 0; // Performance: no shadows for lines
 
             for (let a = 0; a < particles.length; a++) {
@@ -239,9 +242,10 @@ const InteractiveHero = () => {
             className="absolute inset-0 z-0 pointer-events-none"
             style={{
                 mixBlendMode: 'screen',
-                filter: 'contrast(1.1) brightness(1.1)',
+                filter: window.innerWidth < 768 ? 'none' : 'contrast(1.1) brightness(1.1)',
                 maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
-                WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
+                WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+                willChange: 'transform'
             }}
         />
     );

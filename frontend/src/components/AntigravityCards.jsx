@@ -11,78 +11,16 @@ const ParticleCard = ({ title, description, stepNumber }) => {
         const ctx = canvas.getContext('2d');
         let animationFrameId;
 
+        const isMobile = window.innerWidth < 768;
         let particles = [];
-        const particleCount = 120;
+        const particleCount = isMobile ? 40 : 100;
 
         // Target points for the "morphed" state (a rectangle/frame)
         const targets = [];
-        const width = canvas.width;
-        const height = canvas.height;
-        const padding = 20;
-
-        // Generate targets along the perimeter of a rounded rectangle
         for (let i = 0; i < particleCount; i++) {
-            targets.push({
-                x: Math.random() * width,
-                y: Math.random() * height
-            });
+            targets.push({ x: 0, y: 0 });
         }
 
-        class Particle {
-            constructor() {
-                this.reset();
-            }
-
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.5 + 0.5;
-                this.baseX = this.x;
-                this.baseY = this.y;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
-                this.acc = 0.05;
-                this.opacity = Math.random() * 0.5 + 0.1;
-            }
-
-            update(isHovered, target) {
-                if (isHovered) {
-                    // Move towards target perimeter with organic easing
-                    const dx = target.x - this.x;
-                    const dy = target.y - this.y;
-                    this.x += dx * 0.15; // Faster convergence
-                    this.y += dy * 0.15;
-                    this.opacity = Math.min(0.8, this.opacity + 0.05);
-                    this.size = Math.min(2, this.size + 0.1);
-                } else {
-                    // Drift naturally with lower friction feel
-                    this.x += this.vx;
-                    this.y += this.vy;
-                    this.opacity = Math.max(0.15, this.opacity - 0.002);
-                    this.size = Math.max(0.7, this.size - 0.005);
-
-                    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
-                        this.reset();
-                    }
-                }
-            }
-
-            draw() {
-                ctx.fillStyle = `rgba(165, 180, 252, ${this.opacity})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        const init = () => {
-            particles = [];
-            for (let i = 0; i < particleCount; i++) {
-                particles.push(new Particle());
-            }
-        };
-
-        // Rectangular frame targets
         const updateTargets = () => {
             const w = canvas.width - 40;
             const h = canvas.height - 40;
@@ -108,9 +46,61 @@ const ParticleCard = ({ title, description, stepNumber }) => {
             }
         };
 
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.acc = 0.05;
+                this.opacity = Math.random() * 0.5 + 0.1;
+            }
+
+            update(isHovered, target) {
+                if (isHovered) {
+                    const dx = target.x - this.x;
+                    const dy = target.y - this.y;
+                    this.x += dx * 0.15;
+                    this.y += dy * 0.15;
+                    this.opacity = Math.min(0.8, this.opacity + 0.05);
+                    this.size = Math.min(2, this.size + 0.1);
+                } else {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.opacity = Math.max(0.15, this.opacity - 0.002);
+                    this.size = Math.max(0.7, this.size - 0.005);
+
+                    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                        this.reset();
+                    }
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(165, 180, 252, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        const init = () => {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+            updateTargets();
+        };
+
         const animate = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            updateTargets();
             particles.forEach((p, i) => {
                 p.update(isHovered, targets[i]);
                 p.draw();
@@ -122,6 +112,7 @@ const ParticleCard = ({ title, description, stepNumber }) => {
             const rect = canvas.parentElement.getBoundingClientRect();
             canvas.width = rect.width;
             canvas.height = rect.height;
+            updateTargets();
         };
 
         window.addEventListener('resize', handleResize);
@@ -146,6 +137,7 @@ const ParticleCard = ({ title, description, stepNumber }) => {
                 <canvas
                     ref={canvasRef}
                     className="absolute inset-0 pointer-events-none"
+                    style={{ willChange: 'transform' }}
                 />
 
                 <div className="relative z-10 p-5 md:p-8 h-full flex flex-col items-center justify-center text-center">
