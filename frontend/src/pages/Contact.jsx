@@ -61,7 +61,7 @@ export default function Contact({ onNavigate }) {
   return (
     <div className="page-container min-h-screen">
       {/* Hero Section */}
-      <section className="min-h-[70vh] flex items-center justify-center px-8 sm:px-12 lg:px-20 relative overflow-hidden">
+      <section className="min-h-[70svh] flex items-center justify-center px-8 sm:px-12 lg:px-20 relative overflow-hidden">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-600/5 rounded-full blur-[120px] animate-float" style={{ animationDuration: '18s' }}></div>
 
         <div className="max-w-5xl mx-auto text-center relative z-10 px-4">

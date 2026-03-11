@@ -16,7 +16,17 @@ const InteractiveHero = () => {
             pressed: false
         };
 
+        let lastWidth = window.innerWidth;
+        
         const handleResize = () => {
+            const isMobile = window.innerWidth < 768;
+            // On mobile, ignore vertical resize events caused by the URL bar appearing/disappearing
+            // Only reinitialize if the width changes (orientation change)
+            if (isMobile && window.innerWidth === lastWidth && canvas.width > 0) {
+                return;
+            }
+            lastWidth = window.innerWidth;
+            
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             init();

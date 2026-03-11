@@ -64,7 +64,7 @@ export default function Home({ onNavigate }) {
 
       {/* Hero Section */}
       <section
-        className="relative overflow-hidden min-h-[70vh] flex items-center justify-center"
+        className="relative overflow-hidden min-h-[70svh] flex items-center justify-center"
         style={{ paddingLeft: 'clamp(32px, 8vw, 96px)', paddingRight: 'clamp(32px, 8vw, 96px)' }}
       >
         <InteractiveHero />
