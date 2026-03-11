@@ -312,7 +312,7 @@ export default function Contact({ onNavigate }) {
       </section>
 
       {/* Connected Nodes Section */}
-      <section className="min-h-screen flex items-center justify-center px-4 sm:px-8 relative overflow-hidden">
+      <section className="min-h-screen flex items-center justify-center px-4 sm:px-8 pb-20 md:pb-0 relative overflow-hidden">
         {/* Background Atmosphere */}
         <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-indigo-600/5 rounded-full blur-[80px] md:blur-[120px]"></div>
         <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-purple-600/5 rounded-full blur-[80px] md:blur-[120px]"></div>
@@ -440,7 +440,7 @@ export default function Contact({ onNavigate }) {
               </div>
             </div>
 
-            <div className="absolute top-[250px] right-[-10px] md:top-[120px] md:left-[180px] group animate-float" style={{ animationDelay: '-4s' }}>
+            <div className="absolute top-[230px] right-[-10px] md:top-[120px] md:left-[180px] group animate-float" style={{ animationDelay: '-4s' }}>
               <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center p-3 md:p-4 text-center transform hover:-rotate-6 transition-all animate-pulse-slow">
                 <span className="text-cyan-400 font-black text-lg md:text-xl mb-1">&lt; 2h</span>
                 <span className="text-slate-500 text-[9px] md:text-[10px] font-bold uppercase tracking-tighter">Response Time</span>
