@@ -14,7 +14,7 @@ const ParticleCard = ({ title, description, stepNumber }) => {
         const isMobile = window.innerWidth < 768;
         let particles = [];
         // Increase particle density when hovered/active for a richer "wow" effect
-        const particleCount = isMobile ? (isHovered ? 80 : 40) : (isHovered ? 80 : 60);
+        const particleCount = isMobile ? (isHovered ? 85 : 40) : (isHovered ? 85 : 60);
 
         // Target points for the "morphed" state (a rectangle/frame)
         const targets = [];
@@ -26,23 +26,23 @@ const ParticleCard = ({ title, description, stepNumber }) => {
             const w = canvas.width - 40;
             const h = canvas.height - 40;
             const p = 20;
+            const perimeter = 2 * w + 2 * h;
 
             for (let i = 0; i < particleCount; i++) {
-                const side = i % 4;
-                const progress = (i / particleCount) * 4 % 1;
+                const distance = (i / particleCount) * perimeter;
 
-                if (side === 0) { // top
-                    targets[i].x = p + progress * w;
+                if (distance <= w) { // top edge
+                    targets[i].x = p + distance;
                     targets[i].y = p;
-                } else if (side === 1) { // right
+                } else if (distance <= w + h) { // right edge
                     targets[i].x = p + w;
-                    targets[i].y = p + progress * h;
-                } else if (side === 2) { // bottom
-                    targets[i].x = p + w - progress * w;
+                    targets[i].y = p + (distance - w);
+                } else if (distance <= 2 * w + h) { // bottom edge
+                    targets[i].x = p + w - (distance - w - h);
                     targets[i].y = p + h;
-                } else { // left
+                } else { // left edge
                     targets[i].x = p;
-                    targets[i].y = p + h - progress * h;
+                    targets[i].y = p + h - (distance - 2 * w - h);
                 }
             }
         };
