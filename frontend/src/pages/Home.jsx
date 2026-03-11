@@ -120,7 +120,7 @@ export default function Home({ onNavigate }) {
 
       {/* How It Works */}
       <section
-        className="relative pt-24 pb-0 w-full flex flex-col items-center px-6 sm:px-12 lg:px-20"
+        className="relative pt-24 pb-0 w-full flex flex-col items-center px-6 md:px-[110px]"
       >
         <div className="w-full flex flex-col items-center">
           <div className="text-center">
