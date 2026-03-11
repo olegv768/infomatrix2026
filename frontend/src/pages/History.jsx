@@ -57,7 +57,7 @@ export default function History({ onNavigate, onLoadRoadmap }) {
     }
 
     return (
-        <div className="page-container min-h-screen bg-transparent overflow-x-hidden">
+        <div className="page-container min-h-[100svh] bg-transparent overflow-x-hidden">
             {/* Hero Section */}
             <section className="min-h-[60svh] flex items-center justify-center px-4 sm:px-12 lg:px-20 relative overflow-hidden">
                 <div className="max-w-5xl mx-auto text-center relative z-10">
