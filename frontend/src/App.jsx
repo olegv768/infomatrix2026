@@ -297,7 +297,7 @@ function App() {
     }
 
     return (
-        <div className="min-h-[100svh] bg-main text-white">
+        <div className="min-h-svh bg-main text-white">
             <Navbar currentPage={currentPage} onNavigate={setCurrentPage} />
             <main>
                 {renderPage()}
