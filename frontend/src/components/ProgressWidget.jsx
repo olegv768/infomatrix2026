@@ -72,7 +72,7 @@ const ProgressWidget = ({
             whileDrag={{ scale: 1.1, cursor: 'grabbing' }}
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`fixed bottom-8 right-8 z-50 transition-opacity duration-700 ${!isPC ? '' : 'pointer-events-auto'}`}
+            className={`fixed bottom-8 right-12 z-50 transition-opacity duration-700 ${!isPC ? '' : 'pointer-events-auto'}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             style={{ touchAction: !isPC ? 'none' : 'auto' }} // Critical for mobile dragging
