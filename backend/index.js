@@ -141,8 +141,8 @@ RESOURCE QUALITY GUIDELINES:
 Make the roadmap practical, actionable, and comprehensive enough to truly master the skill.
 Make sure all quotes are properly closed and JSON is valid!`;
 
-    // Use only Gemini 2.5 Flash as requested
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // Use Gemini 3 Flash Preview
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
     // Implement retry logic for rate limits
     let result;
