@@ -278,27 +278,38 @@ export default function Generator({
         d3
           .forceLink(links)
           .id((d) => d.id)
-          .distance(180)
-          .strength(0.3)
+          .distance(220)
+          .strength(0.25)
       )
-      .force('charge', d3.forceManyBody().strength(-1000))
+      .force('charge', d3.forceManyBody().strength(-1200))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(90))
+      .force('collision', d3.forceCollide().radius((d) => {
+        const radii = { 0: 68, 1: 52, 2: 42, 3: 34, 4: 26 }
+        return (radii[d.level] || 24) + 20
+      }))
 
     simulationRef.current = simulation
 
     const linkGroup = container.append('g').attr('class', 'links')
     const nodeGroup = container.append('g').attr('class', 'nodes')
 
-    const getNodeBaseColor = (level) => {
-      const colors = {
-        0: '#6366f1', // Indigo
-        1: '#3b82f6', // Blue
-        2: '#ec4899', // Pink
-        3: '#10b981', // Green
-        4: '#f97316', // Orange
-      }
-      return colors[level] || colors[4]
+    // ===== PREMIUM NODE SYSTEM =====
+    // Color palette per level
+    const levelPalette = {
+      0: { base: '#6366f1', light: '#a5b4fc', dark: '#4338ca', glow: 'rgba(99,102,241,0.6)', name: 'indigo' },
+      1: { base: '#3b82f6', light: '#93c5fd', dark: '#1d4ed8', glow: 'rgba(59,130,246,0.5)', name: 'blue' },
+      2: { base: '#ec4899', light: '#f9a8d4', dark: '#be185d', glow: 'rgba(236,72,153,0.5)', name: 'pink' },
+      3: { base: '#10b981', light: '#6ee7b7', dark: '#047857', glow: 'rgba(16,185,129,0.5)', name: 'green' },
+      4: { base: '#f97316', light: '#fdba74', dark: '#c2410c', glow: 'rgba(249,115,22,0.5)', name: 'orange' },
+    }
+    const completedPalette = { base: '#10b981', light: '#6ee7b7', dark: '#047857', glow: 'rgba(16,185,129,0.5)' }
+
+    const getNodeBaseColor = (level) => (levelPalette[level] || levelPalette[4]).base
+
+    // Node radius by level — root is dramatically larger
+    const getNodeRadius = (level) => {
+      const radii = { 0: 68, 1: 52, 2: 42, 3: 34, 4: 26 }
+      return radii[level] !== undefined ? radii[level] : 24
     }
 
     // Generate Link Gradients
@@ -323,13 +334,12 @@ export default function Generator({
       .append('path')
       .attr('fill', 'none')
       .attr('stroke', (d) => `url(#${linkId(d)})`)
-      .attr('stroke-width', 2.5)
-      .attr('stroke-opacity', 0.6)
-      .attr('stroke-dasharray', '8,8')
+      .attr('stroke-width', 2)
+      .attr('stroke-opacity', 0.45)
+      .attr('stroke-dasharray', '8,6')
       .attr('class', 'animated-link')
-      .style('filter', 'drop-shadow(0 0 4px rgba(99, 102, 241, 0.3))')
 
-    // Add styles for the link animation
+    // Add styles for the link animation and node hover
     const styleSheet = document.createElement("style")
     styleSheet.innerText = `
       @keyframes flow {
@@ -353,52 +363,38 @@ export default function Generator({
       .animate-scan {
         animation: scan 2s infinite linear;
       }
-      .node-group:hover circle {
-        stroke-width: 5;
-        filter: brightness(1.2) url(#glow);
-        transform: scale(1.1);
+      .node-group:hover .node-main {
+        stroke-opacity: 0.9;
+        stroke-width: 3;
       }
     `
     document.head.appendChild(styleSheet)
 
-    const getNodeColor = (level) => {
-      const colors = {
-        0: 'url(#gradient-purple)',
-        1: 'url(#gradient-blue)',
-        2: 'url(#gradient-pink)',
-        3: 'url(#gradient-green)',
-        4: 'url(#gradient-orange)',
-      }
-      return colors[level] || colors[4]
-    }
+    // Create radial gradients for each level (cheap, no blur)
+    Object.entries(levelPalette).forEach(([level, pal]) => {
+      const rg = defs.append('radialGradient')
+        .attr('id', `node-radial-${level}`)
+        .attr('cx', '35%').attr('cy', '30%').attr('r', '70%')
+      rg.append('stop').attr('offset', '0%').attr('stop-color', pal.light).attr('stop-opacity', 0.9)
+      rg.append('stop').attr('offset', '50%').attr('stop-color', pal.base).attr('stop-opacity', 1)
+      rg.append('stop').attr('offset', '100%').attr('stop-color', pal.dark).attr('stop-opacity', 1)
+    })
+    // Completed radial gradient
+    const rgDone = defs.append('radialGradient')
+      .attr('id', 'node-radial-done')
+      .attr('cx', '35%').attr('cy', '30%').attr('r', '70%')
+    rgDone.append('stop').attr('offset', '0%').attr('stop-color', completedPalette.light).attr('stop-opacity', 0.9)
+    rgDone.append('stop').attr('offset', '50%').attr('stop-color', completedPalette.base).attr('stop-opacity', 1)
+    rgDone.append('stop').attr('offset', '100%').attr('stop-color', completedPalette.dark).attr('stop-opacity', 1)
 
-      ;['purple', 'blue', 'pink', 'green', 'orange'].forEach((color) => {
-        const gradient = defs
-          .append('linearGradient')
-          .attr('id', `gradient-${color}`)
-          .attr('x1', '0%')
-          .attr('y1', '0%')
-          .attr('x2', '100%')
-          .attr('y2', '100%')
-
-        const colors = {
-          purple: ['#a78bfa', '#6366f1'],
-          blue: ['#60a5fa', '#3b82f6'],
-          pink: ['#f472b6', '#ec4899'],
-          green: ['#34d399', '#10b981'],
-          orange: ['#fb923c', '#f97316'],
-        }
-
-        gradient
-          .append('stop')
-          .attr('offset', '0%')
-          .attr('stop-color', colors[color][0])
-
-        gradient
-          .append('stop')
-          .attr('offset', '100%')
-          .attr('stop-color', colors[color][1])
-      })
+    // Single lightweight glow filter (shared by all nodes)
+    const glowLight = defs.append('filter')
+      .attr('id', 'glow-light')
+      .attr('x', '-50%').attr('y', '-50%').attr('width', '200%').attr('height', '200%')
+    glowLight.append('feGaussianBlur').attr('stdDeviation', '3').attr('result', 'blur')
+    const fmLight = glowLight.append('feMerge')
+    fmLight.append('feMergeNode').attr('in', 'blur')
+    fmLight.append('feMergeNode').attr('in', 'SourceGraphic')
 
     const nodeElements = nodeGroup
       .selectAll('g')
@@ -414,86 +410,150 @@ export default function Generator({
           .on('drag', dragged)
           .on('end', dragended)
       )
-      .on('click', (event, d) => {
+      .on('click', function(event, d) {
         event.stopPropagation()
         setSelectedNode(d)
+
+        // === CLICK ANIMATION ===
+        const clickedGroup = d3.select(this)
+        const r = getNodeRadius(d.level)
+        const pal = completedNodes.has(d.id) ? completedPalette : (levelPalette[d.level] || levelPalette[4])
+
+        // 1) Scale bounce on the whole group
+        clickedGroup
+          .transition().duration(150).ease(d3.easeCubicOut)
+          .attr('transform', `translate(${d.x},${d.y}) scale(1.25)`)
+          .transition().duration(400).ease(d3.easeElasticOut.amplitude(1).period(0.4))
+          .attr('transform', `translate(${d.x},${d.y}) scale(1)`)
+
+        // 2) Expanding ripple ring
+        const ripple = clickedGroup.append('circle')
+          .attr('r', r)
+          .attr('fill', 'none')
+          .attr('stroke', pal.light)
+          .attr('stroke-width', 4)
+          .attr('stroke-opacity', 0.8)
+          .attr('pointer-events', 'none')
+
+        ripple
+          .transition().duration(600).ease(d3.easeCubicOut)
+          .attr('r', r + 40)
+          .attr('stroke-width', 1)
+          .attr('stroke-opacity', 0)
+          .remove()
+
+        // 3) Flash the main circle stroke
+        const mainCircle = clickedGroup.select('.node-main')
+        mainCircle
+          .transition().duration(100)
+          .attr('stroke-opacity', 1)
+          .attr('stroke-width', 4)
+          .transition().duration(500).ease(d3.easeCubicOut)
+          .attr('stroke-opacity', 0.4)
+          .attr('stroke-width', d.level === 0 ? 2.5 : 1.5)
       })
 
-    nodeElements
-      .append('circle')
-      .attr('r', (d) => (d.level === 0 ? 52 : d.level === 1 ? 44 : d.level === 2 ? 38 : d.level === 3 ? 32 : 28))
-      .attr('fill', (d) =>
-        completedNodes.has(d.id) ? '#10b981' : getNodeColor(d.level)
-      )
-      .attr('stroke', '#fff')
-      .attr('stroke-width', 2.5)
-      .attr('filter', 'url(#glow)')
-      .attr('opacity', (d) => (completedNodes.has(d.id) ? 0.9 : 1))
-      .style('transition', 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)')
-
-    // Add 3D Reflection Highlight
-    nodeElements
-      .append('circle')
-      .attr('r', (d) => (d.level === 0 ? 30 : d.level === 1 ? 25 : d.level === 2 ? 20 : d.level === 3 ? 15 : 12))
-      .attr('cx', (d) => (d.level === 0 ? -12 : -10))
-      .attr('cy', (d) => (d.level === 0 ? -12 : -10))
-      .attr('fill', 'rgba(255,255,255,0.2)')
-      .attr('filter', 'blur(8px)')
+    // 1) Outer halo ring — ROOT ONLY (no animation on every node)
+    nodeElements.filter(d => d.level === 0).append('circle')
+      .attr('r', (d) => getNodeRadius(d.level) + 10)
+      .attr('fill', 'none')
+      .attr('stroke', '#a5b4fc')
+      .attr('stroke-width', 2)
+      .attr('stroke-opacity', 0.25)
       .attr('pointer-events', 'none')
 
+    // 2) Main circle body — radial gradient fills (no SVG filter, just stroke glow via opacity)
+    nodeElements.append('circle')
+      .attr('class', 'node-main')
+      .attr('r', (d) => getNodeRadius(d.level))
+      .attr('fill', (d) => completedNodes.has(d.id) ? 'url(#node-radial-done)' : `url(#node-radial-${Math.min(d.level, 4)})`)
+      .attr('stroke', (d) => {
+        const pal = completedNodes.has(d.id) ? completedPalette : (levelPalette[d.level] || levelPalette[4])
+        return pal.light
+      })
+      .attr('stroke-width', (d) => d.level === 0 ? 2.5 : 1.5)
+      .attr('stroke-opacity', 0.4)
+      .attr('filter', (d) => d.level <= 1 ? 'url(#glow-light)' : null)
+      .style('transition', 'stroke-opacity 0.3s ease')
+
+    // 3) Top specular highlight — cheap ellipse, no filter
+    nodeElements.append('ellipse')
+      .attr('rx', (d) => getNodeRadius(d.level) * 0.45)
+      .attr('ry', (d) => getNodeRadius(d.level) * 0.22)
+      .attr('cx', 0)
+      .attr('cy', (d) => -getNodeRadius(d.level) * 0.32)
+      .attr('fill', 'rgba(255,255,255,0.15)')
+      .attr('pointer-events', 'none')
+
+    // 4) Completion checkmark badge (no blur filter)
     nodeElements.each(function (d) {
       if (completedNodes.has(d.id)) {
         const g = d3.select(this)
+        const r = getNodeRadius(d.level)
+        const badgeX = r * 0.55
+        const badgeY = -r * 0.55
+        const badgeR = Math.max(10, r * 0.22)
+
         g.append('circle')
-          .attr('r', 14)
+          .attr('r', badgeR)
+          .attr('cx', badgeX).attr('cy', badgeY)
           .attr('fill', '#fff')
-          .attr('cx', 24)
-          .attr('cy', -24)
-          .attr('filter', 'url(#glow)')
+          .attr('stroke', '#10b981')
+          .attr('stroke-width', 1.5)
 
         g.append('text')
-          .attr('x', 24)
-          .attr('y', -24)
+          .attr('x', badgeX).attr('y', badgeY)
           .attr('text-anchor', 'middle')
-          .attr('dy', '0.35em')
+          .attr('dy', '0.38em')
           .attr('fill', '#10b981')
-          .attr('font-size', '16px')
+          .attr('font-size', `${badgeR * 1.3}px`)
           .attr('font-weight', '900')
           .attr('pointer-events', 'none')
           .text('✓')
       }
     })
 
+    // 8) Text labels — sized per level for clarity
     nodeElements
       .append('text')
       .attr('text-anchor', 'middle')
       .attr('dy', '0.35em')
       .attr('fill', '#fff')
-      .attr('font-size', (d) => (d.level === 0 ? '15px' : '12px'))
-      .attr('font-weight', '800')
+      .attr('font-size', (d) => {
+        const sizes = { 0: '16px', 1: '13px', 2: '11px', 3: '10px', 4: '9px' }
+        return sizes[d.level] || '9px'
+      })
+      .attr('font-weight', (d) => d.level === 0 ? '900' : '700')
       .attr('pointer-events', 'none')
       .attr('font-family', "'Outfit', sans-serif")
+      .attr('letter-spacing', (d) => d.level === 0 ? '0.02em' : '0')
+      .style('text-shadow', '0 1px 3px rgba(0,0,0,0.5)')
       .each(function (d) {
         const words = d.label.split(' ')
         const text = d3.select(this)
+        const r = getNodeRadius(d.level)
+        // Max chars per line based on node size
+        const maxWidth = r * 1.4
 
         if (words.length === 1) {
-          text.text(d.label)
+          text.text(d.label.length > 12 ? d.label.slice(0, 11) + '…' : d.label)
         } else {
           text.text('')
           const midpoint = Math.ceil(words.length / 2)
+          const line1 = words.slice(0, midpoint).join(' ')
+          const line2 = words.slice(midpoint).join(' ')
 
           text
             .append('tspan')
             .attr('x', 0)
-            .attr('dy', '-0.5em')
-            .text(words.slice(0, midpoint).join(' '))
+            .attr('dy', words.length > 2 ? '-0.6em' : '-0.5em')
+            .text(line1.length > 14 && d.level > 2 ? line1.slice(0, 13) + '…' : line1)
 
           text
             .append('tspan')
             .attr('x', 0)
             .attr('dy', '1.2em')
-            .text(words.slice(midpoint).join(' '))
+            .text(line2.length > 14 && d.level > 2 ? line2.slice(0, 13) + '…' : line2)
         }
       })
 
