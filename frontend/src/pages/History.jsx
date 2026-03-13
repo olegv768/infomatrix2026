@@ -59,7 +59,10 @@ export default function History({ onNavigate, onLoadRoadmap }) {
     return (
         <div className="page-container min-h-full bg-transparent overflow-x-hidden">
             {/* Hero Section */}
-            <section className="min-h-[60lvh] flex items-center justify-center px-4 sm:px-12 lg:px-20 relative overflow-hidden">
+            <section 
+                className="flex items-center justify-center px-4 sm:px-12 lg:px-20 relative overflow-hidden"
+                style={{ minHeight: 'calc(var(--vh, 1vh) * 60)' }}
+            >
                 <div className="max-w-5xl mx-auto text-center relative z-10">
                     <ScrollReveal delay={0}>
                         <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-sm font-jakarta font-bold tracking-widest uppercase mb-8 backdrop-blur-md">

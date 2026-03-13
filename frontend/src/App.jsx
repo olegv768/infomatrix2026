@@ -21,6 +21,24 @@ function App() {
         } else {
             setCurrentPage('home')
         }
+
+        // Mobile Viewport Height Hack - prevents jumping on scroll
+        const updateHeight = () => {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        };
+        
+        let lastWidth = window.innerWidth;
+        const handleResize = () => {
+            if (window.innerWidth !== lastWidth) {
+                updateHeight();
+                lastWidth = window.innerWidth;
+            }
+        };
+
+        updateHeight();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, [])
 
     // Persisted state for Generator

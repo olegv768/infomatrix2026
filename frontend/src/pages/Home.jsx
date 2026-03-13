@@ -64,8 +64,12 @@ export default function Home({ onNavigate }) {
 
       {/* Hero Section */}
       <section
-        className="relative overflow-hidden min-h-[70lvh] flex items-center justify-center"
-        style={{ paddingLeft: 'clamp(32px, 8vw, 96px)', paddingRight: 'clamp(32px, 8vw, 96px)' }}
+        className="relative overflow-hidden flex items-center justify-center"
+        style={{ 
+          minHeight: 'calc(var(--vh, 1vh) * 70)',
+          paddingLeft: 'clamp(32px, 8vw, 96px)', 
+          paddingRight: 'clamp(32px, 8vw, 96px)' 
+        }}
       >
         <InteractiveHero />
         <div className="max-w-7xl mx-auto text-center relative z-10 px-4">

@@ -579,7 +579,10 @@ export default function Generator({
   }))
 
   return (
-    <div className="fixed inset-0 w-full h-lvh bg-main text-white overflow-hidden flex pt-16">
+    <div 
+      className="fixed inset-0 w-full bg-main text-white overflow-hidden flex pt-16"
+      style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
+    >
       {/* Background particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {particles.map((particle) => (
