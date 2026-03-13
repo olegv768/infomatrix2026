@@ -59,9 +59,9 @@ export default function Contact({ onNavigate }) {
 
 
   return (
-    <div className="page-container min-h-svh">
+    <div className="page-container min-h-full">
       {/* Hero Section */}
-      <section className="min-h-[70svh] flex items-center justify-center px-8 sm:px-12 lg:px-20 relative overflow-hidden">
+      <section className="min-h-[70lvh] flex items-center justify-center px-8 sm:px-12 lg:px-20 relative overflow-hidden">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-600/5 rounded-full blur-[120px] animate-float" style={{ animationDuration: '18s' }}></div>
 
         <div className="max-w-5xl mx-auto text-center relative z-10 px-4">
@@ -312,7 +312,7 @@ export default function Contact({ onNavigate }) {
       </section>
 
       {/* Connected Nodes Section */}
-      <section className="min-h-svh flex items-center justify-center px-4 sm:px-8 pb-20 md:pb-0 relative overflow-hidden">
+      <section className="min-h-full flex items-center justify-center px-4 sm:px-8 pb-20 md:pb-0 relative overflow-hidden">
         {/* Background Atmosphere */}
         <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-indigo-600/5 rounded-full blur-[80px] md:blur-[120px]"></div>
         <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-purple-600/5 rounded-full blur-[80px] md:blur-[120px]"></div>

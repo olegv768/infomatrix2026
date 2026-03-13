@@ -23,9 +23,9 @@
   transition-timing-function: var(--ease-lush);
 }
 
-html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 80px;
+html,
+body {
+  height: 100%;
 }
 
 body {
@@ -36,6 +36,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
+  min-height: 100%;
+  overflow-x: hidden;
 }
 
 body::before {
@@ -60,7 +62,9 @@ body::before {
 }
 
 #root {
-  min-height: 100svh;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Custom scrollbar */
@@ -202,7 +206,7 @@ body::before {
   position: fixed;
   inset: 0;
   width: 100%;
-  height: 100%;
+  height: 100lvh; /* Fixed large height to prevent shrinking bg */
   background-image:
     radial-gradient(circle at 0% 0%, rgba(30, 27, 75, 0.4) 0%, transparent 50%),
     radial-gradient(circle at 100% 100%, rgba(15, 23, 42, 0.4) 0%, transparent 50%),
@@ -638,8 +642,7 @@ body::before {
   */
   
   #root {
-    min-height: 100vh;
-    min-height: 100svh; /* Use small viewport height for stability */
+    min-height: 100%;
     display: flex;
     flex-direction: column;
   }

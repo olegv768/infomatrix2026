@@ -47,9 +47,9 @@ export default function About({ onNavigate }) {
   ]
 
   return (
-    <div className="page-container min-h-svh">
+    <div className="page-container min-h-full">
       {/* Hero Section */}
-      <section className="min-h-[60svh] flex items-center justify-center px-8 sm:px-12 lg:px-20 relative overflow-hidden">
+      <section className="min-h-[60lvh] flex items-center justify-center px-8 sm:px-12 lg:px-20 relative overflow-hidden">
         <div className="max-w-5xl mx-auto text-center relative z-10 px-4">
           <ScrollReveal delay={0}>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-6">

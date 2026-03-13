@@ -45,7 +45,7 @@ export default function Home({ onNavigate }) {
   ]
 
   return (
-    <div className="page-container min-h-svh relative overflow-hidden">
+    <div className="page-container min-h-full relative overflow-hidden">
       {/* Global Atmospheric Blobs */}
       <div className="absolute top-[20%] -left-[10%] w-[600px] h-[600px] bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none -z-10 animate-float" style={{ animationDuration: '15s' }}></div>
       <div className="absolute top-[50%] -right-[5%] w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-[120px] pointer-events-none -z-10 animate-float" style={{ animationDuration: '20s', animationDelay: '-5s' }}></div>
@@ -64,7 +64,7 @@ export default function Home({ onNavigate }) {
 
       {/* Hero Section */}
       <section
-        className="relative overflow-hidden min-h-[70svh] flex items-center justify-center"
+        className="relative overflow-hidden min-h-[70lvh] flex items-center justify-center"
         style={{ paddingLeft: 'clamp(32px, 8vw, 96px)', paddingRight: 'clamp(32px, 8vw, 96px)' }}
       >
         <InteractiveHero />
