@@ -639,7 +639,7 @@ body::before {
   
   #root {
     min-height: 100vh;
-    min-height: 100dvh; /* Use dynamic viewport height if supported */
+    min-height: 100svh; /* Use small viewport height for stability */
     display: flex;
     flex-direction: column;
   }

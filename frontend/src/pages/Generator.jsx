@@ -579,7 +579,7 @@ export default function Generator({
   }))
 
   return (
-    <div className="fixed inset-0 w-dvw h-dvh bg-main text-white overflow-hidden flex pt-16">
+    <div className="fixed inset-0 w-full h-full bg-main text-white overflow-hidden flex pt-16">
       {/* Background particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {particles.map((particle) => (
