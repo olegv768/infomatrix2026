@@ -77,8 +77,9 @@ const InteractiveHero = () => {
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
                 ctx.fillStyle = this.color;
 
-                // Add tiny glow to closer particles
-                if (this.layer === 1) {
+                // Add tiny glow only on desktop to save mobile performance
+                const isMobile = window.innerWidth < 768;
+                if (this.layer === 1 && !isMobile) {
                     ctx.shadowBlur = 5;
                     ctx.shadowColor = 'rgba(99, 102, 241, 0.5)';
                 } else {
@@ -210,7 +211,7 @@ const InteractiveHero = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // 1. Draw Global Bloom Atmosphere
-            if (mouse.x != null && mouse.y != null) {
+            if (mouse.x != null && mouse.y != null && window.innerWidth >= 768) {
                 const glowSize = mouse.pressed ? mouse.radius * 3 : mouse.radius * 2;
                 const gradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, glowSize);
                 gradient.addColorStop(0, mouse.pressed ? 'rgba(79, 70, 229, 0.15)' : 'rgba(99, 102, 241, 0.1)');

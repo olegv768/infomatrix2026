@@ -630,37 +630,22 @@ body::before {
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 
-/* ===== iOS Safari Viewport Jump Fix ===== */
-/* This completely locks the UI from being pushed/shrunk by the address bar */
+/* ===== iOS Safari Viewport Fix (Less Aggressive) ===== */
 @media (max-width: 768px) {
-  html, body {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100vw;
-    height: 100svh;
-    overflow: hidden;
-  }
+  /* 
+     Removed position: fixed on html/body as it can cause 
+     rendering issues and blocks natural scrolling on many devices. 
+  */
   
   #root {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
+    min-height: 100vh;
+    min-height: 100dvh; /* Use dynamic viewport height if supported */
+    display: flex;
+    flex-direction: column;
   }
 
-  .min-h-screen {
-    min-height: 100% !important;
+  /* Ensure main content takes space */
+  main {
+    flex: 1;
   }
-  .h-screen {
-    height: 100% !important;
-  }
-}
+}

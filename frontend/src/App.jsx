@@ -13,11 +13,12 @@ function App() {
 
     // Handle initial routing and browser navigation
     useEffect(() => {
-        const path = window.location.pathname.replace('/', '')
+        const path = window.location.pathname.split('/').filter(Boolean)[0] || 'home'
         const validPages = ['home', 'generator', 'about', 'contact', 'history']
+        
         if (validPages.includes(path)) {
             setCurrentPage(path)
-        } else if (path === '') {
+        } else {
             setCurrentPage('home')
         }
     }, [])
