@@ -3,4 +3,4 @@ Allow: /
 Disallow: /profile
 Disallow: /history
 
-Sitemap: https://levelupmap26.vercel.app/sitemap-main.xml
+Sitemap: https://levelupmap26.vercel.app/sitemap.xml

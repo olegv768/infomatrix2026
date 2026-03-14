@@ -1,17 +1,13 @@
 {
   "rewrites": [
     {
-      "source": "/sitemap.xml",
-      "destination": "/sitemap-main.xml"
-    },
-    {
-      "source": "/((?!sitemap-main.xml|sitemap.xml|robots.txt).*)",
+      "source": "/((?!sitemap.xml|robots.txt).*)",
       "destination": "/frontend/index.html"
     }
   ],
   "headers": [
     {
-      "source": "/sitemap-main.xml",
+      "source": "/sitemap.xml",
       "headers": [
         {
           "key": "Content-Type",
