@@ -108,9 +108,9 @@ export default function Home({ onNavigate }) {
             {features.map((feature, index) => (
               <ScrollReveal key={index} delay={index * 100}>
                 <div
-                  className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-500 group flex flex-col items-center text-center h-full card-tilt glow-border"
+                  className="p-8 rounded-3xl bg-white/5 border border-white/10 md:hover:border-indigo-500/30 md:hover:bg-indigo-500/5 transition-all duration-500 group flex flex-col items-center text-center h-full card-tilt glow-border"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-6 group-hover:shadow-lg group-hover:shadow-indigo-500/30 transition-all duration-500 group-hover:-translate-y-1 icon-spin">
+                  <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-6 md:group-hover:shadow-lg md:group-hover:shadow-indigo-500/30 transition-all duration-500 md:group-hover:-translate-y-1 icon-spin">
                     <i className={`fa-solid ${feature.icon} text-white text-xl transition-transform`}></i>
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>

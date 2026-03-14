@@ -188,12 +188,10 @@ body::before {
   transition: all 0.6s var(--ease-lush);
 }
 
-.hover-lift {
-  transition: transform 0.4s var(--ease-lush);
-}
-
-.hover-lift:hover {
-  transform: translateY(-8px);
+@media (hover: hover) {
+  .hover-lift:hover {
+    transform: translateY(-8px);
+  }
 }
 
 .page-container {
@@ -284,8 +282,10 @@ body::before {
   transition: left 0.6s var(--ease-lush);
 }
 
-.btn-shine:hover::before {
-  left: 100%;
+@media (hover: hover) {
+  .btn-shine:hover::before {
+    left: 100%;
+  }
 }
 
 /* Magnetic scale effect */
@@ -293,9 +293,11 @@ body::before {
   transition: transform 0.3s var(--ease-spring), box-shadow 0.3s var(--ease-lush);
 }
 
-.magnetic-hover:hover {
-  transform: scale(1.03) translateY(-3px);
-  box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.2);
+@media (hover: hover) {
+  .magnetic-hover:hover {
+    transform: scale(1.03) translateY(-3px);
+    box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.2);
+  }
 }
 
 /* Shimmer gradient text */
@@ -337,14 +339,11 @@ body::before {
 
 
 /* 3D Card tilt */
-.card-tilt {
-  transition: transform 0.4s var(--ease-lush), box-shadow 0.4s var(--ease-lush);
-  transform-style: preserve-3d;
-}
-
-.card-tilt:hover {
-  transform: perspective(1000px) rotateX(3deg) rotateY(-3deg) translateY(-10px);
-  box-shadow: 0 20px 40px -20px rgba(99, 102, 241, 0.15);
+@media (hover: hover) {
+  .card-tilt:hover {
+    transform: perspective(1000px) rotateX(3deg) rotateY(-3deg) translateY(-10px);
+    box-shadow: 0 20px 40px -20px rgba(99, 102, 241, 0.15);
+  }
 }
 
 /* Animated glow border */
@@ -367,8 +366,10 @@ body::before {
   filter: blur(8px);
 }
 
-.glow-border:hover::before {
-  opacity: 0.4;
+@media (hover: hover) {
+  .glow-border:hover::before {
+    opacity: 0.4;
+  }
 }
 
 /* Subtle glow border */
@@ -391,8 +392,10 @@ body::before {
   filter: blur(4px);
 }
 
-.glow-border-subtle:hover::before {
-  opacity: 0.05;
+@media (hover: hover) {
+  .glow-border-subtle:hover::before {
+    opacity: 0.05;
+  }
 }
 
 /* Enhanced input focus */
@@ -449,8 +452,10 @@ body::before {
 }
 
 /* Icon spin on hover */
-.icon-spin:hover i {
-  animation: spin-once 0.6s var(--ease-spring);
+@media (hover: hover) {
+  .icon-spin:hover i {
+    animation: spin-once 0.6s var(--ease-spring);
+  }
 }
 
 @keyframes spin-once {
@@ -481,8 +486,10 @@ body::before {
   border-radius: 2px;
 }
 
-.underline-slide:hover::after {
-  width: 100%;
+@media (hover: hover) {
+  .underline-slide:hover::after {
+    width: 100%;
+  }
 }
 
 /* Pulse ring effect */
@@ -560,9 +567,11 @@ body::before {
 }
 
 /* Interactive icon bounce */
-.icon-bounce:hover i,
-.icon-bounce:hover svg {
-  animation: icon-bounce 0.5s var(--ease-spring);
+@media (hover: hover) {
+  .icon-bounce:hover i,
+  .icon-bounce:hover svg {
+    animation: icon-bounce 0.5s var(--ease-spring);
+  }
 }
 
 @keyframes icon-bounce {

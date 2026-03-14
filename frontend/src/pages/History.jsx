@@ -188,7 +188,7 @@ export default function History({ onNavigate, onLoadRoadmap }) {
                                             onClick={() => setSelectedItem(selectedItem?.id === item.id ? null : item)}
                                             className={`group relative p-6 sm:p-8 rounded-[32px] glass-premium transition-all duration-700 cursor-pointer hover-lift ${selectedItem?.id === item.id
                                                 ? 'border-indigo-500/50 ring-2 ring-indigo-500/20 bg-indigo-500/5'
-                                                : 'border-white/5 hover:border-indigo-500/30'
+                                                : 'border-white/5 md:hover:border-indigo-500/30'
                                                 }`}
                                         >
                                             {/* Delete Button */}
@@ -201,7 +201,7 @@ export default function History({ onNavigate, onLoadRoadmap }) {
 
                                             {/* Progress Ring with Glow */}
                                             <div className="relative w-24 h-24 mb-6 mx-auto group/progress">
-                                                <div className="absolute inset-0 rounded-full bg-indigo-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                                                <div className="absolute inset-0 rounded-full bg-indigo-500/10 blur-xl opacity-0 md:group-hover:opacity-100 transition-opacity duration-700"></div>
                                                 <svg className="w-full h-full -rotate-90 relative z-10">
                                                     <circle
                                                         cx="48"
@@ -231,23 +231,23 @@ export default function History({ onNavigate, onLoadRoadmap }) {
                                                     </defs>
                                                 </svg>
                                                 <div className="absolute inset-0 flex items-center justify-center z-20">
-                                                    <span className="text-xl font-outfit font-black text-white group-hover:text-indigo-300 transition-colors">{getProgress(item)}%</span>
+                                                    <span className="text-xl font-outfit font-black text-white md:group-hover:text-indigo-300 transition-colors">{getProgress(item)}%</span>
                                                 </div>
                                             </div>
 
                                             {/* Title */}
-                                            <h3 className="text-2xl font-outfit font-bold text-white text-center mb-3 line-clamp-2 group-hover:text-indigo-200 transition-colors leading-tight">
+                                            <h3 className="text-2xl font-outfit font-bold text-white text-center mb-3 line-clamp-2 md:group-hover:text-indigo-200 transition-colors leading-tight">
                                                 {item.data?.title || 'Untitled Roadmap'}
                                             </h3>
 
                                             {/* Meta Info */}
                                             <div className="flex items-center justify-center gap-3 sm:gap-5 text-[12px] sm:text-sm font-medium text-slate-500 mb-6">
-                                                <span className="flex items-center gap-1.5 sm:gap-2 group-hover:text-slate-400 transition-colors">
+                                                <span className="flex items-center gap-1.5 sm:gap-2 md:group-hover:text-slate-400 transition-colors">
                                                     <i className="fa-solid fa-diagram-project text-[10px] sm:text-xs text-indigo-500/70"></i>
                                                     {item.data?.nodes?.length || 0} Levels
                                                 </span>
                                                 <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-slate-700"></span>
-                                                <span className="flex items-center gap-1.5 sm:gap-2 group-hover:text-slate-400 transition-colors">
+                                                <span className="flex items-center gap-1.5 sm:gap-2 md:group-hover:text-slate-400 transition-colors">
                                                     <i className="fa-regular fa-calendar text-[10px] sm:text-xs text-purple-500/70"></i>
                                                     {formatDate(item.timestamp)}
                                                 </span>
@@ -258,7 +258,7 @@ export default function History({ onNavigate, onLoadRoadmap }) {
                                                 {item.data?.nodes?.slice(1, 4).map((node, idx) => (
                                                     <span
                                                         key={idx}
-                                                        className="px-4 py-1.5 rounded-full bg-slate-800/40 border border-white/5 text-[11px] text-slate-400 font-jakarta font-semibold uppercase tracking-wider group-hover:border-indigo-500/20 group-hover:bg-indigo-500/5 transition-all"
+                                                        className="px-4 py-1.5 rounded-full bg-slate-800/40 border border-white/5 text-[11px] text-slate-400 font-jakarta font-semibold uppercase tracking-wider md:group-hover:border-indigo-500/20 md:group-hover:bg-indigo-500/5 transition-all"
                                                     >
                                                         {node.label}
                                                     </span>

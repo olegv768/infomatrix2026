@@ -124,9 +124,9 @@ export default function About({ onNavigate }) {
             {values.map((value, index) => (
               <ScrollReveal key={index} delay={index * 100}>
                 <div
-                  className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-500/30 transition-all text-center group flex flex-col items-center h-full card-tilt glow-border"
+                  className="p-6 rounded-2xl bg-white/5 border border-white/10 md:hover:border-indigo-500/30 transition-all text-center group flex flex-col items-center h-full card-tilt glow-border"
                 >
-                  <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mx-auto mb-[70px] group-hover:shadow-lg group-hover:shadow-indigo-500/30 transition-all icon-spin">
+                  <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mx-auto mb-[70px] md:group-hover:shadow-lg md:group-hover:shadow-indigo-500/30 transition-all icon-spin">
                     <i className={`fa-solid ${value.icon} text-white text-2xl transition-transform`}></i>
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-2">{value.title}</h3>
@@ -156,10 +156,10 @@ export default function About({ onNavigate }) {
             {team.map((member, index) => (
               <ScrollReveal key={index} delay={index * 150}>
                 <div
-                  className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-500/20 transition-all text-center group flex flex-col items-center h-full hover-lift"
+                  className="p-6 rounded-2xl bg-white/5 border border-white/10 md:hover:border-indigo-500/20 transition-all text-center group flex flex-col items-center h-full hover-lift"
                 >
                   <div className="relative inline-block mb-4">
-                    <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-indigo-500/30 group-hover:border-indigo-500 transition-all">
+                    <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-indigo-500/30 md:group-hover:border-indigo-500 transition-all">
                       <img
                         src={member.image}
                         alt={member.name}

@@ -5,13 +5,21 @@ const ParticleCard = ({ title, description, stepNumber }) => {
     const canvasRef = useRef(null);
     const [isHovered, setIsHovered] = useState(false);
 
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        setIsMobile(window.innerWidth < 768);
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         let animationFrameId;
 
-        const isMobile = window.innerWidth < 768;
         let particles = [];
         // Increase particle density when hovered/active for a richer "wow" effect
         const particleCount = isMobile ? (isHovered ? 85 : 40) : (isHovered ? 85 : 60);
@@ -130,8 +138,8 @@ const ParticleCard = ({ title, description, stepNumber }) => {
     return (
         <div
             className="relative group h-full cursor-pointer active:scale-95 transition-transform"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            onMouseEnter={() => !isMobile && setIsHovered(true)}
+            onMouseLeave={() => !isMobile && setIsHovered(false)}
             onClick={() => setIsHovered(!isHovered)}
         >
             <div className={`absolute inset-0 rounded-3xl transition-all duration-500 overflow-hidden ${isHovered ? 'bg-indigo-600/10 scale-[1.02] shadow-[0_0_40px_rgba(99,102,241,0.2)]' : 'bg-white/5'
@@ -145,7 +153,7 @@ const ParticleCard = ({ title, description, stepNumber }) => {
                 <div className="relative z-10 p-5 md:p-8 h-full flex flex-col items-center justify-center text-center">
                     <ScrollReveal delay={100}>
                         <div className={`mb-4 md:mb-6 transition-all duration-500 ${isHovered ? 'scale-110 -translate-y-2' : ''}`}>
-                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-linear-to-br from-indigo-500/20 to-purple-600/20 flex items-center justify-center border border-white/10 group-hover:border-indigo-500/50">
+                            <div className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-linear-to-br from-indigo-500/20 to-purple-600/20 flex items-center justify-center border transition-colors duration-500 ${isHovered ? 'border-indigo-500/50' : 'border-white/10'}`}>
                                 <span className="text-xl md:text-2xl font-black text-indigo-400 font-['Outfit']">{stepNumber}</span>
                             </div>
                         </div>
