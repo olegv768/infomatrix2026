@@ -12,6 +12,10 @@
         {
           "key": "Content-Type",
           "value": "text/xml; charset=UTF-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, proxy-revalidate"
         }
       ]
     }
