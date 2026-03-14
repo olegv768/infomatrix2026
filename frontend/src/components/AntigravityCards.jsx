@@ -138,10 +138,10 @@ const ParticleCard = ({ title, description, stepNumber }) => {
 
     return (
         <div
-            className="relative group h-full cursor-pointer active:scale-95 transition-transform"
+            className="relative group h-full w-full cursor-pointer active:scale-95 transition-transform"
             onMouseEnter={() => !isMobile && setIsHovered(true)}
             onMouseLeave={() => !isMobile && setIsHovered(false)}
-            onClick={() => setIsHovered(!isHovered)}
+            onClick={() => isMobile && setIsHovered(!isHovered)}
         >
             <div className={`absolute inset-0 rounded-3xl transition-all duration-700 overflow-hidden ${isHovered ? 'bg-indigo-500/10 backdrop-blur-sm scale-[1.02] shadow-[0_0_50px_rgba(79,70,229,0.2)] border-indigo-500/30' : 'bg-white/5 border-white/10'
                 } border`}>
@@ -151,7 +151,7 @@ const ParticleCard = ({ title, description, stepNumber }) => {
                     style={{ willChange: 'transform' }}
                 />
 
-                <div className="relative z-10 p-5 md:p-8 h-full flex flex-col items-center justify-center text-center">
+                <div className="relative z-10 p-6 md:p-8 lg:p-10 h-full flex flex-col items-center justify-center text-center">
                     <ScrollReveal delay={100}>
                         <div className={`mb-4 md:mb-6 transition-all duration-500 ${isHovered ? 'scale-110 -translate-y-2' : ''}`}>
                             <div className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-linear-to-br from-indigo-500/10 to-cyan-500/10 flex items-center justify-center border transition-all duration-700 ${isHovered ? 'border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.15)]' : 'border-white/10'}`}>
@@ -201,9 +201,9 @@ const AntigravityCards = () => {
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-2 w-full justify-items-center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-12 w-full max-w-7xl mx-auto px-4 md:px-0">
             {steps.map((step, idx) => (
-                <div key={idx} className="h-[260px] md:h-[420px] w-full max-w-[340px] relative">
+                <div key={idx} className="h-[320px] sm:h-[350px] md:h-[400px] lg:h-[450px] w-full relative">
                     <ParticleCard {...step} />
                 </div>
             ))}
