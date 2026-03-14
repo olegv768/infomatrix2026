@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Generator from './pages/Generator'
 import About from './pages/About'
 import Contact from './pages/Contact'
+import Features from './pages/Features'
 import History from './pages/History'
 import ProgressWidget from './components/ProgressWidget'
 
@@ -14,7 +15,7 @@ function App() {
     // Handle initial routing and browser navigation
     useEffect(() => {
         const path = window.location.pathname.split('/').filter(Boolean)[0] || 'home'
-        const validPages = ['home', 'generator', 'about', 'contact', 'history']
+        const validPages = ['home', 'generator', 'about', 'contact', 'history', 'features']
         
         if (validPages.includes(path)) {
             setCurrentPage(path)
@@ -260,13 +261,15 @@ function App() {
             generator: 'AI Generator — Create Your Personalized Learning Roadmap',
             history: 'My Roadmaps — Progress History | Level Up Map',
             about: 'About Us — The Mission of Level Up Map',
-            contact: 'Contact Us — Get in touch with Level Up Map Team'
+            contact: 'Contact Us — Get in touch with Level Up Map Team',
+            features: 'Features — Powerful Tools for Your Learning Journey | Level Up Map'
         }
         const descriptions = {
             home: 'Use AI to generate personalized step-by-step career roadmaps and learning paths. Powered by Gemini AI.',
             generator: 'Enter your goal and our AI will create a comprehensive learning roadmap with resources and tasks.',
             about: 'Learn more about the team behind Level Up Map and how we use AI to democratize learning.',
-            contact: 'Reach out for support, feedback, or collaboration opportunities.'
+            contact: 'Reach out for support, feedback, or collaboration opportunities.',
+            features: 'Discover the powerful features of Level Up Map: AI-powered generation, interactive visualization, progress tracking, and more.'
         }
 
         document.title = titles[currentPage] || 'Level Up Map'
@@ -308,6 +311,8 @@ function App() {
                 return <History onNavigate={setCurrentPage} onLoadRoadmap={handleLoadRoadmap} />
             case 'about':
                 return <About onNavigate={setCurrentPage} />
+            case 'features':
+                return <Features onNavigate={setCurrentPage} />
             case 'contact':
                 return <Contact onNavigate={setCurrentPage} />
             default:
