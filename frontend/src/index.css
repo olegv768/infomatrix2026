@@ -465,6 +465,10 @@ body::before {
   }
 }
 
+.animate-icon-spin {
+  animation: spin-once 0.7s var(--ease-spring);
+}
+
 @keyframes spin-once {
   0% {
     transform: rotate(0deg);

@@ -17,7 +17,7 @@ const FeatureCard = ({ icon, title, description, delay }) => {
             <div
                 className={`p-8 rounded-3xl transition-all duration-500 group flex flex-col items-center text-center h-full card-tilt glow-border cursor-pointer ${
                     isHovered 
-                    ? 'bg-indigo-500/10 border-indigo-500/40 shadow-[0_20px_40px_rgba(99,102,241,0.15)] -translate-y-2' 
+                    ? 'bg-violet-400/20 border-violet-400/40 shadow-[0_20px_40px_rgba(167,139,250,0.25)] -translate-y-2' 
                     : 'bg-white/5 border-white/10'
                 }`}
                 onMouseEnter={() => !isMobile && setIsHovered(true)}
@@ -27,7 +27,7 @@ const FeatureCard = ({ icon, title, description, delay }) => {
                 <div className={`w-14 h-14 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-6 transition-all duration-500 ${
                     isHovered ? 'shadow-lg shadow-indigo-500/40 -translate-y-1' : ''
                 }`}>
-                    <i className={`fa-solid ${icon} text-white text-xl transition-transform ${isHovered ? 'scale-110' : ''}`}></i>
+                    <i className={`fa-solid ${icon} text-white text-xl transition-all duration-500 ${isHovered ? 'scale-110 animate-icon-spin' : ''}`}></i>
                 </div>
                 <h3 className={`text-xl font-semibold mb-3 transition-colors duration-500 ${isHovered ? 'text-white' : 'text-slate-200'}`}>
                     {title}

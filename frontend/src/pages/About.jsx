@@ -18,7 +18,7 @@ const TeamMember = ({ member, delay }) => {
       <ScrollReveal delay={delay}>
         <div
           className={`p-6 rounded-2xl transition-all duration-500 text-center group flex flex-col items-center h-full hover-lift cursor-pointer ${
-            isHovered ? 'bg-indigo-500/10 border-indigo-500/20 shadow-xl' : 'bg-white/5 border-white/10'
+            isHovered ? 'bg-violet-400/20 border-violet-400/30 shadow-xl shadow-violet-500/10' : 'bg-white/5 border-white/10'
           } border`}
           onMouseEnter={() => !isMobile && setIsHovered(true)}
           onMouseLeave={() => !isMobile && setIsHovered(false)}
@@ -26,12 +26,12 @@ const TeamMember = ({ member, delay }) => {
         >
           <div className="relative inline-block mb-4">
             <div className={`w-24 h-24 rounded-full overflow-hidden border-4 transition-all duration-500 ${
-                isHovered ? 'border-indigo-500 scale-105' : 'border-indigo-500/30'
+                isHovered ? 'border-indigo-500 scale-105 shadow-xl shadow-indigo-500/20' : 'border-indigo-500/30'
             }`}>
               <img
                 src={member.image}
                 alt={member.name}
-                className="w-full h-full object-cover transition-transform duration-300"
+                className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? 'scale-110' : ''}`}
                 style={member.style || {}}
               />
             </div>

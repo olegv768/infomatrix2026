@@ -142,7 +142,7 @@ const ParticleCard = ({ title, description, stepNumber }) => {
             onMouseLeave={() => !isMobile && setIsHovered(false)}
             onClick={() => setIsHovered(!isHovered)}
         >
-            <div className={`absolute inset-0 rounded-3xl transition-all duration-500 overflow-hidden ${isHovered ? 'bg-indigo-600/10 scale-[1.02] shadow-[0_0_40px_rgba(99,102,241,0.2)]' : 'bg-white/5'
+            <div className={`absolute inset-0 rounded-3xl transition-all duration-500 overflow-hidden ${isHovered ? 'bg-violet-400/20 scale-[1.02] shadow-[0_0_40px_rgba(167,139,250,0.3)]' : 'bg-white/5'
                 } border border-white/10`}>
                 <canvas
                     ref={canvasRef}
