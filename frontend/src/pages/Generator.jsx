@@ -248,6 +248,7 @@ export default function Generator({
     zoomRef.current = zoomBehavior
 
     // Intelligent initial placement to prevent tangling
+    const isMobile = window.innerWidth < 768
     const nodes = data.nodes.map((d) => {
       const savedPos = nodesRef.current?.find(n => n.id === d.id)
       if (savedPos?.x !== undefined) {
@@ -257,11 +258,12 @@ export default function Generator({
       // Spread nodes vertically by level and horizontally by their position in that level
       const levelNodes = data.nodes.filter(n => n.level === d.level)
       const indexInLevel = levelNodes.findIndex(n => n.id === d.id)
+      const horizontalSpacing = isMobile ? 120 : 200
 
       return {
         ...d,
-        x: width / 2 + (indexInLevel - (levelNodes.length - 1) / 2) * 200 + (Math.random() - 0.5) * 50,
-        y: height / 2 + (d.level * 200) - 300 // Offset upward so it grows down
+        x: width / 2 + (indexInLevel - (levelNodes.length - 1) / 2) * horizontalSpacing + (Math.random() - 0.5) * 50,
+        y: height / 2 + (d.level * (isMobile ? 150 : 200)) - (isMobile ? 150 : 300) // Offset upward so it grows down
       }
     })
     nodesRef.current = nodes
@@ -411,8 +413,12 @@ export default function Generator({
           .on('end', dragended)
       )
       .on('click', function(event, d) {
+        // Prevent click if we're dragging (D3 default behavior is usually enough, but mobile needs extra care)
+        if (event.defaultPrevented) return;
+        
         event.stopPropagation()
         setSelectedNode(d)
+        setSidebarOpen(true) // Automatically open sidebar on mobile when node is clicked
 
         // === CLICK ANIMATION ===
         const clickedGroup = d3.select(this)
@@ -890,7 +896,7 @@ export default function Generator({
       )}
 
       {/* Main canvas area */}
-      <div className="flex-1 relative z-0 mt-48 md:mt-36">
+      <div className="flex-1 relative z-0 mt-32 md:mt-36">
         <svg ref={svgRef} className="w-full h-full" />
         {!data && !loading && (
           <div className="absolute inset-0 flex items-center justify-center">

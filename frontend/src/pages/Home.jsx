@@ -88,6 +88,15 @@ export default function Home({ onNavigate }) {
               </span>
             </h1>
           </ScrollReveal>
+          <ScrollReveal delay={400}>
+            <button
+              onClick={() => onNavigate('generator')}
+              className="mt-10 px-10 py-5 rounded-2xl bg-linear-to-r from-indigo-600 to-purple-600 text-white font-black uppercase tracking-widest hover:shadow-[0_20px_40px_rgba(99,102,241,0.4)] hover:-translate-y-1 transition-all active:scale-95 group flex items-center gap-4 mx-auto"
+            >
+              <span>Get Started</span>
+              <i className="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+            </button>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -108,7 +117,8 @@ export default function Home({ onNavigate }) {
             {features.map((feature, index) => (
               <ScrollReveal key={index} delay={index * 100}>
                 <div
-                  className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-500 group flex flex-col items-center text-center h-full card-tilt glow-border"
+                  className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-500 group flex flex-col items-center text-center h-full card-tilt glow-border cursor-pointer"
+                  onClick={() => onNavigate('generator')}
                 >
                   <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-6 group-hover:shadow-lg group-hover:shadow-indigo-500/30 transition-all duration-500 group-hover:-translate-y-1 icon-spin">
                     <i className={`fa-solid ${feature.icon} text-white text-xl transition-transform`}></i>
@@ -145,7 +155,7 @@ export default function Home({ onNavigate }) {
             className="w-full"
             style={{ marginBottom: '60px' }}
           >
-            <AntigravityCards />
+            <AntigravityCards onNavigate={onNavigate} />
           </div>
         </div>
       </section>

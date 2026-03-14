@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ScrollReveal from './ScrollReveal';
 
-const ParticleCard = ({ title, description, stepNumber }) => {
+const ParticleCard = ({ title, description, stepNumber, onClick }) => {
     const canvasRef = useRef(null);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -129,9 +129,10 @@ const ParticleCard = ({ title, description, stepNumber }) => {
 
     return (
         <div
-            className="relative group h-full"
+            className="relative group h-full cursor-pointer"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onClick={onClick}
         >
             <div className={`absolute inset-0 rounded-3xl transition-all duration-500 overflow-hidden ${isHovered ? 'bg-indigo-600/10 scale-[1.02] shadow-[0_0_40px_rgba(99,102,241,0.2)]' : 'bg-white/5'
                 } border border-white/10`}>
@@ -171,7 +172,7 @@ const ParticleCard = ({ title, description, stepNumber }) => {
     );
 };
 
-const AntigravityCards = () => {
+const AntigravityCards = ({ onNavigate }) => {
     const steps = [
         {
             title: 'Enter Your Goal',
@@ -194,7 +195,7 @@ const AntigravityCards = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-2 w-full justify-items-center">
             {steps.map((step, idx) => (
                 <div key={idx} className="h-[260px] md:h-[420px] w-full max-w-[340px] relative">
-                    <ParticleCard {...step} />
+                    <ParticleCard {...step} onClick={() => onNavigate('generator')} />
                 </div>
             ))}
         </div>

@@ -34,8 +34,8 @@ body {
 
 html {
   overflow-x: hidden;
-  position: absolute; /* Extra stability for some mobile browsers */
-  inset: 0;
+  position: relative;
+  min-height: 100%;
 }
 
 body {
