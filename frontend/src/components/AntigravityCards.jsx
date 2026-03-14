@@ -93,7 +93,8 @@ const ParticleCard = ({ title, description, stepNumber }) => {
             }
 
             draw() {
-                ctx.fillStyle = `rgba(165, 180, 252, ${this.opacity})`;
+                // Luxury cosmic stardust color
+                ctx.fillStyle = `rgba(224, 231, 255, ${this.opacity})`;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
@@ -142,8 +143,8 @@ const ParticleCard = ({ title, description, stepNumber }) => {
             onMouseLeave={() => !isMobile && setIsHovered(false)}
             onClick={() => setIsHovered(!isHovered)}
         >
-            <div className={`absolute inset-0 rounded-3xl transition-all duration-500 overflow-hidden ${isHovered ? 'bg-violet-400/20 scale-[1.02] shadow-[0_0_40px_rgba(167,139,250,0.3)]' : 'bg-white/5'
-                } border border-white/10`}>
+            <div className={`absolute inset-0 rounded-3xl transition-all duration-700 overflow-hidden ${isHovered ? 'bg-indigo-500/10 backdrop-blur-sm scale-[1.02] shadow-[0_0_50px_rgba(79,70,229,0.2)] border-indigo-500/30' : 'bg-white/5 border-white/10'
+                } border`}>
                 <canvas
                     ref={canvasRef}
                     className="absolute inset-0 pointer-events-none"
@@ -153,7 +154,7 @@ const ParticleCard = ({ title, description, stepNumber }) => {
                 <div className="relative z-10 p-5 md:p-8 h-full flex flex-col items-center justify-center text-center">
                     <ScrollReveal delay={100}>
                         <div className={`mb-4 md:mb-6 transition-all duration-500 ${isHovered ? 'scale-110 -translate-y-2' : ''}`}>
-                            <div className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-linear-to-br from-indigo-500/20 to-purple-600/20 flex items-center justify-center border transition-colors duration-500 ${isHovered ? 'border-indigo-500/50' : 'border-white/10'}`}>
+                            <div className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-linear-to-br from-indigo-500/10 to-cyan-500/10 flex items-center justify-center border transition-all duration-700 ${isHovered ? 'border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.15)]' : 'border-white/10'}`}>
                                 <span className="text-xl md:text-2xl font-black text-indigo-400 font-['Outfit']">{stepNumber}</span>
                             </div>
                         </div>
