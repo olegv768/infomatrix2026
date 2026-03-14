@@ -16,14 +16,14 @@ export default function Navbar({ currentPage, onNavigate }) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/40 backdrop-blur-md">
       {/* Use position:relative so we can absolutely place the nav items */}
-      <div className="relative w-full px-12 sm:px-12 lg:px-20 h-16 flex items-center justify-between">
+      <div className="relative w-full px-6 sm:px-12 lg:px-20 h-16 flex items-center justify-between">
 
-        {/* Logo — stays on the left */}
+        {/* Logo — centered container to prevent clipping */}
         <button
           onClick={() => onNavigate('home')}
-          className="flex items-center group"
+          className="flex items-center group relative z-10 ml-0 md:ml-4"
         >
-          <Logo className="scale-90 origin-left" />
+          <Logo className="scale-75 sm:scale-90 origin-center" />
         </button>
 
         {/* Desktop Navigation — HARD pinned to right edge */}
@@ -73,7 +73,7 @@ export default function Navbar({ currentPage, onNavigate }) {
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="md:hidden border-t border-white/10 bg-slate-900/98 backdrop-blur-3xl overflow-hidden"
           >
-            <div className="px-12 py-8 space-y-3">
+            <div className="px-6 sm:px-12 py-8 space-y-3">
               {navItems.map((item, idx) => (
                 <motion.button
                   key={item.id}
