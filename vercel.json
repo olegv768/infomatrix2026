@@ -2,20 +2,20 @@
   "rewrites": [
     {
       "source": "/sitemap.xml",
-      "destination": "/sitemap_main.xml"
+      "destination": "/sitemap-main.xml"
     },
     {
-      "source": "/((?!sitemap_main.xml|sitemap.xml|robots.txt).*)",
+      "source": "/((?!sitemap-main.xml|sitemap.xml|robots.txt).*)",
       "destination": "/frontend/index.html"
     }
   ],
   "headers": [
     {
-      "source": "/sitemap_main.xml",
+      "source": "/sitemap-main.xml",
       "headers": [
         {
           "key": "Content-Type",
-          "value": "application/xml; charset=utf-8"
+          "value": "text/xml; charset=UTF-8"
         }
       ]
     }
