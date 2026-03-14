@@ -1,8 +1,16 @@
 {
   "rewrites": [
     {
-      "source": "/((?!sitemap.xml|robots.txt).*)",
-      "destination": "/frontend/index.html"
+      "source": "/sitemap.xml",
+      "destination": "/sitemap.xml"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
@@ -11,11 +19,7 @@
       "headers": [
         {
           "key": "Content-Type",
-          "value": "text/xml; charset=UTF-8"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate, proxy-revalidate"
+          "value": "application/xml"
         }
       ]
     }
