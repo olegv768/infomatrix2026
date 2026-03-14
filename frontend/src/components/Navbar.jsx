@@ -21,7 +21,7 @@ export default function Navbar({ currentPage, onNavigate }) {
         {/* Logo — centered container to prevent clipping */}
         <button
           onClick={() => onNavigate('home')}
-          className="flex items-center group relative z-10 ml-0 md:ml-4"
+          className="flex items-center group relative z-10 -ml-[10px] md:ml-[6px]"
         >
           <Logo className="scale-75 sm:scale-90 origin-center" />
         </button>
@@ -49,7 +49,7 @@ export default function Navbar({ currentPage, onNavigate }) {
         {/* Mobile menu button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden relative group p-4 rounded-2xl bg-slate-900/60 border border-white/10 shadow-2xl backdrop-blur-xl transition-all active:scale-90 mr-8 sm:mr-10"
+          className="md:hidden relative group p-4 rounded-2xl bg-slate-900/60 border border-white/10 shadow-2xl backdrop-blur-xl transition-all active:scale-90 mr-1 sm:mr-4"
         >
           {/* Ambient Glow */}
           <div className={`absolute inset-0 bg-indigo-500/20 rounded-2xl blur-xl transition-opacity duration-500 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'}`}></div>
