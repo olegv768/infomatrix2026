@@ -1,9 +1,7 @@
 User-agent: *
+Allow: /sitemap.xml
 Allow: /
 Disallow: /profile
 Disallow: /history
-Sitemap: https://levelupmap26.vercel.app/sitemap.xml
 
-User-agent: Googlebot
-Allow: /
 Sitemap: https://levelupmap26.vercel.app/sitemap.xml
