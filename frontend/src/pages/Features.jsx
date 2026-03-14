@@ -1,3 +1,5 @@
+import FeatureCard from '../components/FeatureCard';
+
 export default function Features() {
   const features = [
     {
@@ -86,16 +88,11 @@ export default function Features() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {features.map((feature, index) => (
-            <div
-              key={index}
-              className="p-6 bg-slate-900/90 rounded-2xl border border-slate-700/50 backdrop-blur md:hover:border-slate-600/50 transition-all flex flex-col items-center text-center h-full"
-            >
-              <div className={`w-12 h-12 rounded-xl bg-linear-to-br ${colorClasses[feature.color]} flex items-center justify-center mb-4`}>
-                <i className={`fa-solid ${feature.icon} text-white text-xl`}></i>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-              <p className="text-slate-400 leading-relaxed">{feature.description}</p>
-            </div>
+            <FeatureCard 
+              key={index} 
+              {...feature} 
+              delay={index * 100} 
+            />
           ))}
         </div>
 

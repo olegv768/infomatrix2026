@@ -176,7 +176,14 @@ body::before {
   animation: float 6s ease-in-out infinite;
 }
 
-.animate-pulse-slow {
+.animate-pulse-slow {@keyframes bounce-short {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-bounce-short {
+  animation: bounce-short 0.5s ease-in-out infinite;
+}
   animation: pulse-slow 3s ease-in-out infinite;
 }
 

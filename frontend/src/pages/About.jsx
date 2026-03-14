@@ -1,5 +1,53 @@
 import Footer from '../components/Footer'
 import ScrollReveal from '../components/ScrollReveal'
+import FeatureCard from '../components/FeatureCard'
+import { useState, useEffect } from 'react'
+
+const TeamMember = ({ member, delay }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        setIsMobile(window.innerWidth < 768);
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    return (
+      <ScrollReveal delay={delay}>
+        <div
+          className={`p-6 rounded-2xl transition-all duration-500 text-center group flex flex-col items-center h-full hover-lift cursor-pointer ${
+            isHovered ? 'bg-indigo-500/10 border-indigo-500/20 shadow-xl' : 'bg-white/5 border-white/10'
+          } border`}
+          onMouseEnter={() => !isMobile && setIsHovered(true)}
+          onMouseLeave={() => !isMobile && setIsHovered(false)}
+          onClick={() => setIsHovered(!isHovered)}
+        >
+          <div className="relative inline-block mb-4">
+            <div className={`w-24 h-24 rounded-full overflow-hidden border-4 transition-all duration-500 ${
+                isHovered ? 'border-indigo-500 scale-105' : 'border-indigo-500/30'
+            }`}>
+              <img
+                src={member.image}
+                alt={member.name}
+                className="w-full h-full object-cover transition-transform duration-300"
+                style={member.style || {}}
+              />
+            </div>
+            {isHovered && (
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-green-500 border-4 border-slate-900 flex items-center justify-center animate-bounce-short">
+                    <i className="fa-solid fa-check text-white text-xs"></i>
+                </div>
+            )}
+          </div>
+          <h3 className={`text-xl font-semibold transition-colors ${isHovered ? 'text-white' : 'text-slate-200'}`}>{member.name}</h3>
+          <p className="text-indigo-400 mb-2">{member.role}</p>
+          <p className={`text-sm mb-4 transition-colors ${isHovered ? 'text-slate-200' : 'text-slate-400'}`}>{member.bio}</p>
+        </div>
+      </ScrollReveal>
+    );
+};
 
 export default function About({ onNavigate }) {
   const team = [
@@ -122,17 +170,11 @@ export default function About({ onNavigate }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => (
-              <ScrollReveal key={index} delay={index * 100}>
-                <div
-                  className="p-6 rounded-2xl bg-white/5 border border-white/10 md:hover:border-indigo-500/30 transition-all text-center group flex flex-col items-center h-full card-tilt glow-border"
-                >
-                  <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center mx-auto mb-[70px] md:group-hover:shadow-lg md:group-hover:shadow-indigo-500/30 transition-all icon-spin">
-                    <i className={`fa-solid ${value.icon} text-white text-2xl transition-transform`}></i>
-                  </div>
-                  <h3 className="text-xl font-semibold text-white mb-2">{value.title}</h3>
-                  <p className="text-slate-400 text-sm">{value.description}</p>
-                </div>
-              </ScrollReveal>
+              <FeatureCard 
+                key={index}
+                {...value}
+                delay={index * 100}
+              />
             ))}
           </div>
         </div>
@@ -154,28 +196,7 @@ export default function About({ onNavigate }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {team.map((member, index) => (
-              <ScrollReveal key={index} delay={index * 150}>
-                <div
-                  className="p-6 rounded-2xl bg-white/5 border border-white/10 md:hover:border-indigo-500/20 transition-all text-center group flex flex-col items-center h-full hover-lift"
-                >
-                  <div className="relative inline-block mb-4">
-                    <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-indigo-500/30 md:group-hover:border-indigo-500 transition-all">
-                      <img
-                        src={member.image}
-                        alt={member.name}
-                        className="w-full h-full object-cover transition-transform duration-300"
-                        style={member.style || {}}
-                      />
-                    </div>
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-green-500 border-4 border-slate-900 flex items-center justify-center">
-                      <i className="fa-solid fa-check text-white text-xs"></i>
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-semibold text-white">{member.name}</h3>
-                  <p className="text-indigo-400 mb-2">{member.role}</p>
-                  <p className="text-slate-400 text-sm mb-4">{member.bio}</p>
-                </div>
-              </ScrollReveal>
+              <TeamMember key={index} member={member} delay={index * 150} />
             ))}
           </div>
         </div>
