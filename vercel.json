@@ -1,31 +1,27 @@
 {
-    "rewrites": [
+  "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "/sitemap.xml"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
+    },
+    {
+      "source": "/((?!sitemap.xml|robots.txt).*)",
+      "destination": "/frontend/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/sitemap.xml",
+      "headers": [
         {
-            "source": "/sitemap.xml",
-            "destination": "/frontend/sitemap.xml"
-        },
-        {
-            "source": "/robots.txt",
-            "destination": "/frontend/robots.txt"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/frontend/index.html"
+          "key": "Content-Type",
+          "value": "application/xml; charset=utf-8"
         }
-    ],
-    "headers": [
-        {
-            "source": "/sitemap.xml",
-            "headers": [
-                {
-                    "key": "Content-Type",
-                    "value": "text/xml; charset=utf-8"
-                },
-                {
-                    "key": "X-Robots-Tag",
-                    "value": "noindex"
-                }
-            ]
-        }
-    ]
+      ]
+    }
+  ]
 }

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /profile
+Disallow: /history
+
+Sitemap: https://levelupmap26.vercel.app/sitemap.xml
