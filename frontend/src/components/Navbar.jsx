@@ -18,13 +18,17 @@ export default function Navbar({ currentPage, onNavigate }) {
       {/* Balanced navbar container */}
       <div className="relative w-full px-6 sm:px-12 lg:px-20 h-16 flex items-center justify-between">
 
-        {/* Logo — centered container to prevent clipping */}
-        <button
-          onClick={() => onNavigate('home')}
-          className="flex items-center group relative z-10 -ml-[10px] md:ml-[6px]"
+        {/* Logo — Aggressively shifted towards the edge on all screens */}
+        <div 
+          className="flex items-center absolute left-[-15px] md:left-[-10px] top-1/2 -translate-y-1/2"
         >
-          <Logo className="scale-75 sm:scale-90 origin-center" />
-        </button>
+          <button
+            onClick={() => onNavigate('home')}
+            className="flex items-center group relative z-10"
+          >
+            <Logo className="scale-75 sm:scale-90 origin-center" />
+          </button>
+        </div>
 
         {/* Desktop Navigation — HARD pinned to right edge */}
         <div
@@ -49,7 +53,7 @@ export default function Navbar({ currentPage, onNavigate }) {
         {/* Mobile menu button — Balanced position away from edge */}
         <div 
           className="md:hidden flex items-center"
-          style={{ position: 'absolute', right: '25px', top: '50%', transform: 'translateY(-50%)' }}
+          style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }}
         >
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
