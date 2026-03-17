@@ -49,7 +49,7 @@ export default function Navbar({ currentPage, onNavigate }) {
         {/* Mobile menu button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden relative group p-4 rounded-2xl bg-slate-900/60 border border-white/10 shadow-2xl backdrop-blur-xl transition-all active:scale-90 mr-1 sm:mr-4"
+          className="md:hidden relative group p-4 rounded-2xl bg-slate-900/60 border border-white/10 shadow-2xl backdrop-blur-xl transition-all active:scale-90 mr-[14px] sm:mr-[26px]"
         >
           {/* Ambient Glow */}
           <div className={`absolute inset-0 bg-indigo-500/20 rounded-2xl blur-xl transition-opacity duration-500 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'}`}></div>

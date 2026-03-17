@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/((?!api/|sitemap.xml|robots.txt|index.html|.*\\.).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
