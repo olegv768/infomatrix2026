@@ -37,13 +37,14 @@ export default function Footer({ onNavigate }) {
                 { label: 'Contact', id: 'contact' }
               ].map((item) => (
                 <li key={item.id}>
-                  <button 
-                    onClick={() => onNavigate(item.id)} 
+                  <a 
+                    href={`/${item.id === 'home' ? '' : item.id}`}
+                    onClick={(e) => { e.preventDefault(); onNavigate(item.id); }} 
                     className="group text-slate-400 hover:text-white transition-all duration-300 flex items-center gap-2 text-[17px] font-semibold"
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 scale-0 group-hover:scale-100 transition-transform duration-300 shadow-[0_0_8px_rgba(99,102,241,0.6)]"></span>
                     <span className="underline-slide">{item.label}</span>
-                  </button>
+                  </a>
                 </li>
               ))}
             </ul>

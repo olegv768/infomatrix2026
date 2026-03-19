@@ -22,12 +22,13 @@ export default function Navbar({ currentPage, onNavigate }) {
         <div 
           className="flex items-center absolute left-[-15px] md:left-[-10px] top-1/2 -translate-y-1/2"
         >
-          <button
-            onClick={() => onNavigate('home')}
+          <a
+            href="/"
+            onClick={(e) => { e.preventDefault(); onNavigate('home'); }}
             className="flex items-center group relative z-10"
           >
             <Logo className="scale-75 sm:scale-90 origin-center" />
-          </button>
+          </a>
         </div>
 
         {/* Desktop Navigation — HARD pinned to right edge */}
@@ -36,9 +37,10 @@ export default function Navbar({ currentPage, onNavigate }) {
           style={{ position: 'absolute', right: '32px', top: '50%', transform: 'translateY(-50%)' }}
         >
           {navItems.map((item) => (
-            <button
+            <a
               key={item.id}
-              onClick={() => onNavigate(item.id)}
+              href={`/${item.id === 'home' ? '' : item.id}`}
+              onClick={(e) => { e.preventDefault(); onNavigate(item.id); }}
               className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 icon-bounce underline-slide ${currentPage === item.id
                 ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
                 : 'text-slate-300 hover:text-white hover:bg-white/5'
@@ -46,7 +48,7 @@ export default function Navbar({ currentPage, onNavigate }) {
             >
               <i className={`fa-solid ${item.icon} text-sm transition-transform`}></i>
               {item.label}
-            </button>
+            </a>
           ))}
         </div>
 
@@ -84,12 +86,14 @@ export default function Navbar({ currentPage, onNavigate }) {
           >
             <div className="px-6 sm:px-12 py-8 space-y-3">
               {navItems.map((item, idx) => (
-                <motion.button
+                <motion.a
                   key={item.id}
+                  href={`/${item.id === 'home' ? '' : item.id}`}
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: idx * 0.05 }}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault()
                     onNavigate(item.id)
                     setMobileMenuOpen(false)
                   }}
@@ -102,7 +106,7 @@ export default function Navbar({ currentPage, onNavigate }) {
                     <i className={`fa-solid ${item.icon}`}></i>
                   </div>
                   {item.label}
-                </motion.button>
+                </motion.a>
               ))}
             </div>
           </motion.div>

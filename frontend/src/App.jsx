@@ -12,16 +12,28 @@ import ProgressWidget from './components/ProgressWidget'
 function App() {
     const [currentPage, setCurrentPage] = useState('home')
 
+    const handleNavigate = useCallback((page) => {
+        setCurrentPage(page)
+        const newPath = page === 'home' ? '/' : `/${page}`
+        if (window.location.pathname !== newPath) {
+            window.history.pushState({}, '', newPath)
+        }
+    }, [])
+
     // Handle initial routing and browser navigation
     useEffect(() => {
-        const path = window.location.pathname.split('/').filter(Boolean)[0] || 'home'
-        const validPages = ['home', 'generator', 'about', 'contact', 'history', 'features']
-        
-        if (validPages.includes(path)) {
-            setCurrentPage(path)
-        } else {
-            setCurrentPage('home')
+        const handleLocationChange = () => {
+            const path = window.location.pathname.split('/').filter(Boolean)[0] || 'home'
+            const validPages = ['home', 'generator', 'about', 'contact', 'history', 'features']
+            if (validPages.includes(path)) {
+                setCurrentPage(path)
+            } else {
+                setCurrentPage('home')
+            }
         }
+        
+        handleLocationChange()
+        window.addEventListener('popstate', handleLocationChange)
 
         // Mobile Viewport Height Hack - prevents jumping on scroll
         const updateHeight = () => {
@@ -39,7 +51,10 @@ function App() {
 
         updateHeight();
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('popstate', handleLocationChange);
+        };
     }, [])
 
     // Persisted state for Generator
@@ -191,7 +206,7 @@ function App() {
             localStorage.setItem('roadmap_history', JSON.stringify(trimmedHistory))
 
             // Auto-navigate to generator when done
-            setCurrentPage('generator')
+            handleNavigate('generator')
         } catch (err) {
             console.error('Error:', err)
             setGenerationError(err.message || 'An error occurred during generation')
@@ -251,7 +266,7 @@ function App() {
         setSavedCompletedNodes(new Set(item.completedNodes || []))
         setSavedSelectedNode(null)
         setActiveHistoryId(item.id)
-        setCurrentPage('generator')
+        handleNavigate('generator')
     }
 
     const renderPage = () => {
@@ -288,7 +303,7 @@ function App() {
 
         switch (currentPage) {
             case 'home':
-                return <Home onNavigate={setCurrentPage} />
+                return <Home onNavigate={handleNavigate} />
             case 'generator':
                 return (
                     <Generator
@@ -308,21 +323,21 @@ function App() {
                     />
                 )
             case 'history':
-                return <History onNavigate={setCurrentPage} onLoadRoadmap={handleLoadRoadmap} />
+                return <History onNavigate={handleNavigate} onLoadRoadmap={handleLoadRoadmap} />
             case 'about':
-                return <About onNavigate={setCurrentPage} />
+                return <About onNavigate={handleNavigate} />
             case 'features':
-                return <Features onNavigate={setCurrentPage} />
+                return <Features onNavigate={handleNavigate} />
             case 'contact':
-                return <Contact onNavigate={setCurrentPage} />
+                return <Contact onNavigate={handleNavigate} />
             default:
-                return <Home onNavigate={setCurrentPage} />
+                return <Home onNavigate={handleNavigate} />
         }
     }
 
     return (
         <div className="min-h-full bg-main text-white">
-            <Navbar currentPage={currentPage} onNavigate={setCurrentPage} />
+            <Navbar currentPage={currentPage} onNavigate={handleNavigate} />
             <main>
                 {renderPage()}
             </main>
@@ -335,7 +350,7 @@ function App() {
                 generationProgress={generationProgress}
                 generationGoal={generationGoal}
                 generationError={generationError}
-                onReturn={() => setCurrentPage('generator')}
+                onReturn={() => handleNavigate('generator')}
                 visible={currentPage !== 'generator'}
             />
         </div>

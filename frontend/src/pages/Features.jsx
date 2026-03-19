@@ -1,6 +1,6 @@
 import FeatureCard from '../components/FeatureCard';
 
-export default function Features() {
+export default function Features({ onNavigate }) {
   const features = [
     {
       icon: 'fa-brain',
@@ -141,6 +141,7 @@ export default function Features() {
             </p>
             <a
               href="/generator"
+              onClick={(e) => { e.preventDefault(); onNavigate('generator'); }}
               className="inline-flex items-center gap-2 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold py-4 px-10 rounded-lg transition-all shadow-lg hover:shadow-indigo-500/30"
             >
               <i className="fa-solid fa-wand-magic-sparkles"></i>
