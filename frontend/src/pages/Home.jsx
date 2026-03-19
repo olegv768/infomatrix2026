@@ -83,12 +83,14 @@ export default function Home({ onNavigate }) {
 
           <ScrollReveal delay={200}>
             <h1 className="text-5xl md:text-7xl font-black mb-6 font-['Outfit'] tracking-tight title-reaction">
-              Transform Your Goals Into
+              AI Roadmap Generator: Build
               <span className="block mt-2 text-shimmer">
-                Actionable Roadmaps
+                Your Learning Path
               </span>
             </h1>
           </ScrollReveal>
+
+
         </div>
       </section>
 

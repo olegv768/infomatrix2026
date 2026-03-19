@@ -272,19 +272,19 @@ function App() {
     const renderPage = () => {
         // Dynamic SEO Update
         const titles = {
-            home: 'Level Up Map — Transform Your Goals into Actionable Learning Paths',
-            generator: 'AI Generator — Create Your Personalized Learning Roadmap',
-            history: 'My Roadmaps — Progress History | Level Up Map',
-            about: 'About Us — The Mission of Level Up Map',
-            contact: 'Contact Us — Get in touch with Level Up Map Team',
-            features: 'Features — Powerful Tools for Your Learning Journey | Level Up Map'
+            home: 'AI Roadmap Generator & Learning Path Planner | Level Up Map',
+            generator: 'Free AI Roadmap Generator — Create Your Study Plan | Level Up Map',
+            history: 'My AI Roadmaps — Progress History | Level Up Map',
+            about: 'About Level Up Map — The Ultimate AI Learning Planner',
+            contact: 'Contact Us — Level Up Map Built With AI',
+            features: 'AI Features — Generate Dynamic Learning Roadmaps | Level Up Map'
         }
         const descriptions = {
-            home: 'Use AI to generate personalized step-by-step career roadmaps and learning paths. Powered by Gemini AI.',
-            generator: 'Enter your goal and our AI will create a comprehensive learning roadmap with resources and tasks.',
-            about: 'Learn more about the team behind Level Up Map and how we use AI to democratize learning.',
-            contact: 'Reach out for support, feedback, or collaboration opportunities.',
-            features: 'Discover the powerful features of Level Up Map: AI-powered generation, interactive visualization, progress tracking, and more.'
+            home: 'Free AI roadmap generator. Create personalized, step-by-step career and learning paths instantly. Plan your studies and goals with Gemini AI.',
+            generator: 'Enter any goal or skill, and our AI Roadmap Generator will create a comprehensive, step-by-step learning path complete with milestones and tasks.',
+            about: 'Learn more about the team behind Level Up Map and how we use AI to build the ultimate roadmap generator and study planner.',
+            contact: 'Reach out for support, feedback, or collaboration opportunities with the Level Up Map team.',
+            features: 'Discover the powerful AI features of Level Up Map: instant roadmap generation, interactive visual learning paths, progress tracking, and AI-driven insights.'
         }
 
         document.title = titles[currentPage] || 'Level Up Map'
