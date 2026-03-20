@@ -3,7 +3,7 @@
 An interactive AI roadmap generator that creates personalized learning paths using Google Gemini AI.
 
 ## 🚀 Live Demo
-[Check out the live website here!](https://levelupmap26.vercel.app/)
+[Check out the live website here!](https://levelupmap.xyz/)
 
 
 ## Features

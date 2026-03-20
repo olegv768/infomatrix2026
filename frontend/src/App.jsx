@@ -299,7 +299,7 @@ function App() {
             document.head.appendChild(link)
         }
         const path = currentPage === 'home' ? '' : currentPage
-        link.setAttribute('href', `https://levelupmap26.vercel.app/${path}`)
+        link.setAttribute('href', `https://levelupmap.xyz/${path}`)
 
         switch (currentPage) {
             case 'home':
