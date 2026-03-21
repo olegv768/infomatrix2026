@@ -1,0 +1,22 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Indigo Circle - Expanded and bolder -->
+  <circle cx="210" cy="190" r="185" fill="#4f46e5" stroke="white" stroke-width="25"/>
+  <circle cx="210" cy="190" r="185" fill="url(#indigo-grad)" fill-opacity="0.9"/>
+  <text x="210" y="215" text-anchor="middle" fill="white" font-family="Arial Black, Impact, sans-serif" font-weight="950" font-size="70" letter-spacing="-3">LEVELUP</text>
+  
+  <!-- Pink Circle - Expanded and bolder -->
+  <circle cx="370" cy="370" r="135" fill="#ec4899" stroke="white" stroke-width="20"/>
+  <circle cx="370" cy="370" r="135" fill="url(#pink-grad)" fill-opacity="0.9"/>
+  <text x="370" y="388" text-anchor="middle" fill="white" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="55">Map</text>
+
+  <defs>
+    <linearGradient id="indigo-grad" x1="116" y1="80" x2="396" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#1e1b4b"/>
+    </linearGradient>
+    <linearGradient id="pink-grad" x1="240" y1="250" x2="440" y2="450" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fb7185"/>
+      <stop offset="1" stop-color="#831843"/>
+    </linearGradient>
+  </defs>
+</svg>
