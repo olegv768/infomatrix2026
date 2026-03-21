@@ -18,16 +18,16 @@ export default function Navbar({ currentPage, onNavigate }) {
       {/* Balanced navbar container */}
       <div className="relative w-full px-6 sm:px-12 lg:px-20 h-16 flex items-center justify-between">
 
-        {/* Logo — Aggressively shifted towards the edge on all screens */}
+        {/* Logo — Positioned naturally with responsive padding */}
         <div 
-          className="flex items-center absolute left-[-15px] md:left-[-10px] top-1/2 -translate-y-1/2"
+          className="flex items-center absolute left-0 sm:left-4 md:left-8 top-1/2 -translate-y-1/2"
         >
           <a
             href="/"
             onClick={(e) => { e.preventDefault(); onNavigate('home'); }}
-            className="flex items-center group relative z-10"
+            className="flex items-center group relative z-10 p-2"
           >
-            <Logo className="scale-75 sm:scale-90 origin-center" />
+            <Logo className="scale-[0.85] sm:scale-100 origin-left" />
           </a>
         </div>
 
