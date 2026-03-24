@@ -46,11 +46,35 @@ const InteractiveHero = () => {
         const handleMouseDown = () => { mouse.pressed = true; };
         const handleMouseUp = () => { mouse.pressed = false; };
 
+        const handleTouchStart = (e) => {
+            mouse.pressed = true;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = touch.clientX - rect.left;
+            mouse.y = touch.clientY - rect.top;
+        };
+
+        const handleTouchMove = (e) => {
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = touch.clientX - rect.left;
+            mouse.y = touch.clientY - rect.top;
+        };
+
+        const handleTouchEnd = () => {
+            mouse.pressed = false;
+            mouse.x = null;
+            mouse.y = null;
+        };
+
         window.addEventListener('resize', handleResize);
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('mouseleave', handleMouseLeave);
         window.addEventListener('mousedown', handleMouseDown);
         window.addEventListener('mouseup', handleMouseUp);
+        window.addEventListener('touchstart', handleTouchStart);
+        window.addEventListener('touchmove', handleTouchMove);
+        window.addEventListener('touchend', handleTouchEnd);
 
         class Particle {
             constructor(x, y, dx, dy, size, layer) {
@@ -75,13 +99,15 @@ const InteractiveHero = () => {
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-                ctx.fillStyle = this.color;
+                
+                // Add star-like flickering (Antigravity-grade atmosphere)
+                const flicker = Math.random() > 0.98 ? (Math.random() * 0.4) : 0;
+                ctx.fillStyle = this.color.replace(/[\d.]+\)$/g, `${Math.max(0.1, this.baseOpacity + flicker)})`);
 
-                // Add tiny glow only on desktop to save mobile performance
-                const isMobile = window.innerWidth < 768;
-                if (this.layer === 1 && !isMobile) {
-                    ctx.shadowBlur = 5;
-                    ctx.shadowColor = 'rgba(99, 102, 241, 0.5)';
+                // Add tiny glow - enabled for mobile top layer for the "stars" effect
+                if (this.layer === 1) {
+                    ctx.shadowBlur = window.innerWidth < 768 ? 4 : 5;
+                    ctx.shadowColor = 'rgba(165, 180, 252, 0.6)';
                 } else {
                     ctx.shadowBlur = 0;
                 }
@@ -111,8 +137,9 @@ const InteractiveHero = () => {
                     let dy = mouse.y - this.y;
                     let distance = Math.sqrt(dx * dx + dy * dy);
 
-                    // Click makes them fly away much faster
-                    const interactionRadius = mouse.pressed ? mouse.radius * 1.5 : mouse.radius;
+                    // Interaction radius larger on mobile to make it easier to find "stars"
+                    const baseRadius = window.innerWidth < 768 ? 120 : mouse.radius;
+                    const interactionRadius = mouse.pressed ? baseRadius * 1.5 : baseRadius;
 
                     if (distance < interactionRadius) {
                         const force = (interactionRadius - distance) / interactionRadius;
@@ -140,11 +167,12 @@ const InteractiveHero = () => {
             particles = [];
             const count = (canvas.height * canvas.width) / 6000;
             const isMobile = window.innerWidth < 768;
-            const finalCount = Math.min(count, isMobile ? 40 : 350);
+            // Increased mobile count for better visibility
+            const finalCount = Math.min(count, isMobile ? 110 : 350);
 
             for (let i = 0; i < finalCount; i++) {
                 const layer = Math.floor(Math.random() * 3) + 1; // 1, 2, or 3
-                const size = (4 - layer) * (Math.random() * 1 + 0.5);
+                const size = (4 - layer) * (Math.random() * 1 + (isMobile ? 0.8 : 0.5));
                 const x = Math.random() * canvas.width;
                 const y = Math.random() * canvas.height;
                 const dx = (Math.random() * 0.6) - 0.3;
@@ -156,8 +184,7 @@ const InteractiveHero = () => {
 
         const drawConnectors = () => {
             const isMobile = window.innerWidth < 768;
-            if (isMobile) return; // Skip expensive line drawing on mobile
-
+            
             ctx.shadowBlur = 0; // Performance: no shadows for lines
 
             for (let a = 0; a < particles.length; a++) {
@@ -178,6 +205,12 @@ const InteractiveHero = () => {
                         const maxLayer = Math.max(particles[a].layer, particles[b].layer);
                         opacity /= maxLayer;
 
+                        // Reduced opacity and fewer lines on mobile for performance
+                        if (isMobile) {
+                            if (distance > limit * 0.4) continue;
+                            opacity *= 0.5;
+                        }
+
                         ctx.strokeStyle = `rgba(99, 102, 241, ${opacity})`;
                         ctx.lineWidth = 0.4;
                         ctx.beginPath();
@@ -192,7 +225,8 @@ const InteractiveHero = () => {
                     let dx = particles[a].x - mouse.x;
                     let dy = particles[a].y - mouse.y;
                     let distance = dx * dx + dy * dy;
-                    let mouseLimit = mouse.radius * mouse.radius;
+                    const baseRadius = isMobile ? 120 : mouse.radius;
+                    let mouseLimit = baseRadius * baseRadius;
 
                     if (distance < mouseLimit) {
                         let opacity = (1 - (distance / mouseLimit)) * 0.25;
@@ -211,10 +245,17 @@ const InteractiveHero = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // 1. Draw Global Bloom Atmosphere
-            if (mouse.x != null && mouse.y != null && window.innerWidth >= 768) {
-                const glowSize = mouse.pressed ? mouse.radius * 3 : mouse.radius * 2;
+            if (mouse.x != null && mouse.y != null) {
+                const isMobile = window.innerWidth < 768;
+                const baseRadius = isMobile ? 120 : mouse.radius;
+                const glowSize = mouse.pressed ? baseRadius * 3 : baseRadius * 2;
                 const gradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, glowSize);
-                gradient.addColorStop(0, mouse.pressed ? 'rgba(79, 70, 229, 0.15)' : 'rgba(99, 102, 241, 0.1)');
+                
+                // Slightly more subtle on mobile
+                const baseOpacity = isMobile ? 0.08 : 0.1;
+                const pressOpacity = isMobile ? 0.12 : 0.15;
+                
+                gradient.addColorStop(0, mouse.pressed ? `rgba(79, 70, 229, ${pressOpacity})` : `rgba(99, 102, 241, ${baseOpacity})`);
                 gradient.addColorStop(1, 'rgba(15, 23, 42, 0)');
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -243,6 +284,9 @@ const InteractiveHero = () => {
             window.removeEventListener('mouseleave', handleMouseLeave);
             window.removeEventListener('mousedown', handleMouseDown);
             window.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('touchstart', handleTouchStart);
+            window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchend', handleTouchEnd);
             cancelAnimationFrame(animationFrameId);
         };
     }, []);
@@ -253,7 +297,7 @@ const InteractiveHero = () => {
             className="absolute inset-0 z-0 pointer-events-none"
             style={{
                 mixBlendMode: 'screen',
-                filter: window.innerWidth < 768 ? 'none' : 'contrast(1.1) brightness(1.1)',
+                filter: 'contrast(1.1) brightness(1.1)',
                 maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
                 WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
                 willChange: 'transform'

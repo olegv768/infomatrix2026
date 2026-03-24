@@ -409,6 +409,11 @@ body::before {
   filter: brightness(1.2);
 }
 
+.title-reaction:active {
+  transform: scale(0.98) translateY(1px);
+  filter: brightness(0.9);
+}
+
 .title-reaction:hover .text-shimmer {
   opacity: 1;
   filter: brightness(1.2);
