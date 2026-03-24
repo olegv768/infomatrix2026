@@ -72,7 +72,9 @@ export default function Generator({
   const handleZoomOut = () => {
     if (zoomRef.current && svgRef.current) {
       const svg = d3.select(svgRef.current)
-      const newZoom = Math.max(zoom / 1.2, 0.3)
+      const isMobile = window.innerWidth < 768
+      const minZoom = isMobile ? 0.1 : 0.22
+      const newZoom = Math.max(zoom / 1.2, minZoom)
       zoomRef.current.scaleTo(svg.transition().duration(300), newZoom)
     }
   }
@@ -202,6 +204,8 @@ export default function Generator({
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
 
+    const isMobile = window.innerWidth < 768
+
     const width = svgRef.current.clientWidth
     const height = svgRef.current.clientHeight
 
@@ -238,7 +242,7 @@ export default function Generator({
 
     const zoomBehavior = d3
       .zoom()
-      .scaleExtent([0.3, 3])
+      .scaleExtent([isMobile ? 0.1 : 0.22, 3])
       .on('zoom', (event) => {
         container.attr('transform', event.transform)
         setZoom(event.transform.k)
@@ -248,7 +252,6 @@ export default function Generator({
     zoomRef.current = zoomBehavior
 
     // Intelligent initial placement to prevent tangling
-    const isMobile = window.innerWidth < 768
     const nodes = data.nodes.map((d) => {
       const savedPos = nodesRef.current?.find(n => n.id === d.id)
       if (savedPos?.x !== undefined) {
