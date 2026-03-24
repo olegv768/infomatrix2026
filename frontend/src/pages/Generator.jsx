@@ -261,12 +261,12 @@ export default function Generator({
       // Spread nodes vertically by level and horizontally by their position in that level
       const levelNodes = data.nodes.filter(n => n.level === d.level)
       const indexInLevel = levelNodes.findIndex(n => n.id === d.id)
-      const horizontalSpacing = isMobile ? 120 : 200
+      const horizontalSpacing = isMobile ? 300 : 200 // Increased for larger nodes
 
       return {
         ...d,
         x: width / 2 + (indexInLevel - (levelNodes.length - 1) / 2) * horizontalSpacing + (Math.random() - 0.5) * 50,
-        y: height / 2 + (d.level * (isMobile ? 150 : 200)) - (isMobile ? 150 : 300) // Offset upward so it grows down
+        y: height / 2 + (d.level * (isMobile ? 350 : 200)) - (isMobile ? 300 : 300) // Adjusted vertical spacing
       }
     })
     nodesRef.current = nodes
@@ -290,7 +290,8 @@ export default function Generator({
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('collision', d3.forceCollide().radius((d) => {
         const radii = { 0: 68, 1: 52, 2: 42, 3: 34, 4: 26 }
-        return (radii[d.level] || 24) + 20
+        const r = radii[d.level] || 24
+        return (isMobile ? r * 2.5 : r) + 20
       }))
 
     simulationRef.current = simulation
@@ -314,7 +315,8 @@ export default function Generator({
     // Node radius by level — root is dramatically larger
     const getNodeRadius = (level) => {
       const radii = { 0: 68, 1: 52, 2: 42, 3: 34, 4: 26 }
-      return radii[level] !== undefined ? radii[level] : 24
+      const r = radii[level] !== undefined ? radii[level] : 24
+      return isMobile ? r * 2.5 : r
     }
 
     // Generate Link Gradients
@@ -529,8 +531,10 @@ export default function Generator({
       .attr('dy', '0.35em')
       .attr('fill', '#fff')
       .attr('font-size', (d) => {
-        const sizes = { 0: '16px', 1: '13px', 2: '11px', 3: '10px', 4: '9px' }
-        return sizes[d.level] || '9px'
+        const sizes = isMobile 
+          ? { 0: '40px', 1: '32px', 2: '28px', 3: '25px', 4: '22px' }
+          : { 0: '16px', 1: '13px', 2: '11px', 3: '10px', 4: '9px' }
+        return sizes[d.level] || (isMobile ? '22px' : '9px')
       })
       .attr('font-weight', (d) => d.level === 0 ? '900' : '700')
       .attr('pointer-events', 'none')
@@ -544,8 +548,11 @@ export default function Generator({
         // Max chars per line based on node size
         const maxWidth = r * 1.4
 
+        const charLimit = isMobile ? 30 : 12
+        const lineLimit = isMobile ? 35 : 14
+
         if (words.length === 1) {
-          text.text(d.label.length > 12 ? d.label.slice(0, 11) + '…' : d.label)
+          text.text(d.label.length > charLimit ? d.label.slice(0, charLimit - 1) + '…' : d.label)
         } else {
           text.text('')
           const midpoint = Math.ceil(words.length / 2)
@@ -556,13 +563,13 @@ export default function Generator({
             .append('tspan')
             .attr('x', 0)
             .attr('dy', words.length > 2 ? '-0.6em' : '-0.5em')
-            .text(line1.length > 14 && d.level > 2 ? line1.slice(0, 13) + '…' : line1)
+            .text(line1.length > lineLimit && d.level > 2 ? line1.slice(0, lineLimit - 1) + '…' : line1)
 
           text
             .append('tspan')
             .attr('x', 0)
             .attr('dy', '1.2em')
-            .text(line2.length > 14 && d.level > 2 ? line2.slice(0, 13) + '…' : line2)
+            .text(line2.length > lineLimit && d.level > 2 ? line2.slice(0, lineLimit - 1) + '…' : line2)
         }
       })
 
@@ -822,7 +829,7 @@ export default function Generator({
 
       {/* Zoom Controls */}
       {data && (
-        <div className={`export-hide absolute bottom-36 md:top-56 right-12 z-20 flex flex-col gap-2 transition-all duration-300 ${sidebarOpen ? 'md:right-[504px]' : 'md:right-12'} ${window.innerWidth < 768 && sidebarOpen ? 'hidden' : 'flex'}`}>
+        <div className={`export-hide absolute bottom-48 md:top-56 right-12 z-20 flex flex-col gap-2 transition-all duration-300 ${sidebarOpen ? 'md:right-[504px]' : 'md:right-12'} ${window.innerWidth < 768 && sidebarOpen ? 'hidden' : 'flex'}`}>
           {/* Futuristic Circular Progress */}
           <div className="relative group mb-4">
             <div className="absolute -inset-1 bg-linear-to-r from-indigo-500 to-purple-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
