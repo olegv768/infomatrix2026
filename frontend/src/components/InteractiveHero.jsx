@@ -12,7 +12,7 @@ const InteractiveHero = () => {
         const mouse = {
             x: null,
             y: null,
-            radius: 200,
+            radius: 120, // Slightly smaller base radius for mobile
             pressed: false
         };
 
@@ -20,22 +20,31 @@ const InteractiveHero = () => {
         
         const handleResize = () => {
             const isMobile = window.innerWidth < 768;
-            // On mobile, ignore vertical resize events caused by the URL bar appearing/disappearing
-            // Only reinitialize if the width changes (orientation change)
             if (isMobile && window.innerWidth === lastWidth && canvas.width > 0) {
                 return;
             }
             lastWidth = window.innerWidth;
             
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            // Get actual dimensions of the parent section
+            if (canvas.parentElement) {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+            } else {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
             init();
         };
 
-        const handleMouseMove = (event) => {
+        const updateMousePosition = (x, y) => {
             const rect = canvas.getBoundingClientRect();
-            mouse.x = event.clientX - rect.left;
-            mouse.y = event.clientY - rect.top;
+            mouse.x = x - rect.left;
+            mouse.y = y - rect.top;
+        };
+
+        const handleMouseMove = (event) => {
+            updateMousePosition(event.clientX, event.clientY);
         };
 
         const handleMouseLeave = () => {
@@ -48,17 +57,15 @@ const InteractiveHero = () => {
 
         const handleTouchStart = (e) => {
             mouse.pressed = true;
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            mouse.x = touch.clientX - rect.left;
-            mouse.y = touch.clientY - rect.top;
+            if (e.touches && e.touches[0]) {
+                updateMousePosition(e.touches[0].clientX, e.touches[0].clientY);
+            }
         };
 
         const handleTouchMove = (e) => {
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            mouse.x = touch.clientX - rect.left;
-            mouse.y = touch.clientY - rect.top;
+            if (e.touches && e.touches[0]) {
+                updateMousePosition(e.touches[0].clientX, e.touches[0].clientY);
+            }
         };
 
         const handleTouchEnd = () => {
@@ -67,14 +74,15 @@ const InteractiveHero = () => {
             mouse.y = null;
         };
 
+        // Add listeners to window to capture events everywhere
         window.addEventListener('resize', handleResize);
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('mouseleave', handleMouseLeave);
         window.addEventListener('mousedown', handleMouseDown);
         window.addEventListener('mouseup', handleMouseUp);
-        window.addEventListener('touchstart', handleTouchStart);
-        window.addEventListener('touchmove', handleTouchMove);
-        window.addEventListener('touchend', handleTouchEnd);
+        window.addEventListener('touchstart', handleTouchStart, { passive: true });
+        window.addEventListener('touchmove', handleTouchMove, { passive: true });
+        window.addEventListener('touchend', handleTouchEnd, { passive: true });
 
         class Particle {
             constructor(x, y, dx, dy, size, layer) {
@@ -85,29 +93,30 @@ const InteractiveHero = () => {
                 this.size = size;
                 this.layer = layer; // 1 (closer) to 3 (background)
 
-                // Physics constants (Antigravity-grade refinement)
+                // Physics constants
                 this.density = (Math.random() * 20) + 15;
-                this.friction = 0.98; // Increased for longer, smoother glide
+                this.friction = 0.98;
                 this.velocity = { x: 0, y: 0 };
 
-                // Colors based on layer depth
+                // Colors components for robust calculation
                 const opacities = [0.6, 0.4, 0.2];
                 this.baseOpacity = opacities[layer - 1];
-                this.color = `rgba(226, 232, 240, ${this.baseOpacity})`;
+                this.baseColor = layer === 1 ? '165, 180, 252' : '226, 232, 240';
             }
 
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
                 
-                // Add star-like flickering (Antigravity-grade atmosphere)
-                const flicker = Math.random() > 0.98 ? (Math.random() * 0.4) : 0;
-                ctx.fillStyle = this.color.replace(/[\d.]+\)$/g, `${Math.max(0.1, this.baseOpacity + flicker)})`);
+                // Twinkle effect
+                const flicker = Math.random() > 0.98 ? (Math.random() * 0.3) : 0;
+                const alpha = Math.max(0.1, this.baseOpacity + flicker);
+                ctx.fillStyle = `rgba(${this.baseColor}, ${alpha})`;
 
-                // Add tiny glow - enabled for mobile top layer for the "stars" effect
+                // Bloom only on layer 1
                 if (this.layer === 1) {
-                    ctx.shadowBlur = window.innerWidth < 768 ? 4 : 5;
-                    ctx.shadowColor = 'rgba(165, 180, 252, 0.6)';
+                    ctx.shadowBlur = window.innerWidth < 768 ? 4 : 8;
+                    ctx.shadowColor = 'rgba(99, 102, 241, 0.4)';
                 } else {
                     ctx.shadowBlur = 0;
                 }
@@ -116,46 +125,37 @@ const InteractiveHero = () => {
             }
 
             update() {
-                // 1. Drifting + Layered speeds (Parallax)
-                const speedMult = (4 - this.layer) * 0.5;
+                const speedMult = (4 - this.layer) * 0.4;
                 this.x += this.dx * speedMult + this.velocity.x;
                 this.y += this.dy * speedMult + this.velocity.y;
 
-                // 2. Physics deceleration
                 this.velocity.x *= this.friction;
                 this.velocity.y *= this.friction;
 
-                // 3. Infinite Wrap
-                if (this.x > canvas.width + 50) this.x = -50;
-                else if (this.x < -50) this.x = canvas.width + 50;
-                if (this.y > canvas.height + 50) this.y = -50;
-                else if (this.y < -50) this.y = canvas.height + 50;
+                // Infinite Wrap
+                const margin = 50;
+                if (this.x > canvas.width + margin) this.x = -margin;
+                else if (this.x < -margin) this.x = canvas.width + margin;
+                if (this.y > canvas.height + margin) this.y = -margin;
+                else if (this.y < -margin) this.y = canvas.height + margin;
 
-                // 4. Advanced Interaction
-                if (mouse.x != null && mouse.y != null) {
+                // Interaction
+                if (mouse.x !== null && mouse.y !== null) {
                     let dx = mouse.x - this.x;
                     let dy = mouse.y - this.y;
                     let distance = Math.sqrt(dx * dx + dy * dy);
 
-                    // Interaction radius larger on mobile to make it easier to find "stars"
-                    const baseRadius = window.innerWidth < 768 ? 120 : mouse.radius;
-                    const interactionRadius = mouse.pressed ? baseRadius * 1.5 : baseRadius;
+                    const baseRadius = window.innerWidth < 768 ? 120 : 200;
+                    const interactionRadius = mouse.pressed ? baseRadius * 1.6 : baseRadius;
 
                     if (distance < interactionRadius) {
                         const force = (interactionRadius - distance) / interactionRadius;
                         const directionX = dx / distance;
                         const directionY = dy / distance;
 
-                        const pushStrength = mouse.pressed ? 2.5 : 1;
-                        this.velocity.x -= directionX * force * this.density * 0.05 * pushStrength;
-                        this.velocity.y -= directionY * force * this.density * 0.05 * pushStrength;
-
-                        // Interaction visual feedback
-                        if (this.layer === 1) {
-                            this.color = `rgba(165, 180, 252, ${this.baseOpacity + force * 0.4})`;
-                        }
-                    } else {
-                        this.color = `rgba(226, 232, 240, ${this.baseOpacity})`;
+                        const pushStrength = mouse.pressed ? 2.8 : 1.2;
+                        this.velocity.x -= directionX * force * this.density * 0.04 * pushStrength;
+                        this.velocity.y -= directionY * force * this.density * 0.04 * pushStrength;
                     }
                 }
 
@@ -165,18 +165,20 @@ const InteractiveHero = () => {
 
         const init = () => {
             particles = [];
-            const count = (canvas.height * canvas.width) / 6000;
+            const area = canvas.width * canvas.height;
             const isMobile = window.innerWidth < 768;
-            // Increased mobile count for better visibility
-            const finalCount = Math.min(count, isMobile ? 110 : 350);
+            
+            // Adjust count based on area to ensure full coverage
+            let count = Math.floor(area / 7000);
+            const finalCount = Math.min(count, isMobile ? 120 : 350);
 
             for (let i = 0; i < finalCount; i++) {
-                const layer = Math.floor(Math.random() * 3) + 1; // 1, 2, or 3
-                const size = (4 - layer) * (Math.random() * 1 + (isMobile ? 0.8 : 0.5));
+                const layer = Math.floor(Math.random() * 3) + 1;
+                const size = (4 - layer) * (Math.random() * 1.2 + (isMobile ? 0.8 : 0.6));
                 const x = Math.random() * canvas.width;
                 const y = Math.random() * canvas.height;
-                const dx = (Math.random() * 0.6) - 0.3;
-                const dy = (Math.random() * 0.6) - 0.3;
+                const dx = (Math.random() * 0.5) - 0.25;
+                const dy = (Math.random() * 0.5) - 0.25;
 
                 particles.push(new Particle(x, y, dx, dy, size, layer));
             }
@@ -184,11 +186,11 @@ const InteractiveHero = () => {
 
         const drawConnectors = () => {
             const isMobile = window.innerWidth < 768;
+            const threshold = (canvas.width / 8) * (canvas.height / 8);
             
-            ctx.shadowBlur = 0; // Performance: no shadows for lines
+            ctx.shadowBlur = 0;
 
             for (let a = 0; a < particles.length; a++) {
-                // Lines only between particles in the same or adjacent layers to create depth
                 for (let b = a + 1; b < particles.length; b++) {
                     if (Math.abs(particles[a].layer - particles[b].layer) > 1) continue;
 
@@ -196,23 +198,16 @@ const InteractiveHero = () => {
                     let dy = particles[a].y - particles[b].y;
                     let distance = dx * dx + dy * dy;
 
-                    // Layer-dependent threshold
-                    const limit = (canvas.width / 7) * (canvas.height / 7);
-
-                    if (distance < limit) {
-                        let opacity = (1 - (distance / limit)) * 0.15;
-                        // Fade lines based on deepest particle
-                        const maxLayer = Math.max(particles[a].layer, particles[b].layer);
-                        opacity /= maxLayer;
-
-                        // Reduced opacity and fewer lines on mobile for performance
+                    if (distance < threshold) {
+                        let opacity = (1 - (distance / threshold)) * 0.12;
+                        
                         if (isMobile) {
-                            if (distance > limit * 0.4) continue;
-                            opacity *= 0.5;
+                            if (distance > threshold * 0.5) continue;
+                            opacity *= 0.4;
                         }
 
                         ctx.strokeStyle = `rgba(99, 102, 241, ${opacity})`;
-                        ctx.lineWidth = 0.4;
+                        ctx.lineWidth = 0.5;
                         ctx.beginPath();
                         ctx.moveTo(particles[a].x, particles[a].y);
                         ctx.lineTo(particles[b].x, particles[b].y);
@@ -220,18 +215,17 @@ const InteractiveHero = () => {
                     }
                 }
 
-                // Connect to mouse with higher intensity
-                if (mouse.x != null && mouse.y != null) {
+                if (mouse.x !== null && mouse.y !== null) {
                     let dx = particles[a].x - mouse.x;
                     let dy = particles[a].y - mouse.y;
                     let distance = dx * dx + dy * dy;
-                    const baseRadius = isMobile ? 120 : mouse.radius;
+                    const baseRadius = isMobile ? 120 : 200;
                     let mouseLimit = baseRadius * baseRadius;
 
                     if (distance < mouseLimit) {
-                        let opacity = (1 - (distance / mouseLimit)) * 0.25;
+                        let opacity = (1 - (distance / mouseLimit)) * 0.2;
                         ctx.strokeStyle = `rgba(165, 180, 252, ${opacity / particles[a].layer})`;
-                        ctx.lineWidth = 0.6;
+                        ctx.lineWidth = 0.8;
                         ctx.beginPath();
                         ctx.moveTo(particles[a].x, particles[a].y);
                         ctx.lineTo(mouse.x, mouse.y);
@@ -244,16 +238,15 @@ const InteractiveHero = () => {
         const drawScene = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. Draw Global Bloom Atmosphere
-            if (mouse.x != null && mouse.y != null) {
+            // Bloom
+            if (mouse.x !== null && mouse.y !== null) {
                 const isMobile = window.innerWidth < 768;
-                const baseRadius = isMobile ? 120 : mouse.radius;
-                const glowSize = mouse.pressed ? baseRadius * 3 : baseRadius * 2;
+                const baseRadius = isMobile ? 120 : 200;
+                const glowSize = mouse.pressed ? baseRadius * 3.5 : baseRadius * 2;
                 const gradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, glowSize);
                 
-                // Slightly more subtle on mobile
-                const baseOpacity = isMobile ? 0.08 : 0.1;
-                const pressOpacity = isMobile ? 0.12 : 0.15;
+                const baseOpacity = isMobile ? 0.06 : 0.1;
+                const pressOpacity = isMobile ? 0.1 : 0.15;
                 
                 gradient.addColorStop(0, mouse.pressed ? `rgba(79, 70, 229, ${pressOpacity})` : `rgba(99, 102, 241, ${baseOpacity})`);
                 gradient.addColorStop(1, 'rgba(15, 23, 42, 0)');
@@ -261,12 +254,10 @@ const InteractiveHero = () => {
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
-            // 2. Draw Particles with Physics
             for (let i = 0; i < particles.length; i++) {
                 particles[i].update();
             }
 
-            // 3. Draw Web/Mesh
             drawConnectors();
         };
 
@@ -297,7 +288,6 @@ const InteractiveHero = () => {
             className="absolute inset-0 z-0 pointer-events-none"
             style={{
                 mixBlendMode: 'screen',
-                filter: 'contrast(1.1) brightness(1.1)',
                 maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
                 WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
                 willChange: 'transform'
@@ -307,3 +297,4 @@ const InteractiveHero = () => {
 };
 
 export default InteractiveHero;
+
