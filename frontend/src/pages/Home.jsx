@@ -7,9 +7,17 @@ import FeatureCard from '../components/FeatureCard'
 
 export default function Home({ onNavigate }) {
   const sectionRefs = useRef([])
+  const [showHeroEffect, setShowHeroEffect] = React.useState(false)
 
   useEffect(() => {
-    // Legacy observer removed in favor of ScrollReveal
+    // Only show the complex star effect on desktop to save mobile performance
+    setShowHeroEffect(window.innerWidth >= 768)
+    
+    const handleResize = () => {
+      setShowHeroEffect(window.innerWidth >= 768)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
   }, [])
 
   const features = [
@@ -72,7 +80,7 @@ export default function Home({ onNavigate }) {
           paddingRight: 'clamp(32px, 8vw, 96px)' 
         }}
       >
-        <InteractiveHero />
+        {showHeroEffect && <InteractiveHero />}
         <div className="max-w-7xl mx-auto text-center relative z-10 px-4">
           <ScrollReveal delay={0}>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-8 btn-shine magnetic-hover cursor-default">
