@@ -261,12 +261,12 @@ export default function Generator({
       // Spread nodes vertically by level and horizontally by their position in that level
       const levelNodes = data.nodes.filter(n => n.level === d.level)
       const indexInLevel = levelNodes.findIndex(n => n.id === d.id)
-      const horizontalSpacing = isMobile ? 220 : 200 // Proportional to 1.8x
+      const horizontalSpacing = isMobile ? 265 : 200 // 1.2x current
 
       return {
         ...d,
         x: width / 2 + (indexInLevel - (levelNodes.length - 1) / 2) * horizontalSpacing + (Math.random() - 0.5) * 50,
-        y: height / 2 + (d.level * (isMobile ? 250 : 200)) - (isMobile ? 250 : 300) // Proportional to 1.8x
+        y: height / 2 + (d.level * (isMobile ? 300 : 200)) - (isMobile ? 300 : 300) // 1.2x current
       }
     })
     nodesRef.current = nodes
@@ -283,7 +283,7 @@ export default function Generator({
         d3
           .forceLink(links)
           .id((d) => d.id)
-          .distance(220)
+          .distance(isMobile ? 265 : 220) // 1.2x larger for mobile
           .strength(0.25)
       )
       .force('charge', d3.forceManyBody().strength(-1200))
@@ -291,7 +291,7 @@ export default function Generator({
       .force('collision', d3.forceCollide().radius((d) => {
         const radii = { 0: 68, 1: 52, 2: 42, 3: 34, 4: 26 }
         const r = radii[d.level] || 24
-        return (isMobile ? r * 1.8 : r) + 20
+        return (isMobile ? r * 1.4 : r) + 20
       }))
 
     simulationRef.current = simulation
@@ -316,7 +316,7 @@ export default function Generator({
     const getNodeRadius = (level) => {
       const radii = { 0: 68, 1: 52, 2: 42, 3: 34, 4: 26 }
       const r = radii[level] !== undefined ? radii[level] : 24
-      return isMobile ? r * 1.8 : r
+      return isMobile ? r * 1.4 : r
     }
 
     // Generate Link Gradients
@@ -532,9 +532,9 @@ export default function Generator({
       .attr('fill', '#fff')
       .attr('font-size', (d) => {
         const sizes = isMobile 
-          ? { 0: '29px', 1: '23px', 2: '20px', 3: '18px', 4: '16px' }
+          ? { 0: '22px', 1: '18px', 2: '15px', 3: '14px', 4: '13px' }
           : { 0: '16px', 1: '13px', 2: '11px', 3: '10px', 4: '9px' }
-        return sizes[d.level] || (isMobile ? '16px' : '9px')
+        return sizes[d.level] || (isMobile ? '13px' : '9px')
       })
       .attr('font-weight', (d) => d.level === 0 ? '900' : '700')
       .attr('pointer-events', 'none')
@@ -548,8 +548,8 @@ export default function Generator({
         // Max chars per line based on node size
         const maxWidth = r * 1.4
 
-        const charLimit = isMobile ? 20 : 12
-        const lineLimit = isMobile ? 24 : 14
+        const charLimit = isMobile ? 15 : 12
+        const lineLimit = isMobile ? 18 : 14
 
         if (words.length === 1) {
           text.text(d.label.length > charLimit ? d.label.slice(0, charLimit - 1) + '…' : d.label)
