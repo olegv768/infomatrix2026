@@ -873,21 +873,21 @@ export default function Generator({
 
           <button
             onClick={handleZoomIn}
-            className="p-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-slate-600/50 backdrop-blur transition-colors shadow-lg"
+            className="p-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-slate-600/50 backdrop-blur transition-colors shadow-lg hidden md:block"
             title="Zoom In"
           >
             <i className="fa-solid fa-magnifying-glass-plus text-white"></i>
           </button>
           <button
             onClick={handleZoomOut}
-            className="p-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-slate-600/50 backdrop-blur transition-colors shadow-lg"
+            className="p-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-slate-600/50 backdrop-blur transition-colors shadow-lg hidden md:block"
             title="Zoom Out"
           >
             <i className="fa-solid fa-magnifying-glass-minus text-white"></i>
           </button>
           <button
             onClick={handleResetZoom}
-            className="p-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-slate-600/50 backdrop-blur transition-colors shadow-lg"
+            className="p-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-slate-600/50 backdrop-blur transition-colors shadow-lg hidden md:block"
             title="Reset Zoom"
           >
             <i className="fa-solid fa-expand text-white"></i>
