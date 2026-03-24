@@ -261,12 +261,12 @@ export default function Generator({
       // Spread nodes vertically by level and horizontally by their position in that level
       const levelNodes = data.nodes.filter(n => n.level === d.level)
       const indexInLevel = levelNodes.findIndex(n => n.id === d.id)
-      const horizontalSpacing = isMobile ? 300 : 200 // Increased for larger nodes
+      const horizontalSpacing = isMobile ? 220 : 200 // Proportional to 1.8x
 
       return {
         ...d,
         x: width / 2 + (indexInLevel - (levelNodes.length - 1) / 2) * horizontalSpacing + (Math.random() - 0.5) * 50,
-        y: height / 2 + (d.level * (isMobile ? 350 : 200)) - (isMobile ? 300 : 300) // Adjusted vertical spacing
+        y: height / 2 + (d.level * (isMobile ? 250 : 200)) - (isMobile ? 250 : 300) // Proportional to 1.8x
       }
     })
     nodesRef.current = nodes
@@ -291,7 +291,7 @@ export default function Generator({
       .force('collision', d3.forceCollide().radius((d) => {
         const radii = { 0: 68, 1: 52, 2: 42, 3: 34, 4: 26 }
         const r = radii[d.level] || 24
-        return (isMobile ? r * 2.5 : r) + 20
+        return (isMobile ? r * 1.8 : r) + 20
       }))
 
     simulationRef.current = simulation
@@ -316,7 +316,7 @@ export default function Generator({
     const getNodeRadius = (level) => {
       const radii = { 0: 68, 1: 52, 2: 42, 3: 34, 4: 26 }
       const r = radii[level] !== undefined ? radii[level] : 24
-      return isMobile ? r * 2.5 : r
+      return isMobile ? r * 1.8 : r
     }
 
     // Generate Link Gradients
@@ -532,9 +532,9 @@ export default function Generator({
       .attr('fill', '#fff')
       .attr('font-size', (d) => {
         const sizes = isMobile 
-          ? { 0: '40px', 1: '32px', 2: '28px', 3: '25px', 4: '22px' }
+          ? { 0: '29px', 1: '23px', 2: '20px', 3: '18px', 4: '16px' }
           : { 0: '16px', 1: '13px', 2: '11px', 3: '10px', 4: '9px' }
-        return sizes[d.level] || (isMobile ? '22px' : '9px')
+        return sizes[d.level] || (isMobile ? '16px' : '9px')
       })
       .attr('font-weight', (d) => d.level === 0 ? '900' : '700')
       .attr('pointer-events', 'none')
@@ -548,8 +548,8 @@ export default function Generator({
         // Max chars per line based on node size
         const maxWidth = r * 1.4
 
-        const charLimit = isMobile ? 30 : 12
-        const lineLimit = isMobile ? 35 : 14
+        const charLimit = isMobile ? 20 : 12
+        const lineLimit = isMobile ? 24 : 14
 
         if (words.length === 1) {
           text.text(d.label.length > charLimit ? d.label.slice(0, charLimit - 1) + '…' : d.label)
@@ -829,7 +829,7 @@ export default function Generator({
 
       {/* Zoom Controls */}
       {data && (
-        <div className={`export-hide absolute bottom-48 md:top-56 right-12 z-20 flex flex-col gap-2 transition-all duration-300 ${sidebarOpen ? 'md:right-[504px]' : 'md:right-12'} ${window.innerWidth < 768 && sidebarOpen ? 'hidden' : 'flex'}`}>
+        <div className={`export-hide absolute bottom-56 right-6 md:top-56 md:right-12 z-20 flex flex-col gap-2 transition-all duration-300 ${sidebarOpen ? 'md:right-[504px]' : 'md:right-12'} ${window.innerWidth < 768 && sidebarOpen ? 'hidden' : 'flex'}`}>
           {/* Futuristic Circular Progress */}
           <div className="relative group mb-4">
             <div className="absolute -inset-1 bg-linear-to-r from-indigo-500 to-purple-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
