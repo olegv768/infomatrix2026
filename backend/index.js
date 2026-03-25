@@ -12,9 +12,15 @@ const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 const app = express();
 app.use(
   cors({
-    origin: "*",
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://levelupmap.xyz",
+      /\.vercel\.app$/,   // любые превью-деплои на Vercel
+    ],
     methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    optionsSuccessStatus: 200,
   }),
 );
 app.use(express.json());
@@ -72,12 +78,12 @@ app.post("/roadmap", async (req, res) => {
     return res.status(400).json({ error: "Goal is required" });
   }
 
+  let roadmapText = "";
+
   try {
     const prompt = `Create a comprehensive and detailed roadmap for achieving the goal: ${goal}
 
 CRITICAL INSTRUCTION: You MUST respond in the SAME LANGUAGE as the user's goal above. If the goal is in Russian, respond in Russian. If in English, respond in English. Match the user's language exactly.
-
-IMPORTANT: Return ONLY clean JSON without explanations, no text before or after the JSON.
 
 JSON Format:
 {
@@ -110,12 +116,7 @@ Rules:
 - category: one of "basics", "practice", "advanced", "goal", "foundation", "intermediate"
 - timeEstimate: realistic time estimate (e.g., "1-2 weeks", "1 month", "2-3 months")
 - children: array of child node ids (each node should have 2-5 children for proper depth)
-- resources: REQUIRED! Array of 2-4 HIGH-QUALITY learning resources for this specific node
-  * Use REAL, EXISTING URLs that are currently available online
-  * Prefer: official documentation, popular YouTube channels, Coursera, Udemy, freeCodeCamp, MDN, W3Schools
-  * Types: "youtube" (video tutorials), "documentation" (official docs), "course" (online courses), "article" (blog posts/guides), "book" (online books)
-  * Each resource must be directly relevant to the specific node topic
-  * Mix different types of resources for learning variety
+- resources: MANDATORY array of 2-4 learning resources (see RESOURCE RULES below)
 
 Create 30-50 nodes with comprehensive logical structure:
 - 1 node at level 0 (main goal)
@@ -132,17 +133,43 @@ Ensure the roadmap covers:
 - Each node should logically build on previous ones
 - STRICT RULE: Child nodes MUST be exactly one level deeper than their parent (e.g., Level 2 parent -> Level 3 children). Do NOT skip levels (e.g., Level 2 -> Level 4 is FORBIDDEN).
 
-RESOURCE QUALITY GUIDELINES:
-- For YouTube: link to well-known educational channels (Traversy Media, freeCodeCamp, The Net Ninja, etc.)
-- For Documentation: use official sources (React.dev, developer.mozilla.org, python.org/docs, etc.)
-- For Courses: suggest popular platforms (Coursera, Udemy, EdX, Codecademy, freeCodeCamp)
-- Ensure all URLs are realistic and follow proper URL format
+════════════════════════════════════════
+RESOURCE RULES — FOLLOW EXACTLY:
+════════════════════════════════════════
 
-Make the roadmap practical, actionable, and comprehensive enough to truly master the skill.
-Make sure all quotes are properly closed and JSON is valid!`;
+RULE 1 — MINIMUM 2 RESOURCES PER NODE (NON-NEGOTIABLE):
+Every node MUST have at least 2 resources. If you cannot find 2 topic-specific resources,
+use these guaranteed fallback URLs (replace TOPIC with the actual topic slug):
+  { "title": "freeCodeCamp — Search (English)", "type": "course", "url": "https://www.freecodecamp.org/news/search/?query=TOPIC" }
+  { "title": "YouTube — Search (English)", "type": "youtube", "url": "https://www.youtube.com/results?search_query=TOPIC" }
+  { "title": "Coursera — Search (English)", "type": "course", "url": "https://www.coursera.org/search?query=TOPIC" }
+NEVER leave a node with 0 or 1 resource.
 
-    // Use Gemini 3 Flash Preview
-    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+RULE 2 — ONLY REAL, VERIFIABLE URLS (NO FABRICATION):
+Do NOT invent article titles or fake blog posts. Only use URLs from known platforms:
+  YouTube: youtube.com/@traversymedia, youtube.com/@freecodecamp, youtube.com/results?search_query=...
+  Docs: developer.mozilla.org, docs.python.org, react.dev, learn.microsoft.com, docs.oracle.com
+  Courses: freecodecamp.org, theodinproject.com, cs50.harvard.edu, coursera.org, udemy.com
+  Articles: css-tricks.com, smashingmagazine.com, dev.to, medium.com, geeksforgeeks.org
+
+RULE 3 — LANGUAGE LABELS ON RESOURCE TITLES:
+If the resource is in the SAME language as the user's goal → write title normally.
+If the resource is in a DIFFERENT language → append the language name in parentheses.
+Examples: "The Odin Project (English)", "MDN Web Docs (English)", "freeCodeCamp (English)"
+Do NOT translate titles — keep them original. ALWAYS prefer resources in the user's language first;
+only fall back to English if no native-language resource exists.
+
+RULE 4 — NO FABRICATED TASKS:
+Every node must represent a real, widely-recognized learning step.
+Do NOT invent obscure sub-skills or fictional milestones that have no real-world basis.`;
+
+    // Use Gemini 3 Flash Preview with JSON mode
+    const model = genAI.getGenerativeModel({
+      model: "gemini-3-flash-preview",
+      generationConfig: {
+        responseMimeType: "application/json"
+      }
+    });
 
     // Implement retry logic for rate limits
     let result;
@@ -168,19 +195,10 @@ Make sure all quotes are properly closed and JSON is valid!`;
     }
 
     const response = await result.response;
-    let roadmapText = response.text();
+    roadmapText = response.text();
 
     if (!roadmapText) {
       return res.status(500).json({ error: "Failed to generate roadmap" });
-    }
-
-    // Clean up markdown code blocks if present
-    const jsonMatch = roadmapText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      roadmapText = jsonMatch[0];
-    } else {
-      // Fallback cleanup if regex fails
-      roadmapText = roadmapText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     }
 
     const roadmapJson = JSON.parse(roadmapText);
