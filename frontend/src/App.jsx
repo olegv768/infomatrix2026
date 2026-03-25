@@ -5,7 +5,7 @@ import Home from './pages/Home'
 import Generator from './pages/Generator'
 import About from './pages/About'
 import Contact from './pages/Contact'
-import Features from './pages/Features'
+
 import History from './pages/History'
 import ProgressWidget from './components/ProgressWidget'
 
@@ -24,7 +24,7 @@ function App() {
     useEffect(() => {
         const handleLocationChange = () => {
             const path = window.location.pathname.split('/').filter(Boolean)[0] || 'home'
-            const validPages = ['home', 'generator', 'about', 'contact', 'history', 'features']
+            const validPages = ['home', 'generator', 'about', 'contact', 'history']
             if (validPages.includes(path)) {
                 setCurrentPage(path)
             } else {
@@ -277,14 +277,14 @@ function App() {
             history: 'My AI Roadmaps — Progress History | Level Up Map',
             about: 'About Level Up Map — The Ultimate AI Learning Planner',
             contact: 'Contact Us — Level Up Map Built With AI',
-            features: 'AI Features — Generate Dynamic Learning Roadmaps | Level Up Map'
+
         }
         const descriptions = {
             home: 'Free AI roadmap generator. Create personalized, step-by-step career and learning paths instantly. Plan your studies and goals with Gemini AI.',
             generator: 'Enter any goal or skill, and our AI Roadmap Generator will create a comprehensive, step-by-step learning path complete with milestones and tasks.',
             about: 'Learn more about the team behind Level Up Map and how we use AI to build the ultimate roadmap generator and study planner.',
             contact: 'Reach out for support, feedback, or collaboration opportunities with the Level Up Map team.',
-            features: 'Discover the powerful AI features of Level Up Map: instant roadmap generation, interactive visual learning paths, progress tracking, and AI-driven insights.'
+
         }
 
         document.title = titles[currentPage] || 'Level Up Map'
@@ -326,8 +326,7 @@ function App() {
                 return <History onNavigate={handleNavigate} onLoadRoadmap={handleLoadRoadmap} />
             case 'about':
                 return <About onNavigate={handleNavigate} />
-            case 'features':
-                return <Features onNavigate={handleNavigate} />
+
             case 'contact':
                 return <Contact onNavigate={handleNavigate} />
             default:

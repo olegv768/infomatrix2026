@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import Footer from '../components/Footer'
 import InteractiveHero from '../components/InteractiveHero'
 import AntigravityCards from '../components/AntigravityCards'
-import ScrollReveal from '../components/ScrollReveal'
+
 import FeatureCard from '../components/FeatureCard'
 
 export default function Home({ onNavigate }) {
@@ -52,6 +52,8 @@ export default function Home({ onNavigate }) {
       description: 'Create roadmaps for any goal - from learning programming to starting a business.'
     }
   ]
+
+
 
   return (
     <div className="page-container min-h-full relative overflow-hidden">
@@ -126,6 +128,8 @@ export default function Home({ onNavigate }) {
           </div>
         </div>
       </section>
+
+
 
       {/* How It Works */}
       <section
