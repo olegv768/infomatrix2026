@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import Footer from '../components/Footer'
 import InteractiveHero from '../components/InteractiveHero'
 import AntigravityCards from '../components/AntigravityCards'
-
+import ScrollReveal from '../components/ScrollReveal'
 import FeatureCard from '../components/FeatureCard'
 
 export default function Home({ onNavigate }) {
