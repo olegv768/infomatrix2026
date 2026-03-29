@@ -1,6 +1,6 @@
 # RoadmapAI - AI-Powered Learning Paths
 
-An interactive AI roadmap generator that creates personalized learning paths using Google Gemini AI.
+An interactive AI roadmap generator that creates personalized learning paths using Google Gemma AI.
 
 ## 🚀 Live Demo
 [Check out the live website here!](https://levelupmap.xyz/)
@@ -44,10 +44,10 @@ cd backend
 npm install
 ```
 
-Create a `.env` file with your Google Gemini API key:
+Create a `.env` file with your Google Gemma API key:
 
 ```
-API_KEY=your_google_gemini_api_key
+API_KEY=your_google_gemma_api_key
 ```
 
 Start the server:
@@ -78,7 +78,7 @@ The project uses a split deployment architecture for maximum stability:
 - **Build Command**: `npm install`
 - **Start Command**: `node index.js`
 - **Environment Variables**: 
-  - `API_KEY`: Your Google Gemini API key.
+  - `API_KEY`: Your Google Gemma API key.
   - `NODE_ENV`: `production`
 
 ### 2. Frontend (deployed on Vercel)
@@ -90,7 +90,7 @@ The project uses a split deployment architecture for maximum stability:
 ## Tech Stack
 
 - **Frontend**: React, Vite, TailwindCSS, D3.js, Font Awesome
-- **Backend**: Node.js, Express.js, Google Gemini AI
+- **Backend**: Node.js, Express.js, Google Gemma AI
 - **Email/Contact**: Web3Forms
 
 ## License

@@ -1,22 +1,27 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import nodemailer from "nodemailer";
+import multer from "multer";
+import axios from "axios";
+import FormData from "form-data";
+import fs from "fs";
+import path from "path";
 
 dotenv.config();
 
-// Initialize the API with the standard library
-const genAI = new GoogleGenerativeAI(process.env.API_KEY);
-
 const app = express();
+const upload = multer({ storage: multer.memoryStorage() });
+
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
       "http://localhost:3000",
       "https://levelupmap.xyz",
-      /\.vercel\.app$/,   // любые превью-деплои на Vercel
+      /\.vercel\.app$/,
     ],
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -26,7 +31,7 @@ app.use(
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Roadmap API Server is running!");
+  res.send("Roadmap API Server is running with alem.ai!");
 });
 
 // Email Transporter setup
@@ -72,16 +77,72 @@ app.post("/contact", async (req, res) => {
   }
 });
 
+app.post("/transcribe", upload.single("audio"), async (req, res) => {
+  try {
+    const file = req.file;
+    if (!file) {
+      console.error("No audio file found in the request");
+      return res.status(400).json({ error: "No audio file provided" });
+    }
+
+    if (file.buffer.length < 100) {
+       console.error("Audio file is too small or empty");
+       return res.status(400).json({ error: "Audio recording is empty" });
+    }
+
+    const tempFilePath = path.join(process.cwd(), "speech.wav");
+    // Write buffer to disk to ensure flawless stream formatting for ffmpeg on API side
+    fs.writeFileSync(tempFilePath, file.buffer);
+
+    // Determine model and key based on lang
+    const lang = req.body.lang || "ru";
+    const model = lang === "kk" ? "speech-to-text-kk" : "speech-to-text";
+    const apiKey = lang === "kk" ? process.env.ALEM_STT_KK_API_KEY : process.env.ALEM_STT_API_KEY;
+
+    const formData = new FormData();
+    formData.append("model", model);
+    formData.append("file", fs.readFileSync(tempFilePath), {
+      filename: "speech.wav",
+      contentType: "audio/wav",
+    });
+    formData.append("language", lang);
+
+    console.log(`📡 Sending ${lang} audio buffer (${file.buffer.length} bytes) to alem.ai via axios...`);
+    
+    const response = await axios.post("https://llm.alem.ai/v1/audio/transcriptions", formData, {
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        ...formData.getHeaders(),
+      },
+      timeout: 30000 
+    });
+
+    // Cleanup temp file
+    if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+
+    console.log("✅ Transcription success:", response.data.text);
+    res.json({ text: response.data.text });
+  } catch (error) {
+    console.error("❌ Transcription error detail:");
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("Data:", JSON.stringify(error.response.data, null, 2));
+      res.status(500).json({ error: "Transcription failed", details: error.response.data });
+    } else {
+      console.error("Message:", error.message);
+      res.status(500).json({ error: "Transcription failed", details: error.message });
+    }
+  }
+});
+
 app.post("/roadmap", async (req, res) => {
   const { goal } = req.body;
+  console.log(`🚀 New Roadmap Request: ${goal}`);
   if (!goal) {
     return res.status(400).json({ error: "Goal is required" });
   }
 
-  let roadmapText = "";
-
-  try {
-    const prompt = `Create a comprehensive and detailed roadmap for achieving the goal: ${goal}
+  const prompt = `Create a comprehensive and detailed roadmap for achieving the goal: ${goal}
 
 CRITICAL INSTRUCTION: You MUST respond in the SAME LANGUAGE as the user's goal above. If the goal is in Russian, respond in Russian. If in English, respond in English. Match the user's language exactly.
 
@@ -119,7 +180,7 @@ Rules:
 - resources: MANDATORY array of 2-4 learning resources (see RESOURCE RULES below)
 
 Create 30-50 nodes with comprehensive logical structure:
-- 1 node at level 0 (main goal)
+- 1 node at level 0 (main Goal)
 - 4-6 nodes at level 1 (major phases/stages of learning)
 - 12-18 nodes at level 2 (key milestones and major topics)
 - 12-20 nodes at level 3 (specific tasks, subtopics, and skills)
@@ -131,101 +192,60 @@ Ensure the roadmap covers:
 - Practical projects and exercises
 - Advanced topics and specializations
 - Each node should logically build on previous ones
-- STRICT RULE: Child nodes MUST be exactly one level deeper than their parent (e.g., Level 2 parent -> Level 3 children). Do NOT skip levels (e.g., Level 2 -> Level 4 is FORBIDDEN).
+- STRICT RULE: Child nodes MUST be exactly one level deeper than their parent (e.g., Level 2 parent -> Level 3 children). Do NOT skip levels.
 
 ════════════════════════════════════════
 RESOURCE RULES — FOLLOW EXACTLY:
 ════════════════════════════════════════
+RULE 1 — MINIMUM 2 RESOURCES: Every node MUST have at least 2 resources. Use fallback URLs if needed.
+RULE 2 — VERIFIABLE URLs: Only use URLs from known platforms (youtube, docs, coursera).
+RULE 3 — LANGUAGE LABELS: Keep titles original, append language in parentheses if different.
+RULE 4 — NO FABRICATED TASKS: Follow real-world steps.
 
-RULE 1 — MINIMUM 2 RESOURCES PER NODE (NON-NEGOTIABLE):
-Every node MUST have at least 2 resources. If you cannot find 2 topic-specific resources,
-use these guaranteed fallback URLs (replace TOPIC with the actual topic slug):
-  { "title": "freeCodeCamp — Search (English)", "type": "course", "url": "https://www.freecodecamp.org/news/search/?query=TOPIC" }
-  { "title": "YouTube — Search (English)", "type": "youtube", "url": "https://www.youtube.com/results?search_query=TOPIC" }
-  { "title": "Coursera — Search (English)", "type": "course", "url": "https://www.coursera.org/search?query=TOPIC" }
-NEVER leave a node with 0 or 1 resource.
+════════════════════════════════════════
+STRICT RESTRICTIONS — DO NOT VIOLATE:
+════════════════════════════════════════
+❌ Нельзя нарушать законодательство РК
+❌ Нельзя проводить незаконную обработку данных
+❌ Нельзя давать медицинские/юридические рекомендации
+❌ Нельзя создавать азартные игры
 
-RULE 2 — ONLY REAL, VERIFIABLE URLS (NO FABRICATION):
-Do NOT invent article titles or fake blog posts. Only use URLs from known platforms:
-  YouTube: youtube.com/@traversymedia, youtube.com/@freecodecamp, youtube.com/results?search_query=...
-  Docs: developer.mozilla.org, docs.python.org, react.dev, learn.microsoft.com, docs.oracle.com
-  Courses: freecodecamp.org, theodinproject.com, cs50.harvard.edu, coursera.org, udemy.com
-  Articles: css-tricks.com, smashingmagazine.com, dev.to, medium.com, geeksforgeeks.org
+Output explicitly ONLY valid JSON. No markdown wrappers.`;
 
-RULE 3 — LANGUAGE LABELS ON RESOURCE TITLES:
-If the resource is in the SAME language as the user's goal → write title normally.
-If the resource is in a DIFFERENT language → append the language name in parentheses.
-Examples: "The Odin Project (English)", "MDN Web Docs (English)", "freeCodeCamp (English)"
-Do NOT translate titles — keep them original. ALWAYS prefer resources in the user's language first;
-only fall back to English if no native-language resource exists.
-
-RULE 4 — NO FABRICATED TASKS:
-Every node must represent a real, widely-recognized learning step.
-Do NOT invent obscure sub-skills or fictional milestones that have no real-world basis.`;
-
-    // Use Gemini 3 Flash Preview with JSON mode
-    const model = genAI.getGenerativeModel({
-      model: "gemini-3-flash-preview",
-      generationConfig: {
-        responseMimeType: "application/json"
-      }
+  try {
+    const response = await fetch("https://llm.alem.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.ALEM_AI_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gemma3", 
+        messages: [{ role: "user", content: prompt }]
+      })
     });
 
-    // Implement retry logic for rate limits
-    let result;
-    let maxRetries = 2;
-    let retryCount = 0;
-    let baseDelay = 3000;
-
-    while (retryCount <= maxRetries) {
-      try {
-        result = await model.generateContent(prompt);
-        break;
-      } catch (error) {
-        const isRateLimit = error.status === 429 || (error.message && error.message.includes("429"));
-        if (isRateLimit && retryCount < maxRetries) {
-          retryCount++;
-          console.log(`Rate limit reached, retrying in ${baseDelay / 1000}s... (Attempt ${retryCount}/${maxRetries})`);
-          await new Promise(resolve => setTimeout(resolve, baseDelay));
-          baseDelay *= 2; // Exponential backoff
-        } else {
-          throw error;
-        }
-      }
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || "API request failed with status: " + response.status);
     }
 
-    const response = await result.response;
-    roadmapText = response.text();
+    const data = await response.json();
+    let roadmapText = data.choices[0].message.content.trim();
 
-    if (!roadmapText) {
-      return res.status(500).json({ error: "Failed to generate roadmap" });
+    // Strip markdown JSON wrappers if gemma3 adds them
+    if (roadmapText.startsWith('```json')) {
+      roadmapText = roadmapText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (roadmapText.startsWith('```')) {
+      roadmapText = roadmapText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     }
 
     const roadmapJson = JSON.parse(roadmapText);
     res.json(roadmapJson);
+
   } catch (error) {
     console.error("Error generating roadmap:", error);
-
-    const isRateLimit = error.status === 429 || (error.message && error.message.includes("429"));
-
-    if (isRateLimit) {
-      return res.status(429).json({
-        error: "AI Service is busy. Please try again in 30 seconds.",
-        details: "The AI service is currently experiencing high demand. We've attempted retries, but the limit persists. Please wait a moment before trying again."
-      });
-    }
-
-    if (error instanceof SyntaxError) {
-      console.error("Raw Invalid JSON:", roadmapText);
-      return res.status(500).json({
-        error: "Invalid Roadmap Format",
-        details: "The AI generated an invalid roadmap structure. Please try a more specific goal."
-      });
-    }
-
-    res
-      .status(500)
-      .json({ error: "Generation Failed", details: error.message });
+    res.status(500).json({ error: "Generation Failed", details: error.message });
   }
 });
 

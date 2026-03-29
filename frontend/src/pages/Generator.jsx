@@ -34,6 +34,144 @@ export default function Generator({
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const svgRef = useRef(null)
   const simulationRef = useRef(null)
+  const [isRecording, setIsRecording] = useState(false);
+  const [selectedSTTLang, setSelectedSTTLang] = useState('ru'); // 'ru' or 'kk'
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+
+
+  const audioBufferToWav = (buffer) => {
+    const numOfChan = buffer.numberOfChannels;
+    const length = buffer.length * numOfChan * 2 + 44;
+    const bufferArr = new ArrayBuffer(length);
+    const view = new DataView(bufferArr);
+    const channels = [];
+    let i;
+    let sample;
+    let offset = 0;
+    let pos = 0;
+
+    // write WAVE header
+    const setUint32 = (data) => {
+      view.setUint32(pos, data, true);
+      pos += 4;
+    };
+
+    const setUint16 = (data) => {
+      view.setUint16(pos, data, true);
+      pos += 2;
+    };
+
+    setUint32(0x46464952); // "RIFF"
+    setUint32(length - 8); // file length - 8
+    setUint32(0x45564157); // "WAVE"
+
+    setUint32(0x20746d66); // "fmt " chunk
+    setUint32(16); // length = 16
+    setUint16(1); // PCM (uncompressed)
+    setUint16(numOfChan);
+    setUint32(buffer.sampleRate);
+    setUint32(buffer.sampleRate * 2 * numOfChan); // avg. bytes/sec
+    setUint16(numOfChan * 2); // block-align
+    setUint16(16); // 16-bit (hardcoded)
+
+    setUint32(0x61746164); // "data" - chunk
+    setUint32(length - pos - 4); // chunk length
+
+    // write interleaved data
+    for (i = 0; i < buffer.numberOfChannels; i++) {
+      channels.push(buffer.getChannelData(i));
+    }
+
+    while (pos < length) {
+      for (i = 0; i < numOfChan; i++) {
+        // interleave channels
+        sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
+        sample = (sample < 0 ? sample * 0x8000 : sample * 0x7fff); // scale to 16-bit signed int
+        view.setInt16(pos, sample, true);
+        pos += 2;
+      }
+      offset++;
+    }
+
+    return new Blob([bufferArr], { type: 'audio/wav' });
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        if (audioChunksRef.current.length === 0) return;
+        
+        const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        
+        try {
+          // Convert WebM to WAV using AudioContext
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const arrayBuffer = await webmBlob.arrayBuffer();
+          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          const wavBlob = audioBufferToWav(audioBuffer);
+
+          if (wavBlob.size < 500) {
+            console.warn("Audio recording is too short, skipping...");
+            return;
+          }
+
+          await sendAudioToBackend(wavBlob);
+        } catch (convErr) {
+          console.error("Audio conversion error:", convErr);
+          setError("Failed to process audio format");
+        } finally {
+          stream.getTracks().forEach((track) => track.stop());
+        }
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Error accessing microphone:", err);
+      setError("Microphone access denied or not supported");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const sendAudioToBackend = async (blob) => {
+    // We reuse generateRoadmap loading state logic for better UX
+    try {
+      const formData = new FormData();
+      formData.append("audio", blob, "recording.wav");
+      formData.append("lang", selectedSTTLang); // Pass the selected language
+
+      const response = await fetch("http://localhost:5001/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Transcription failed");
+      const data = await response.json();
+      if (data.text) setInput(data.text);
+    } catch (err) {
+      console.error("Transcription error:", err);
+      setError("Failed to transcribe audio");
+    }
+  };
+
   const zoomRef = useRef(null)
   const nodesRef = useRef(null) // Хранит массив узлов с позициями
 
@@ -72,9 +210,7 @@ export default function Generator({
   const handleZoomOut = () => {
     if (zoomRef.current && svgRef.current) {
       const svg = d3.select(svgRef.current)
-      const isMobile = window.innerWidth < 768
-      const minZoom = isMobile ? 0.1 : 0.22
-      const newZoom = Math.max(zoom / 1.2, minZoom)
+      const newZoom = Math.max(zoom / 1.2, 0.3)
       zoomRef.current.scaleTo(svg.transition().duration(300), newZoom)
     }
   }
@@ -204,8 +340,6 @@ export default function Generator({
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
 
-    const isMobile = window.innerWidth < 768
-
     const width = svgRef.current.clientWidth
     const height = svgRef.current.clientHeight
 
@@ -242,7 +376,7 @@ export default function Generator({
 
     const zoomBehavior = d3
       .zoom()
-      .scaleExtent([isMobile ? 0.1 : 0.22, 3])
+      .scaleExtent([0.3, 3])
       .on('zoom', (event) => {
         container.attr('transform', event.transform)
         setZoom(event.transform.k)
@@ -252,6 +386,7 @@ export default function Generator({
     zoomRef.current = zoomBehavior
 
     // Intelligent initial placement to prevent tangling
+    const isMobile = window.innerWidth < 768
     const nodes = data.nodes.map((d) => {
       const savedPos = nodesRef.current?.find(n => n.id === d.id)
       if (savedPos?.x !== undefined) {
@@ -261,12 +396,12 @@ export default function Generator({
       // Spread nodes vertically by level and horizontally by their position in that level
       const levelNodes = data.nodes.filter(n => n.level === d.level)
       const indexInLevel = levelNodes.findIndex(n => n.id === d.id)
-      const horizontalSpacing = isMobile ? 265 : 200 // 1.2x current
+      const horizontalSpacing = isMobile ? 120 : 200
 
       return {
         ...d,
         x: width / 2 + (indexInLevel - (levelNodes.length - 1) / 2) * horizontalSpacing + (Math.random() - 0.5) * 50,
-        y: height / 2 + (d.level * (isMobile ? 300 : 200)) - (isMobile ? 300 : 300) // 1.2x current
+        y: height / 2 + (d.level * (isMobile ? 150 : 200)) - (isMobile ? 150 : 300) // Offset upward so it grows down
       }
     })
     nodesRef.current = nodes
@@ -283,15 +418,14 @@ export default function Generator({
         d3
           .forceLink(links)
           .id((d) => d.id)
-          .distance(isMobile ? 265 : 220) // 1.2x larger for mobile
+          .distance(220)
           .strength(0.25)
       )
       .force('charge', d3.forceManyBody().strength(-1200))
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('collision', d3.forceCollide().radius((d) => {
         const radii = { 0: 68, 1: 52, 2: 42, 3: 34, 4: 26 }
-        const r = radii[d.level] || 24
-        return (isMobile ? r * 1.4 : r) + 20
+        return (radii[d.level] || 24) + 20
       }))
 
     simulationRef.current = simulation
@@ -315,8 +449,7 @@ export default function Generator({
     // Node radius by level — root is dramatically larger
     const getNodeRadius = (level) => {
       const radii = { 0: 68, 1: 52, 2: 42, 3: 34, 4: 26 }
-      const r = radii[level] !== undefined ? radii[level] : 24
-      return isMobile ? r * 1.4 : r
+      return radii[level] !== undefined ? radii[level] : 24
     }
 
     // Generate Link Gradients
@@ -417,10 +550,10 @@ export default function Generator({
           .on('drag', dragged)
           .on('end', dragended)
       )
-      .on('click', function(event, d) {
+      .on('click', function (event, d) {
         // Prevent click if we're dragging (D3 default behavior is usually enough, but mobile needs extra care)
         if (event.defaultPrevented) return;
-        
+
         event.stopPropagation()
         setSelectedNode(d)
         setSidebarOpen(true) // Automatically open sidebar on mobile when node is clicked
@@ -531,10 +664,8 @@ export default function Generator({
       .attr('dy', '0.35em')
       .attr('fill', '#fff')
       .attr('font-size', (d) => {
-        const sizes = isMobile 
-          ? { 0: '22px', 1: '18px', 2: '15px', 3: '14px', 4: '13px' }
-          : { 0: '16px', 1: '13px', 2: '11px', 3: '10px', 4: '9px' }
-        return sizes[d.level] || (isMobile ? '13px' : '9px')
+        const sizes = { 0: '16px', 1: '13px', 2: '11px', 3: '10px', 4: '9px' }
+        return sizes[d.level] || '9px'
       })
       .attr('font-weight', (d) => d.level === 0 ? '900' : '700')
       .attr('pointer-events', 'none')
@@ -548,11 +679,8 @@ export default function Generator({
         // Max chars per line based on node size
         const maxWidth = r * 1.4
 
-        const charLimit = isMobile ? 15 : 12
-        const lineLimit = isMobile ? 18 : 14
-
         if (words.length === 1) {
-          text.text(d.label.length > charLimit ? d.label.slice(0, charLimit - 1) + '…' : d.label)
+          text.text(d.label.length > 12 ? d.label.slice(0, 11) + '…' : d.label)
         } else {
           text.text('')
           const midpoint = Math.ceil(words.length / 2)
@@ -563,13 +691,13 @@ export default function Generator({
             .append('tspan')
             .attr('x', 0)
             .attr('dy', words.length > 2 ? '-0.6em' : '-0.5em')
-            .text(line1.length > lineLimit && d.level > 2 ? line1.slice(0, lineLimit - 1) + '…' : line1)
+            .text(line1.length > 14 && d.level > 2 ? line1.slice(0, 13) + '…' : line1)
 
           text
             .append('tspan')
             .attr('x', 0)
             .attr('dy', '1.2em')
-            .text(line2.length > lineLimit && d.level > 2 ? line2.slice(0, lineLimit - 1) + '…' : line2)
+            .text(line2.length > 14 && d.level > 2 ? line2.slice(0, 13) + '…' : line2)
         }
       })
 
@@ -655,7 +783,7 @@ export default function Generator({
   }))
 
   return (
-    <div 
+    <div
       className="fixed inset-0 w-full bg-main text-white overflow-hidden flex pt-16"
       style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
     >
@@ -692,6 +820,42 @@ export default function Generator({
             transform: translateY(-25px) translateX(8px);
           }
         }
+        @keyframes mic-pulse {
+          0% { 
+            transform: scale(1); 
+            box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7), 0 0 20px rgba(249, 115, 22, 0.3); 
+          }
+          50% { 
+            transform: scale(1.08); 
+            box-shadow: 0 0 0 12px rgba(249, 115, 22, 0), 0 0 40px rgba(249, 115, 22, 0.5); 
+          }
+          100% { 
+            transform: scale(1); 
+            box-shadow: 0 0 0 0 rgba(249, 115, 22, 0), 0 0 20px rgba(249, 115, 22, 0.3); 
+          }
+        }
+        @keyframes ring-rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes particle-swirl-1 {
+          0% { transform: rotate(0deg) translateX(18px) rotate(0deg); opacity: 0; }
+          20% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { transform: rotate(360deg) translateX(18px) rotate(-360deg); opacity: 0; }
+        }
+        @keyframes particle-swirl-2 {
+          0% { transform: rotate(120deg) translateX(15px) rotate(-120deg); opacity: 0; }
+          20% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { transform: rotate(480deg) translateX(15px) rotate(-480deg); opacity: 0; }
+        }
+        @keyframes particle-swirl-3 {
+          0% { transform: rotate(240deg) translateX(20px) rotate(-240deg); opacity: 0; }
+          20% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { transform: rotate(600deg) translateX(20px) rotate(-600deg); opacity: 0; }
+        }
       `}</style>
 
       {/* Header - Fully Adaptive & Premium */}
@@ -706,24 +870,70 @@ export default function Generator({
             </h1>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-3 md:gap-4">
-            <div className="relative flex-1 group min-w-[200px]">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && !loading && handleGenerate()}
-                placeholder="What is your next big goal? (e.g. Master Python, Product Design...)"
-                className="w-full px-6 py-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all text-lg font-medium"
-                disabled={loading}
-              />
-              <div className="absolute inset-0 rounded-2xl border border-indigo-500/0 group-focus-within:border-indigo-500/30 pointer-events-none transition-all"></div>
+          <div className="flex flex-col lg:flex-row gap-3 md:gap-4 items-stretch">
+            <div className="flex flex-1 gap-2 md:gap-3 items-stretch">
+              <div className="relative flex-1 group min-w-[200px]">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && !loading && handleGenerate()}
+                  placeholder="What is your next big goal? (e.g. Master Python, Product Design...)"
+                  className="w-full h-full px-6 py-3.5 bg-slate-800/40 border border-slate-700/50 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all text-base font-medium"
+                  disabled={loading}
+                />
+                <div className="absolute inset-0 rounded-2xl border border-indigo-500/0 group-focus-within:border-indigo-500/30 pointer-events-none transition-all"></div>
+              </div>
+
+              {/* Voice & Lang Controls - Now Grouped with Input */}
+              <div className="flex items-center gap-2 px-2 py-1 bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-2xl shrink-0">
+                {/* Language Toggle */}
+                <button
+                  onClick={() => setSelectedSTTLang(prev => prev === 'ru' ? 'kk' : prev === 'kk' ? 'en' : 'ru')}
+                  disabled={loading || isRecording}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 border shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] min-w-[62px] justify-center ${
+                    selectedSTTLang === 'ru'
+                      ? 'bg-linear-to-br from-indigo-500/20 to-blue-600/20 text-indigo-200 border-indigo-500/30 hover:border-indigo-400/50 hover:from-indigo-500/30 hover:to-blue-600/30 hover:text-white hover:shadow-[0_0_15px_rgba(99,102,241,0.2)]'
+                      : selectedSTTLang === 'kk'
+                      ? 'bg-linear-to-br from-teal-500/20 to-emerald-600/20 text-teal-200 border-teal-500/30 hover:border-teal-400/50 hover:from-teal-500/30 hover:to-emerald-600/30 hover:text-white hover:shadow-[0_0_15px_rgba(20,184,166,0.2)]'
+                      : 'bg-linear-to-br from-rose-500/20 to-pink-600/20 text-rose-200 border-rose-500/30 hover:border-rose-400/50 hover:from-rose-500/30 hover:to-pink-600/30 hover:text-white hover:shadow-[0_0_15px_rgba(225,29,72,0.2)]'
+                  }`}
+                  title={`Switch to ${selectedSTTLang === 'ru' ? 'Kazakh' : selectedSTTLang === 'kk' ? 'English' : 'Russian'}`}
+                >
+                  <i className="fa-solid fa-language opacity-80 text-xs"></i>
+                  {selectedSTTLang === 'kk' ? 'kz' : selectedSTTLang}
+                </button>
+
+                <div className="w-px h-4 bg-slate-700/50 mx-0.5"></div>
+
+                {/* Mic Icon */}
+                <button
+                  onClick={isRecording ? stopRecording : startRecording}
+                  disabled={loading}
+                  className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                    isRecording 
+                      ? 'bg-linear-to-tr from-orange-600 to-amber-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.5)] animate-[mic-pulse_1.5s_infinite]' 
+                      : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/10'
+                  }`}
+                  title={isRecording ? "Stop Recording" : "Voice Input"}
+                >
+                  {isRecording && (
+                    <>
+                      <div className="absolute inset-0 rounded-xl border border-white/40 border-t-transparent animate-[ring-rotate_2s_linear_infinite]"></div>
+                      <div className="absolute w-1 h-1 bg-white rounded-full animate-[particle-swirl-1_1.2s_linear_infinite]"></div>
+                      <div className="absolute w-1 h-1 bg-amber-300 rounded-full animate-[particle-swirl-2_0.8s_linear_infinite]"></div>
+                      <div className="absolute w-0.5 h-0.5 bg-yellow-200 rounded-full animate-[particle-swirl-3_1.5s_linear_infinite]"></div>
+                    </>
+                  )}
+                  <i className={`fa-solid ${isRecording ? 'fa-microphone' : 'fa-microphone'} text-sm z-10`}></i>
+                </button>
+              </div>
             </div>
 
             <button
               onClick={handleGenerate}
               disabled={loading}
-              className={`relative overflow-hidden group w-full lg:w-auto lg:min-w-[280px] px-8 py-5 rounded-3xl font-black text-sm uppercase tracking-[0.2em] transition-all duration-500 active:scale-95 flex items-center justify-center gap-4 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] ${loading
+              className={`relative overflow-hidden group w-full lg:w-auto lg:min-w-[220px] px-6 py-4 rounded-3xl font-black text-xs uppercase tracking-[0.2em] transition-all duration-500 active:scale-95 flex items-center justify-center gap-4 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] ${loading
                 ? 'bg-slate-900/80 text-white cursor-not-allowed border border-white/5'
                 : 'bg-linear-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white hover:shadow-[0_20px_50px_rgba(99,102,241,0.4)] hover:-translate-y-1'
                 }`}
@@ -829,7 +1039,7 @@ export default function Generator({
 
       {/* Zoom Controls */}
       {data && (
-        <div className={`export-hide absolute bottom-56 right-6 md:top-56 md:right-12 z-20 flex flex-col gap-2 transition-all duration-300 ${sidebarOpen ? 'md:right-[504px]' : 'md:right-12'} ${window.innerWidth < 768 && sidebarOpen ? 'hidden' : 'flex'}`}>
+        <div className={`export-hide absolute bottom-36 md:top-56 right-12 z-20 flex flex-col gap-2 transition-all duration-300 ${sidebarOpen ? 'md:right-[504px]' : 'md:right-12'} ${window.innerWidth < 768 && sidebarOpen ? 'hidden' : 'flex'}`}>
           {/* Futuristic Circular Progress */}
           <div className="relative group mb-4">
             <div className="absolute -inset-1 bg-linear-to-r from-indigo-500 to-purple-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
@@ -880,21 +1090,21 @@ export default function Generator({
 
           <button
             onClick={handleZoomIn}
-            className="p-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-slate-600/50 backdrop-blur transition-colors shadow-lg hidden md:block"
+            className="p-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-slate-600/50 backdrop-blur transition-colors shadow-lg"
             title="Zoom In"
           >
             <i className="fa-solid fa-magnifying-glass-plus text-white"></i>
           </button>
           <button
             onClick={handleZoomOut}
-            className="p-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-slate-600/50 backdrop-blur transition-colors shadow-lg hidden md:block"
+            className="p-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-slate-600/50 backdrop-blur transition-colors shadow-lg"
             title="Zoom Out"
           >
             <i className="fa-solid fa-magnifying-glass-minus text-white"></i>
           </button>
           <button
             onClick={handleResetZoom}
-            className="p-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-slate-600/50 backdrop-blur transition-colors shadow-lg hidden md:block"
+            className="p-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-slate-600/50 backdrop-blur transition-colors shadow-lg"
             title="Reset Zoom"
           >
             <i className="fa-solid fa-expand text-white"></i>

@@ -52,12 +52,6 @@ const TeamMember = ({ member, delay }) => {
 export default function About({ onNavigate }) {
   const team = [
     {
-      name: 'Aslan Abdulayev',
-      role: 'Full-stack developer',
-      image: 'Aslan.jpg',
-      bio: 'He love for clean code. The website works because of its code.'
-    },
-    {
       name: 'Oleg Volosov',
       role: 'Frontend developer / D3.js',
       image: 'Oleg_v2.png',
@@ -65,7 +59,7 @@ export default function About({ onNavigate }) {
     },
     {
       name: 'Danial Kabylkan',
-      role: 'Frontend/Web3',
+      role: 'Backend Developer',
       image: 'Danial.jpg',
       bio: 'React, Node.js, Solana. 2nd place at Solana Day, sponsored by Decentrathon.'
     }
@@ -146,7 +140,7 @@ export default function About({ onNavigate }) {
               </ScrollReveal>
               <ScrollReveal delay={400}>
                 <p>
-                  By combining the power of Google's Gemini AI with intuitive visualization, we've created a platform that turns ambitious goals into actionable, step-by-step plans.
+                  By combining the power of Google's Gemma AI with intuitive visualization, we've created a platform that turns ambitious goals into actionable, step-by-step plans.
                 </p>
               </ScrollReveal>
             </div>
@@ -194,7 +188,7 @@ export default function About({ onNavigate }) {
           </div>
           <div style={{ height: '35px' }}></div> {/* Forced spacing of 35px */}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {team.map((member, index) => (
               <TeamMember key={index} member={member} delay={index * 150} />
             ))}

@@ -87,7 +87,7 @@ export default function Home({ onNavigate }) {
           <ScrollReveal delay={0}>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-8 btn-shine magnetic-hover cursor-default">
               <i className="fa-solid fa-sparkles"></i>
-              <span>Powered by Google Gemini AI</span>
+              <span>Powered by Google Gemma AI</span>
             </div>
           </ScrollReveal>
 
