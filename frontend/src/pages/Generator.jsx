@@ -41,56 +41,40 @@ export default function Generator({
 
 
   const audioBufferToWav = (buffer) => {
-    const numOfChan = buffer.numberOfChannels;
+    // Force Mono (1 channel) for best STT compatibility
+    const numOfChan = 1;
+    const sampleRate = buffer.sampleRate;
     const length = buffer.length * numOfChan * 2 + 44;
     const bufferArr = new ArrayBuffer(length);
     const view = new DataView(bufferArr);
-    const channels = [];
-    let i;
-    let sample;
-    let offset = 0;
     let pos = 0;
+    let offset = 0;
 
-    // write WAVE header
-    const setUint32 = (data) => {
-      view.setUint32(pos, data, true);
-      pos += 4;
-    };
-
-    const setUint16 = (data) => {
-      view.setUint16(pos, data, true);
-      pos += 2;
-    };
+    const setUint32 = (data) => { view.setUint32(pos, data, true); pos += 4; };
+    const setUint16 = (data) => { view.setUint16(pos, data, true); pos += 2; };
 
     setUint32(0x46464952); // "RIFF"
-    setUint32(length - 8); // file length - 8
+    setUint32(length - 8);
     setUint32(0x45564157); // "WAVE"
-
-    setUint32(0x20746d66); // "fmt " chunk
-    setUint32(16); // length = 16
-    setUint16(1); // PCM (uncompressed)
+    setUint32(0x20746d66); // "fmt "
+    setUint32(16);
+    setUint16(1); // PCM
     setUint16(numOfChan);
-    setUint32(buffer.sampleRate);
-    setUint32(buffer.sampleRate * 2 * numOfChan); // avg. bytes/sec
-    setUint16(numOfChan * 2); // block-align
-    setUint16(16); // 16-bit (hardcoded)
+    setUint32(sampleRate);
+    setUint32(sampleRate * 2 * numOfChan);
+    setUint16(numOfChan * 2);
+    setUint16(16); // 16-bit
+    setUint32(0x61746164); // "data"
+    setUint32(length - pos - 4);
 
-    setUint32(0x61746164); // "data" - chunk
-    setUint32(length - pos - 4); // chunk length
-
-    // write interleaved data
-    for (i = 0; i < buffer.numberOfChannels; i++) {
-      channels.push(buffer.getChannelData(i));
-    }
+    // Get channel 0 for mono
+    const chanData = buffer.getChannelData(0);
 
     while (pos < length) {
-      for (i = 0; i < numOfChan; i++) {
-        // interleave channels
-        sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
-        sample = (sample < 0 ? sample * 0x8000 : sample * 0x7fff); // scale to 16-bit signed int
-        view.setInt16(pos, sample, true);
-        pos += 2;
-      }
+      let sample = Math.max(-1, Math.min(1, chanData[offset])); 
+      sample = (sample < 0 ? sample * 0x8000 : sample * 0x7fff);
+      view.setInt16(pos, sample, true);
+      pos += 2;
       offset++;
     }
 
@@ -100,8 +84,9 @@ export default function Generator({
   const audioContextRef = useRef(null);
   
   const startRecording = async () => {
+    setError(""); // Clear any old errors
     try {
-      // Mobile browsers (Safari) need AudioContext to be created/resumed in a user gesture (like this click)
+      // Mobile browsers (Safari) need AudioContext to be created/resumed in a user gesture
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       audioContextRef.current = new AudioContextClass();
       if (audioContextRef.current.state === 'suspended') {
@@ -114,31 +99,31 @@ export default function Generator({
       audioChunksRef.current = [];
 
       mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
       };
 
       mediaRecorder.onstop = async () => {
-        if (audioChunksRef.current.length === 0) return;
+        if (audioChunksRef.current.length === 0) {
+            setError("No audio received");
+            return;
+        }
         
-        const mimeType = mediaRecorderRef.current.mimeType;
+        const mimeType = mediaRecorderRef.current.mimeType || 'audio/webm';
         const recordedBlob = new Blob(audioChunksRef.current, { type: mimeType });
         
         try {
+          if (audioContextRef.current.state === 'suspended') {
+            await audioContextRef.current.resume();
+          }
+          
           const arrayBuffer = await recordedBlob.arrayBuffer();
           const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
           const wavBlob = audioBufferToWav(audioBuffer);
 
-          if (wavBlob.size < 500) {
-            console.warn("Audio recording is too short, skipping...");
-            return;
-          }
-
           await sendAudioToBackend(wavBlob);
         } catch (convErr) {
           console.error("Audio conversion error:", convErr);
-          setError(`Format error: ${mimeType}`);
+          setError(`Format problem: ${mimeType}. Please try again.`);
         } finally {
           stream.getTracks().forEach((track) => track.stop());
         }
@@ -147,8 +132,8 @@ export default function Generator({
       mediaRecorder.start();
       setIsRecording(true);
     } catch (err) {
-      console.error("Error accessing microphone:", err);
-      setError("Microphone access denied or not supported");
+      console.error("Mic access error:", err);
+      setError("Mic blocked. Please allow access in browser settings.");
     }
   };
 
