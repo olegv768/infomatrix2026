@@ -886,7 +886,7 @@ export default function Generator({
               </div>
 
               {/* Voice & Lang Controls - Now Grouped with Input */}
-              <div className="flex items-center gap-2 px-2 py-1 bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-2xl shrink-0">
+              <div className="hidden sm:flex items-center gap-2 px-2 py-1 bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-2xl shrink-0">
                 {/* Language Toggle */}
                 <button
                   onClick={() => setSelectedSTTLang(prev => prev === 'ru' ? 'kk' : prev === 'kk' ? 'en' : 'ru')}
