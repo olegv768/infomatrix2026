@@ -117,12 +117,26 @@ export default function Generator({
           }
           
           const arrayBuffer = await recordedBlob.arrayBuffer();
-          const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
-          const wavBlob = audioBufferToWav(audioBuffer);
+          const sourceBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
+          
+          // Resample to 16000Hz Mono for maximum API compatibility
+          const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(
+            1, // mono
+            Math.ceil(sourceBuffer.duration * 16000), 
+            16000
+          );
+          
+          const source = offlineCtx.createBufferSource();
+          source.buffer = sourceBuffer;
+          source.connect(offlineCtx.destination);
+          source.start();
+          
+          const resampledBuffer = await offlineCtx.startRendering();
+          const wavBlob = audioBufferToWav(resampledBuffer);
 
           await sendAudioToBackend(wavBlob);
         } catch (convErr) {
-          console.error("Audio conversion error:", convErr);
+          console.error("Audio error:", convErr);
           setError(`Format problem: ${mimeType}. Please try again.`);
         } finally {
           stream.getTracks().forEach((track) => track.stop());
