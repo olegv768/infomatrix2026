@@ -159,13 +159,22 @@ export default function Generator({
   };
 
   const sendAudioToBackend = async (blob) => {
-    // We reuse generateRoadmap loading state logic for better UX
+    // Mirror App.jsx logic for production vs development URLs
+    const apiBase = import.meta.env.VITE_API_URL || '';
+    const isProd = import.meta.env.PROD;
+    
+    // In production, use apiBase or relative path. 
+    // In dev, use current hostname (fixes mobile access via IP).
+    const apiUrl = isProd 
+      ? `${apiBase}/transcribe` 
+      : `http://${window.location.hostname}:5001/transcribe`;
+
     try {
       const formData = new FormData();
       formData.append("audio", blob, "recording.wav");
-      formData.append("lang", selectedSTTLang); // Pass the selected language
+      formData.append("lang", selectedSTTLang);
 
-      const response = await fetch("http://localhost:5001/transcribe", {
+      const response = await fetch(apiUrl, {
         method: "POST",
         body: formData,
       });
