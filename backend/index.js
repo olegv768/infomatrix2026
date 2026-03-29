@@ -138,114 +138,93 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
 app.post("/roadmap", async (req, res) => {
   const { goal } = req.body;
   console.log(`🚀 New Roadmap Request: ${goal}`);
+  
   if (!goal) {
     return res.status(400).json({ error: "Goal is required" });
   }
 
+  const apiKey = process.env.ALEM_AI_KEY;
+  if (!apiKey) {
+    console.error("❌ ALEM_AI_KEY is missing in environment variables!");
+    return res.status(500).json({ error: "Server Configuration Error", details: "API Key is not configured on the server." });
+  }
+
   const prompt = `Create a comprehensive and detailed roadmap for achieving the goal: ${goal}
 
-CRITICAL INSTRUCTION: You MUST respond in the SAME LANGUAGE as the user's goal above. If the goal is in Russian, respond in Russian. If in English, respond in English. Match the user's language exactly.
+CRITICAL INSTRUCTION: You MUST respond in the SAME LANGUAGE as the user's goal above. Match the user's language exactly.
 
 JSON Format:
 {
-  "title": "Roadmap Title (in user's language)",
+  "title": "Roadmap Title",
   "nodes": [
     {
       "id": "main",
       "label": "Main Goal",
       "level": 0,
-      "description": "Detailed description of the main goal",
+      "description": "...",
       "category": "goal",
-      "timeEstimate": "6-12 months",
-      "children": ["step1", "step2"],
-      "resources": [
-        {
-          "title": "Resource name",
-          "type": "youtube|documentation|course|article|book",
-          "url": "https://actual-real-url.com"
-        }
-      ]
+      "timeEstimate": "...",
+      "children": ["step1"],
+      "resources": [{"title": "...", "type": "youtube", "url": "..."}]
     }
   ]
 }
 
-Rules:
-- id: only latin letters and numbers, no spaces
-- label: 2-5 words, short descriptive name (in user's language)
-- level: 0 (main goal), 1 (major phases), 2 (key milestones), 3 (specific tasks), 4 (micro-steps)
-- description: detailed, practical description of what to do and why (in user's language)
-- category: one of "basics", "practice", "advanced", "goal", "foundation", "intermediate"
-- timeEstimate: realistic time estimate (e.g., "1-2 weeks", "1 month", "2-3 months")
-- children: array of child node ids (each node should have 2-5 children for proper depth)
-- resources: MANDATORY array of 2-4 learning resources (see RESOURCE RULES below)
-
-Create 30-50 nodes with comprehensive logical structure:
-- 1 node at level 0 (main Goal)
-- 4-6 nodes at level 1 (major phases/stages of learning)
-- 12-18 nodes at level 2 (key milestones and major topics)
-- 12-20 nodes at level 3 (specific tasks, subtopics, and skills)
-- 2-10 nodes at level 4 (optional micro-steps for complex topics)
-
-Ensure the roadmap covers:
-- Foundational knowledge first
-- Progressive skill building
-- Practical projects and exercises
-- Advanced topics and specializations
-- Each node should logically build on previous ones
-- STRICT RULE: Child nodes MUST be exactly one level deeper than their parent (e.g., Level 2 parent -> Level 3 children). Do NOT skip levels.
-
-════════════════════════════════════════
-RESOURCE RULES — FOLLOW EXACTLY:
-════════════════════════════════════════
-RULE 1 — MINIMUM 2 RESOURCES: Every node MUST have at least 2 resources. Use fallback URLs if needed.
-RULE 2 — VERIFIABLE URLs: Only use URLs from known platforms (youtube, docs, coursera).
-RULE 3 — LANGUAGE LABELS: Keep titles original, append language in parentheses if different.
-RULE 4 — NO FABRICATED TASKS: Follow real-world steps.
-
-════════════════════════════════════════
-STRICT RESTRICTIONS — DO NOT VIOLATE:
-════════════════════════════════════════
-❌ Нельзя нарушать законодательство РК
-❌ Нельзя проводить незаконную обработку данных
-❌ Нельзя давать медицинские/юридические рекомендации
-❌ Нельзя создавать азартные игры
-
 Output explicitly ONLY valid JSON. No markdown wrappers.`;
 
   try {
-    const response = await fetch("https://llm.alem.ai/v1/chat/completions", {
-      method: "POST",
+    console.log("📡 Contacting alem.ai with gemma3...");
+    const response = await axios.post("https://llm.alem.ai/v1/chat/completions", {
+      model: "gemma3", 
+      messages: [{ role: "user", content: prompt }]
+    }, {
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.ALEM_AI_KEY}`
+        "Authorization": `Bearer ${apiKey}`
       },
-      body: JSON.stringify({
-        model: "gemma3", 
-        messages: [{ role: "user", content: prompt }]
-      })
+      timeout: 60000 // 60s timeout for large generation
     });
 
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || "API request failed with status: " + response.status);
+    let roadmapText = response.data.choices[0].message.content.trim();
+    console.log("✅ Received response from LLM (length:", roadmapText.length, ")");
+
+    // Robust JSON cleaning
+    try {
+      // Remove markdown wrappers
+      if (roadmapText.includes('```')) {
+        roadmapText = roadmapText.replace(/```(?:json)?\s*/g, '').replace(/\s*```/g, '');
+      }
+      
+      // Attempt to find the first '{' and last '}' to strip any prepended/appended text
+      const startIdx = roadmapText.indexOf('{');
+      const endIdx = roadmapText.lastIndexOf('}');
+      if (startIdx !== -1 && endIdx !== -1) {
+        roadmapText = roadmapText.substring(startIdx, endIdx + 1);
+      }
+
+      const roadmapJson = JSON.parse(roadmapText);
+      res.json(roadmapJson);
+      console.log("✨ Roadmap successfully generated and sent to client.");
+
+    } catch (parseError) {
+      console.error("❌ JSON Parse Failed!");
+      console.error("DEBUG: Raw result was:", roadmapText);
+      throw new Error(`Failed to parse AI response into JSON: ${parseError.message}`);
     }
-
-    const data = await response.json();
-    let roadmapText = data.choices[0].message.content.trim();
-
-    // Strip markdown JSON wrappers if gemma3 adds them
-    if (roadmapText.startsWith('```json')) {
-      roadmapText = roadmapText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    } else if (roadmapText.startsWith('```')) {
-      roadmapText = roadmapText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    }
-
-    const roadmapJson = JSON.parse(roadmapText);
-    res.json(roadmapJson);
 
   } catch (error) {
-    console.error("Error generating roadmap:", error);
-    res.status(500).json({ error: "Generation Failed", details: error.message });
+    console.error("❌ Roadmap Generation Error:");
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("Data:", JSON.stringify(error.response.data, null, 2));
+      res.status(500).json({ 
+        error: "Alem AI API Error", 
+        details: error.response.data.error?.message || "LLM Provider Error" 
+      });
+    } else {
+      console.error("Message:", error.message);
+      res.status(500).json({ error: "Generation Failed", details: error.message });
+    }
   }
 });
 
