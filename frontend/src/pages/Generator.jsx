@@ -418,14 +418,14 @@ export default function Generator({
         d3
           .forceLink(links)
           .id((d) => d.id)
-          .distance(220)
-          .strength(0.25)
+          .distance(280) // Increased distance
+          .strength(0.3)
       )
-      .force('charge', d3.forceManyBody().strength(-1200))
+      .force('charge', d3.forceManyBody().strength(-2000)) // Stronger repulsion
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('collision', d3.forceCollide().radius((d) => {
-        const radii = { 0: 68, 1: 52, 2: 42, 3: 34, 4: 26 }
-        return (radii[d.level] || 24) + 20
+        const radii = { 0: 75, 1: 60, 2: 50, 3: 40, 4: 30 }
+        return (radii[d.level] || 30) + 40 // More padding
       }))
 
     simulationRef.current = simulation

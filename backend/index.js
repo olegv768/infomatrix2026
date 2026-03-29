@@ -163,12 +163,39 @@ JSON Format:
       "level": 0,
       "description": "...",
       "category": "goal",
-      "timeEstimate": "...",
+      "timeEstimate": "1-2 weeks",
       "children": ["step1"],
       "resources": [{"title": "...", "type": "youtube", "url": "..."}]
     }
   ]
 }
+
+- timeEstimate: strictly ONLY time with numbers and units (e.g., "2-3 hours", "1-2 days", "2-3 weeks", "1-2 months"). NEVER use "Ongoing", "N/A" or extra explanations.
+- children: array of child node ids (each node should have 2-5 children for proper depth)
+- resources: MANDATORY array of 2-4 learning resources (see RESOURCE RULES below)
+
+Create 30-50 nodes with comprehensive logical structure:
+- 1 node at level 0 (main Goal)
+- 4-6 nodes at level 1 (major phases/stages of learning)
+- 12-18 nodes at level 2 (key milestones and major topics)
+- 12-20 nodes at level 3 (specific tasks, subtopics, and skills)
+- 2-10 nodes at level 4 (optional micro-steps for complex topics)
+
+Ensure the roadmap covers:
+- Foundational knowledge first
+- Progressive skill building
+- Practical projects and exercises
+- Advanced topics and specializations
+- Each node should logically build on previous ones
+- STRICT RULE: Child nodes MUST be exactly one level deeper than their parent (e.g., Level 2 parent -> Level 3 children). Do NOT skip levels.
+
+════════════════════════════════════════
+STRICT RESTRICTIONS — DO NOT VIOLATE:
+════════════════════════════════════════
+❌ Нельзя нарушать законодательство РК
+❌ Нельзя проводить незаконную обработку данных
+❌ Нельзя давать медицинские/юридические рекомендации
+❌ Нельзя создавать азартные игры
 
 Output explicitly ONLY valid JSON. No markdown wrappers.`;
 
