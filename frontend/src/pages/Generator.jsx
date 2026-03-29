@@ -97,8 +97,17 @@ export default function Generator({
     return new Blob([bufferArr], { type: 'audio/wav' });
   };
 
+  const audioContextRef = useRef(null);
+  
   const startRecording = async () => {
     try {
+      // Mobile browsers (Safari) need AudioContext to be created/resumed in a user gesture (like this click)
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      audioContextRef.current = new AudioContextClass();
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -113,13 +122,12 @@ export default function Generator({
       mediaRecorder.onstop = async () => {
         if (audioChunksRef.current.length === 0) return;
         
-        const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const mimeType = mediaRecorderRef.current.mimeType;
+        const recordedBlob = new Blob(audioChunksRef.current, { type: mimeType });
         
         try {
-          // Convert WebM to WAV using AudioContext
-          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-          const arrayBuffer = await webmBlob.arrayBuffer();
-          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          const arrayBuffer = await recordedBlob.arrayBuffer();
+          const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
           const wavBlob = audioBufferToWav(audioBuffer);
 
           if (wavBlob.size < 500) {
@@ -130,7 +138,7 @@ export default function Generator({
           await sendAudioToBackend(wavBlob);
         } catch (convErr) {
           console.error("Audio conversion error:", convErr);
-          setError("Failed to process audio format");
+          setError(`Format error: ${mimeType}`);
         } finally {
           stream.getTracks().forEach((track) => track.stop());
         }
