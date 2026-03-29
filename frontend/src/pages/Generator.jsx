@@ -113,13 +113,31 @@ export default function Generator({
       mediaRecorder.onstop = async () => {
         if (audioChunksRef.current.length === 0) return;
         
-        const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         
         try {
           // Convert WebM to WAV using AudioContext
-          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          const audioContext = new AudioContextClass();
+          
+          // CRITICAL: Resume context if suspended (common on mobile browsers)
+          if (audioContext.state === 'suspended') {
+            await audioContext.resume();
+          }
+
           const arrayBuffer = await webmBlob.arrayBuffer();
-          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          
+          // Enhanced decoding: Some mobile browsers still require the callback syntax for decodeAudioData
+          let audioBuffer;
+          try {
+            audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          } catch (e) {
+            // Fallback for older browsers
+            audioBuffer = await new Promise((resolve, reject) => {
+              audioContext.decodeAudioData(arrayBuffer, resolve, reject);
+            });
+          }
+
           const wavBlob = audioBufferToWav(audioBuffer);
 
           if (wavBlob.size < 500) {
@@ -133,6 +151,7 @@ export default function Generator({
           setError("Failed to process audio format");
         } finally {
           stream.getTracks().forEach((track) => track.stop());
+          setIsRecording(false);
         }
       };
 
@@ -147,23 +166,31 @@ export default function Generator({
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
-      setIsRecording(false);
+      // Note: onstop will handle setting isRecording(false) via finally block
     }
   };
 
   const sendAudioToBackend = async (blob) => {
-    // We reuse generateRoadmap loading state logic for better UX
     try {
       const formData = new FormData();
       formData.append("audio", blob, "recording.wav");
-      formData.append("lang", selectedSTTLang); // Pass the selected language
+      formData.append("lang", selectedSTTLang);
 
-      const response = await fetch("http://localhost:5001/transcribe", {
+      const apiBase = import.meta.env.VITE_API_URL || '';
+      const apiUrl = import.meta.env.PROD 
+        ? `${apiBase}/transcribe` 
+        : 'http://localhost:5001/transcribe';
+
+      const response = await fetch(apiUrl, {
         method: "POST",
         body: formData,
       });
 
-      if (!response.ok) throw new Error("Transcription failed");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || "Transcription failed");
+      }
+      
       const data = await response.json();
       if (data.text) setInput(data.text);
     } catch (err) {
