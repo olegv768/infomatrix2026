@@ -199,58 +199,86 @@ STRICT RESTRICTIONS — DO NOT VIOLATE:
 
 Output explicitly ONLY valid JSON. No markdown wrappers.`;
 
-  try {
-    console.log("📡 Contacting alem.ai with gemma3...");
-    const response = await axios.post("https://llm.alem.ai/v1/chat/completions", {
-      model: "gemma3", 
-      messages: [{ role: "user", content: prompt }]
-    }, {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      timeout: 60000 // 60s timeout for large generation
-    });
+  const MAX_RETRIES = 2;
 
-    let roadmapText = response.data.choices[0].message.content.trim();
-    console.log("✅ Received response from LLM (length:", roadmapText.length, ")");
-
-    // Robust JSON cleaning
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
+      console.log(`📡 Contacting alem.ai with gemma3... (attempt ${attempt + 1}/${MAX_RETRIES + 1})`);
+      const response = await axios.post("https://llm.alem.ai/v1/chat/completions", {
+        model: "gemma3", 
+        messages: [{ role: "user", content: prompt }]
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        timeout: 90000 // 90s timeout for large generation
+      });
+
+      let roadmapText = response.data.choices[0].message.content.trim();
+      console.log("✅ Received response from LLM (length:", roadmapText.length, ")");
+
+      // Robust JSON cleaning
       // Remove markdown wrappers
       if (roadmapText.includes('```')) {
         roadmapText = roadmapText.replace(/```(?:json)?\s*/g, '').replace(/\s*```/g, '');
       }
       
-      // Attempt to find the first '{' and last '}' to strip any prepended/appended text
+      // Strip any text before first '{' and after last '}'
       const startIdx = roadmapText.indexOf('{');
       const endIdx = roadmapText.lastIndexOf('}');
-      if (startIdx !== -1 && endIdx !== -1) {
+      if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
         roadmapText = roadmapText.substring(startIdx, endIdx + 1);
       }
 
-      const roadmapJson = JSON.parse(roadmapText);
-      res.json(roadmapJson);
-      console.log("✨ Roadmap successfully generated and sent to client.");
-
-    } catch (parseError) {
-      console.error("❌ JSON Parse Failed!");
-      console.error("DEBUG: Raw result was:", roadmapText);
-      throw new Error(`Failed to parse AI response into JSON: ${parseError.message}`);
-    }
-
-  } catch (error) {
-    console.error("❌ Roadmap Generation Error:");
-    if (error.response) {
-      console.error("Status:", error.response.status);
-      console.error("Data:", JSON.stringify(error.response.data, null, 2));
-      res.status(500).json({ 
-        error: "Alem AI API Error", 
-        details: error.response.data.error?.message || "LLM Provider Error" 
+      // Remove control characters that break JSON parsing
+      roadmapText = roadmapText.replace(/[\x00-\x1F\x7F]/g, (ch) => {
+        if (ch === '\n' || ch === '\r' || ch === '\t') return ch;
+        return '';
       });
-    } else {
-      console.error("Message:", error.message);
-      res.status(500).json({ error: "Generation Failed", details: error.message });
+
+      // Fix trailing commas before } or ]
+      roadmapText = roadmapText.replace(/,\s*([\]}])/g, '$1');
+
+      try {
+        const roadmapJson = JSON.parse(roadmapText);
+        res.json(roadmapJson);
+        console.log("✨ Roadmap successfully generated and sent to client.");
+        return; // Success — exit the retry loop
+      } catch (parseError) {
+        console.error(`❌ JSON Parse Failed on attempt ${attempt + 1}:`, parseError.message);
+        if (attempt < MAX_RETRIES) {
+          console.log("🔄 Retrying generation...");
+          continue; // Retry
+        }
+        // Final attempt failed
+        console.error("DEBUG: Raw result was:", roadmapText.substring(0, 500));
+        return res.status(500).json({ 
+          error: "Generation Failed", 
+          details: "AI returned invalid format. Please try again." 
+        });
+      }
+
+    } catch (error) {
+      console.error(`❌ Roadmap Generation Error (attempt ${attempt + 1}):`);
+      if (error.response) {
+        console.error("Status:", error.response.status);
+        console.error("Data:", JSON.stringify(error.response.data, null, 2));
+        // API-level errors — don't retry (auth/config issues won't resolve)
+        return res.status(500).json({ 
+          error: "Alem AI API Error", 
+          details: error.response.data.error?.message || "LLM Provider Error" 
+        });
+      } else {
+        console.error("Message:", error.message);
+        if (attempt < MAX_RETRIES && (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.message.includes('timeout'))) {
+          console.log("🔄 Timeout — retrying...");
+          continue; // Retry on timeout
+        }
+        if (attempt >= MAX_RETRIES) {
+          return res.status(500).json({ error: "Generation Failed", details: error.message });
+        }
+      }
     }
   }
 });
