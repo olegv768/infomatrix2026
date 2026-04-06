@@ -89,13 +89,11 @@ The project uses a split deployment architecture for maximum stability:
 
 ## Tech Stack
 
-- **AI & Services (alem.plus)**:
-  - **Speech-to-Text**: High-precision voice transcription.
-  - **Kazakh STT**: Native support for Kazakh speech recognition.
-  - **Gemma 3**: Powered by Google's latest open-weight model via alem.plus.
+- **AI & Services**:
+  - **Gemini 3 Flash**: Powered by Google's latest multimodal model for fast and accurate roadmap generation.
 - **Frontend**: React, Vite, TailwindCSS, D3.js, Font Awesome
 - **Backend**: Node.js, Express.js
-- **Email/Contact**: Web3Forms
+- **Email/Contact**: Nodemailer
 
 ## License
 

@@ -2,16 +2,11 @@ import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import nodemailer from "nodemailer";
-import multer from "multer";
-import axios from "axios";
-import FormData from "form-data";
-import fs from "fs";
-import path from "path";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 dotenv.config();
 
 const app = express();
-const upload = multer({ storage: multer.memoryStorage() });
 
 app.use(
   cors({
@@ -30,8 +25,11 @@ app.use(
 );
 app.use(express.json());
 
+// Initialize Google Generative AI
+const genAI = new GoogleGenerativeAI(process.env.API_KEY);
+
 app.get("/", (req, res) => {
-  res.send("Roadmap API Server is running with alem.ai!");
+  res.send("Roadmap AI Server is running with Gemini 3 Flash!");
 });
 
 // Email Transporter setup
@@ -77,64 +75,6 @@ app.post("/contact", async (req, res) => {
   }
 });
 
-app.post("/transcribe", upload.single("audio"), async (req, res) => {
-  try {
-    const file = req.file;
-    if (!file) {
-      console.error("No audio file found in the request");
-      return res.status(400).json({ error: "No audio file provided" });
-    }
-
-    if (file.buffer.length < 100) {
-       console.error("Audio file is too small or empty");
-       return res.status(400).json({ error: "Audio recording is empty" });
-    }
-
-    const tempFilePath = path.join(process.cwd(), "speech.wav");
-    // Write buffer to disk to ensure flawless stream formatting for ffmpeg on API side
-    fs.writeFileSync(tempFilePath, file.buffer);
-
-    // Determine model and key based on lang
-    const lang = req.body.lang || "ru";
-    const model = lang === "kk" ? "speech-to-text-kk" : "speech-to-text";
-    const apiKey = lang === "kk" ? process.env.ALEM_STT_KK_API_KEY : process.env.ALEM_STT_API_KEY;
-
-    const formData = new FormData();
-    formData.append("model", model);
-    formData.append("file", fs.readFileSync(tempFilePath), {
-      filename: "speech.wav",
-      contentType: "audio/wav",
-    });
-    formData.append("language", lang);
-
-    console.log(`📡 Sending ${lang} audio buffer (${file.buffer.length} bytes) to alem.ai via axios...`);
-    
-    const response = await axios.post("https://llm.alem.ai/v1/audio/transcriptions", formData, {
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        ...formData.getHeaders(),
-      },
-      timeout: 30000 
-    });
-
-    // Cleanup temp file
-    if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
-
-    console.log("✅ Transcription success:", response.data.text);
-    res.json({ text: response.data.text });
-  } catch (error) {
-    console.error("❌ Transcription error detail:");
-    if (error.response) {
-      console.error("Status:", error.response.status);
-      console.error("Data:", JSON.stringify(error.response.data, null, 2));
-      res.status(500).json({ error: "Transcription failed", details: error.response.data });
-    } else {
-      console.error("Message:", error.message);
-      res.status(500).json({ error: "Transcription failed", details: error.message });
-    }
-  }
-});
-
 app.post("/roadmap", async (req, res) => {
   const { goal } = req.body;
   console.log(`🚀 New Roadmap Request: ${goal}`);
@@ -143,9 +83,9 @@ app.post("/roadmap", async (req, res) => {
     return res.status(400).json({ error: "Goal is required" });
   }
 
-  const apiKey = process.env.ALEM_AI_KEY;
+  const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    console.error("❌ ALEM_AI_KEY is missing in environment variables!");
+    console.error("❌ API_KEY is missing in environment variables!");
     return res.status(500).json({ error: "Server Configuration Error", details: "API Key is not configured on the server." });
   }
 
@@ -199,87 +139,53 @@ STRICT RESTRICTIONS — DO NOT VIOLATE:
 
 Output explicitly ONLY valid JSON. No markdown wrappers.`;
 
-  const MAX_RETRIES = 2;
+  try {
+    console.log(`📡 Contacting Gemini 3 Flash...`);
+    
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+    
+    // Set up safety settings if needed (optional)
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    let roadmapText = response.text().trim();
+    
+    console.log("✅ Received response from Gemini (length:", roadmapText.length, ")");
 
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      console.log(`📡 Contacting alem.ai with gemma3... (attempt ${attempt + 1}/${MAX_RETRIES + 1})`);
-      const response = await axios.post("https://llm.alem.ai/v1/chat/completions", {
-        model: "gemma3", 
-        messages: [{ role: "user", content: prompt }]
-      }, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        },
-        timeout: 90000 // 90s timeout for large generation
-      });
-
-      let roadmapText = response.data.choices[0].message.content.trim();
-      console.log("✅ Received response from LLM (length:", roadmapText.length, ")");
-
-      // Robust JSON cleaning
-      // Remove markdown wrappers
-      if (roadmapText.includes('```')) {
-        roadmapText = roadmapText.replace(/```(?:json)?\s*/g, '').replace(/\s*```/g, '');
-      }
-      
-      // Strip any text before first '{' and after last '}'
-      const startIdx = roadmapText.indexOf('{');
-      const endIdx = roadmapText.lastIndexOf('}');
-      if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-        roadmapText = roadmapText.substring(startIdx, endIdx + 1);
-      }
-
-      // Remove control characters that break JSON parsing
-      roadmapText = roadmapText.replace(/[\x00-\x1F\x7F]/g, (ch) => {
-        if (ch === '\n' || ch === '\r' || ch === '\t') return ch;
-        return '';
-      });
-
-      // Fix trailing commas before } or ]
-      roadmapText = roadmapText.replace(/,\s*([\]}])/g, '$1');
-
-      try {
-        const roadmapJson = JSON.parse(roadmapText);
-        res.json(roadmapJson);
-        console.log("✨ Roadmap successfully generated and sent to client.");
-        return; // Success — exit the retry loop
-      } catch (parseError) {
-        console.error(`❌ JSON Parse Failed on attempt ${attempt + 1}:`, parseError.message);
-        if (attempt < MAX_RETRIES) {
-          console.log("🔄 Retrying generation...");
-          continue; // Retry
-        }
-        // Final attempt failed
-        console.error("DEBUG: Raw result was:", roadmapText.substring(0, 500));
-        return res.status(500).json({ 
-          error: "Generation Failed", 
-          details: "AI returned invalid format. Please try again." 
-        });
-      }
-
-    } catch (error) {
-      console.error(`❌ Roadmap Generation Error (attempt ${attempt + 1}):`);
-      if (error.response) {
-        console.error("Status:", error.response.status);
-        console.error("Data:", JSON.stringify(error.response.data, null, 2));
-        // API-level errors — don't retry (auth/config issues won't resolve)
-        return res.status(500).json({ 
-          error: "Alem AI API Error", 
-          details: error.response.data.error?.message || "LLM Provider Error" 
-        });
-      } else {
-        console.error("Message:", error.message);
-        if (attempt < MAX_RETRIES && (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.message.includes('timeout'))) {
-          console.log("🔄 Timeout — retrying...");
-          continue; // Retry on timeout
-        }
-        if (attempt >= MAX_RETRIES) {
-          return res.status(500).json({ error: "Generation Failed", details: error.message });
-        }
-      }
+    // Robust JSON cleaning
+    if (roadmapText.includes('```')) {
+      roadmapText = roadmapText.replace(/```(?:json)?\s*/g, '').replace(/\s*```/g, '');
     }
+    
+    const startIdx = roadmapText.indexOf('{');
+    const endIdx = roadmapText.lastIndexOf('}');
+    if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+      roadmapText = roadmapText.substring(startIdx, endIdx + 1);
+    }
+
+    roadmapText = roadmapText.replace(/[\x00-\x1F\x7F]/g, (ch) => {
+      if (ch === '\n' || ch === '\r' || ch === '\t') return ch;
+      return '';
+    });
+
+    roadmapText = roadmapText.replace(/,\s*([\]}])/g, '$1');
+
+    try {
+      const roadmapJson = JSON.parse(roadmapText);
+      res.json(roadmapJson);
+      console.log("✨ Roadmap successfully generated and sent to client.");
+    } catch (parseError) {
+      console.error(`❌ JSON Parse Failed:`, parseError.message);
+      console.error("DEBUG: Raw result was:", roadmapText.substring(0, 500));
+      return res.status(500).json({ 
+        error: "Generation Failed", 
+        details: "AI returned invalid format. Please try again." 
+      });
+    }
+
+  } catch (error) {
+    console.error(`❌ Roadmap Generation Error:`);
+    console.error("Message:", error.message);
+    res.status(500).json({ error: "Generation Failed", details: error.message });
   }
 });
 
