@@ -277,14 +277,12 @@ function App() {
             history: 'My AI Roadmaps — Progress History | Level Up Map',
             about: 'About Level Up Map — The Ultimate AI Learning Planner',
             contact: 'Contact Us — Level Up Map Built With AI',
-
         }
         const descriptions = {
             home: 'Free AI roadmap generator. Create personalized, step-by-step career and learning paths instantly. Plan your studies and goals with Gemma AI.',
             generator: 'Enter any goal or skill, and our AI Roadmap Generator will create a comprehensive, step-by-step learning path complete with milestones and tasks.',
             about: 'Learn more about the team behind Level Up Map and how we use AI to build the ultimate roadmap generator and study planner.',
             contact: 'Reach out for support, feedback, or collaboration opportunities with the Level Up Map team.',
-
         }
 
         document.title = titles[currentPage] || 'Level Up Map'

@@ -34,7 +34,143 @@ export default function Generator({
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const svgRef = useRef(null)
   const simulationRef = useRef(null)
+  const [isRecording, setIsRecording] = useState(false);
+  const [selectedSTTLang, setSelectedSTTLang] = useState('ru'); // 'ru' or 'kk'
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
 
+
+  const audioBufferToWav = (buffer) => {
+    const numOfChan = buffer.numberOfChannels;
+    const length = buffer.length * numOfChan * 2 + 44;
+    const bufferArr = new ArrayBuffer(length);
+    const view = new DataView(bufferArr);
+    const channels = [];
+    let i;
+    let sample;
+    let offset = 0;
+    let pos = 0;
+
+    // write WAVE header
+    const setUint32 = (data) => {
+      view.setUint32(pos, data, true);
+      pos += 4;
+    };
+
+    const setUint16 = (data) => {
+      view.setUint16(pos, data, true);
+      pos += 2;
+    };
+
+    setUint32(0x46464952); // "RIFF"
+    setUint32(length - 8); // file length - 8
+    setUint32(0x45564157); // "WAVE"
+
+    setUint32(0x20746d66); // "fmt " chunk
+    setUint32(16); // length = 16
+    setUint16(1); // PCM (uncompressed)
+    setUint16(numOfChan);
+    setUint32(buffer.sampleRate);
+    setUint32(buffer.sampleRate * 2 * numOfChan); // avg. bytes/sec
+    setUint16(numOfChan * 2); // block-align
+    setUint16(16); // 16-bit (hardcoded)
+
+    setUint32(0x61746164); // "data" - chunk
+    setUint32(length - pos - 4); // chunk length
+
+    // write interleaved data
+    for (i = 0; i < buffer.numberOfChannels; i++) {
+      channels.push(buffer.getChannelData(i));
+    }
+
+    while (pos < length) {
+      for (i = 0; i < numOfChan; i++) {
+        // interleave channels
+        sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
+        sample = (sample < 0 ? sample * 0x8000 : sample * 0x7fff); // scale to 16-bit signed int
+        view.setInt16(pos, sample, true);
+        pos += 2;
+      }
+      offset++;
+    }
+
+    return new Blob([bufferArr], { type: 'audio/wav' });
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        if (audioChunksRef.current.length === 0) return;
+        
+        const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        
+        try {
+          // Convert WebM to WAV using AudioContext
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const arrayBuffer = await webmBlob.arrayBuffer();
+          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          const wavBlob = audioBufferToWav(audioBuffer);
+
+          if (wavBlob.size < 500) {
+            console.warn("Audio recording is too short, skipping...");
+            return;
+          }
+
+          await sendAudioToBackend(wavBlob);
+        } catch (convErr) {
+          console.error("Audio conversion error:", convErr);
+          setError("Failed to process audio format");
+        } finally {
+          stream.getTracks().forEach((track) => track.stop());
+        }
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Error accessing microphone:", err);
+      setError("Microphone access denied or not supported");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const sendAudioToBackend = async (blob) => {
+    // We reuse generateRoadmap loading state logic for better UX
+    try {
+      const formData = new FormData();
+      formData.append("audio", blob, "recording.wav");
+      formData.append("lang", selectedSTTLang); // Pass the selected language
+
+      const response = await fetch("http://localhost:5001/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Transcription failed");
+      const data = await response.json();
+      if (data.text) setInput(data.text);
+    } catch (err) {
+      console.error("Transcription error:", err);
+      setError("Failed to transcribe audio");
+    }
+  };
 
   const zoomRef = useRef(null)
   const nodesRef = useRef(null) // Хранит массив узлов с позициями
@@ -74,7 +210,7 @@ export default function Generator({
   const handleZoomOut = () => {
     if (zoomRef.current && svgRef.current) {
       const svg = d3.select(svgRef.current)
-      const newZoom = Math.max(zoom / 1.2, 0.15)
+      const newZoom = Math.max(zoom / 1.2, 0.3)
       zoomRef.current.scaleTo(svg.transition().duration(300), newZoom)
     }
   }
@@ -240,7 +376,7 @@ export default function Generator({
 
     const zoomBehavior = d3
       .zoom()
-      .scaleExtent([0.15, 3])
+      .scaleExtent([0.3, 3])
       .on('zoom', (event) => {
         container.attr('transform', event.transform)
         setZoom(event.transform.k)
@@ -282,14 +418,14 @@ export default function Generator({
         d3
           .forceLink(links)
           .id((d) => d.id)
-          .distance(280) // Increased distance
-          .strength(0.3)
+          .distance(220)
+          .strength(0.25)
       )
-      .force('charge', d3.forceManyBody().strength(-2000)) // Stronger repulsion
+      .force('charge', d3.forceManyBody().strength(-1200))
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('collision', d3.forceCollide().radius((d) => {
-        const radii = { 0: 75, 1: 60, 2: 50, 3: 40, 4: 30 }
-        return (radii[d.level] || 30) + 40 // More padding
+        const radii = { 0: 68, 1: 52, 2: 42, 3: 34, 4: 26 }
+        return (radii[d.level] || 24) + 20
       }))
 
     simulationRef.current = simulation
@@ -684,6 +820,42 @@ export default function Generator({
             transform: translateY(-25px) translateX(8px);
           }
         }
+        @keyframes mic-pulse {
+          0% { 
+            transform: scale(1); 
+            box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7), 0 0 20px rgba(249, 115, 22, 0.3); 
+          }
+          50% { 
+            transform: scale(1.08); 
+            box-shadow: 0 0 0 12px rgba(249, 115, 22, 0), 0 0 40px rgba(249, 115, 22, 0.5); 
+          }
+          100% { 
+            transform: scale(1); 
+            box-shadow: 0 0 0 0 rgba(249, 115, 22, 0), 0 0 20px rgba(249, 115, 22, 0.3); 
+          }
+        }
+        @keyframes ring-rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes particle-swirl-1 {
+          0% { transform: rotate(0deg) translateX(18px) rotate(0deg); opacity: 0; }
+          20% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { transform: rotate(360deg) translateX(18px) rotate(-360deg); opacity: 0; }
+        }
+        @keyframes particle-swirl-2 {
+          0% { transform: rotate(120deg) translateX(15px) rotate(-120deg); opacity: 0; }
+          20% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { transform: rotate(480deg) translateX(15px) rotate(-480deg); opacity: 0; }
+        }
+        @keyframes particle-swirl-3 {
+          0% { transform: rotate(240deg) translateX(20px) rotate(-240deg); opacity: 0; }
+          20% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { transform: rotate(600deg) translateX(20px) rotate(-600deg); opacity: 0; }
+        }
       `}</style>
 
       {/* Header - Fully Adaptive & Premium */}
@@ -713,6 +885,49 @@ export default function Generator({
                 <div className="absolute inset-0 rounded-2xl border border-indigo-500/0 group-focus-within:border-indigo-500/30 pointer-events-none transition-all"></div>
               </div>
 
+              {/* Voice & Lang Controls - Now Grouped with Input */}
+              <div className="hidden lg:flex items-center gap-2 px-2 py-1 bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-2xl shrink-0">
+                {/* Language Toggle */}
+                <button
+                  onClick={() => setSelectedSTTLang(prev => prev === 'ru' ? 'kk' : prev === 'kk' ? 'en' : 'ru')}
+                  disabled={loading || isRecording}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 border shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] min-w-[62px] justify-center ${
+                    selectedSTTLang === 'ru'
+                      ? 'bg-linear-to-br from-indigo-500/20 to-blue-600/20 text-indigo-200 border-indigo-500/30 hover:border-indigo-400/50 hover:from-indigo-500/30 hover:to-blue-600/30 hover:text-white hover:shadow-[0_0_15px_rgba(99,102,241,0.2)]'
+                      : selectedSTTLang === 'kk'
+                      ? 'bg-linear-to-br from-teal-500/20 to-emerald-600/20 text-teal-200 border-teal-500/30 hover:border-teal-400/50 hover:from-teal-500/30 hover:to-emerald-600/30 hover:text-white hover:shadow-[0_0_15px_rgba(20,184,166,0.2)]'
+                      : 'bg-linear-to-br from-rose-500/20 to-pink-600/20 text-rose-200 border-rose-500/30 hover:border-rose-400/50 hover:from-rose-500/30 hover:to-pink-600/30 hover:text-white hover:shadow-[0_0_15px_rgba(225,29,72,0.2)]'
+                  }`}
+                  title={`Switch to ${selectedSTTLang === 'ru' ? 'Kazakh' : selectedSTTLang === 'kk' ? 'English' : 'Russian'}`}
+                >
+                  <i className="fa-solid fa-language opacity-80 text-xs"></i>
+                  {selectedSTTLang === 'kk' ? 'kz' : selectedSTTLang}
+                </button>
+
+                <div className="w-px h-4 bg-slate-700/50 mx-0.5"></div>
+
+                {/* Mic Icon */}
+                <button
+                  onClick={isRecording ? stopRecording : startRecording}
+                  disabled={loading}
+                  className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                    isRecording 
+                      ? 'bg-linear-to-tr from-orange-600 to-amber-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.5)] animate-[mic-pulse_1.5s_infinite]' 
+                      : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/10'
+                  }`}
+                  title={isRecording ? "Stop Recording" : "Voice Input"}
+                >
+                  {isRecording && (
+                    <>
+                      <div className="absolute inset-0 rounded-xl border border-white/40 border-t-transparent animate-[ring-rotate_2s_linear_infinite]"></div>
+                      <div className="absolute w-1 h-1 bg-white rounded-full animate-[particle-swirl-1_1.2s_linear_infinite]"></div>
+                      <div className="absolute w-1 h-1 bg-amber-300 rounded-full animate-[particle-swirl-2_0.8s_linear_infinite]"></div>
+                      <div className="absolute w-0.5 h-0.5 bg-yellow-200 rounded-full animate-[particle-swirl-3_1.5s_linear_infinite]"></div>
+                    </>
+                  )}
+                  <i className={`fa-solid ${isRecording ? 'fa-microphone' : 'fa-microphone'} text-sm z-10`}></i>
+                </button>
+              </div>
             </div>
 
             <button

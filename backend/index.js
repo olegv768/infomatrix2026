@@ -2,11 +2,16 @@ import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import nodemailer from "nodemailer";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import multer from "multer";
+import axios from "axios";
+import FormData from "form-data";
+import fs from "fs";
+import path from "path";
 
 dotenv.config();
 
 const app = express();
+const upload = multer({ storage: multer.memoryStorage() });
 
 app.use(
   cors({
@@ -25,11 +30,8 @@ app.use(
 );
 app.use(express.json());
 
-// Initialize Google Generative AI
-const genAI = new GoogleGenerativeAI(process.env.API_KEY);
-
 app.get("/", (req, res) => {
-  res.send("Roadmap AI Server is running with Gemini 3 Flash!");
+  res.send("Roadmap API Server is running with alem.ai!");
 });
 
 // Email Transporter setup
@@ -75,42 +77,105 @@ app.post("/contact", async (req, res) => {
   }
 });
 
+app.post("/transcribe", upload.single("audio"), async (req, res) => {
+  try {
+    const file = req.file;
+    if (!file) {
+      console.error("No audio file found in the request");
+      return res.status(400).json({ error: "No audio file provided" });
+    }
+
+    if (file.buffer.length < 100) {
+       console.error("Audio file is too small or empty");
+       return res.status(400).json({ error: "Audio recording is empty" });
+    }
+
+    const tempFilePath = path.join(process.cwd(), "speech.wav");
+    // Write buffer to disk to ensure flawless stream formatting for ffmpeg on API side
+    fs.writeFileSync(tempFilePath, file.buffer);
+
+    // Determine model and key based on lang
+    const lang = req.body.lang || "ru";
+    const model = lang === "kk" ? "speech-to-text-kk" : "speech-to-text";
+    const apiKey = lang === "kk" ? process.env.ALEM_STT_KK_API_KEY : process.env.ALEM_STT_API_KEY;
+
+    const formData = new FormData();
+    formData.append("model", model);
+    formData.append("file", fs.readFileSync(tempFilePath), {
+      filename: "speech.wav",
+      contentType: "audio/wav",
+    });
+    formData.append("language", lang);
+
+    console.log(`📡 Sending ${lang} audio buffer (${file.buffer.length} bytes) to alem.ai via axios...`);
+    
+    const response = await axios.post("https://llm.alem.ai/v1/audio/transcriptions", formData, {
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        ...formData.getHeaders(),
+      },
+      timeout: 30000 
+    });
+
+    // Cleanup temp file
+    if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+
+    console.log("✅ Transcription success:", response.data.text);
+    res.json({ text: response.data.text });
+  } catch (error) {
+    console.error("❌ Transcription error detail:");
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("Data:", JSON.stringify(error.response.data, null, 2));
+      res.status(500).json({ error: "Transcription failed", details: error.response.data });
+    } else {
+      console.error("Message:", error.message);
+      res.status(500).json({ error: "Transcription failed", details: error.message });
+    }
+  }
+});
+
 app.post("/roadmap", async (req, res) => {
   const { goal } = req.body;
   console.log(`🚀 New Roadmap Request: ${goal}`);
-  
   if (!goal) {
     return res.status(400).json({ error: "Goal is required" });
   }
 
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    console.error("❌ API_KEY is missing in environment variables!");
-    return res.status(500).json({ error: "Server Configuration Error", details: "API Key is not configured on the server." });
-  }
-
   const prompt = `Create a comprehensive and detailed roadmap for achieving the goal: ${goal}
 
-CRITICAL INSTRUCTION: You MUST respond in the SAME LANGUAGE as the user's goal above. Match the user's language exactly.
+CRITICAL INSTRUCTION: You MUST respond in the SAME LANGUAGE as the user's goal above. If the goal is in Russian, respond in Russian. If in English, respond in English. Match the user's language exactly.
 
 JSON Format:
 {
-  "title": "Roadmap Title",
+  "title": "Roadmap Title (in user's language)",
   "nodes": [
     {
       "id": "main",
       "label": "Main Goal",
       "level": 0,
-      "description": "...",
+      "description": "Detailed description of the main goal",
       "category": "goal",
-      "timeEstimate": "1-2 weeks",
-      "children": ["step1"],
-      "resources": [{"title": "...", "type": "youtube", "url": "..."}]
+      "timeEstimate": "6-12 months",
+      "children": ["step1", "step2"],
+      "resources": [
+        {
+          "title": "Resource name",
+          "type": "youtube|documentation|course|article|book",
+          "url": "https://actual-real-url.com"
+        }
+      ]
     }
   ]
 }
 
-- timeEstimate: strictly ONLY time with numbers and units (e.g., "2-3 hours", "1-2 days", "2-3 weeks", "1-2 months"). NEVER use "Ongoing", "N/A" or extra explanations.
+Rules:
+- id: only latin letters and numbers, no spaces
+- label: 2-5 words, short descriptive name (in user's language)
+- level: 0 (main goal), 1 (major phases), 2 (key milestones), 3 (specific tasks), 4 (micro-steps)
+- description: detailed, practical description of what to do and why (in user's language)
+- category: one of "basics", "practice", "advanced", "goal", "foundation", "intermediate"
+- timeEstimate: realistic time estimate (e.g., "1-2 weeks", "1 month", "2-3 months")
 - children: array of child node ids (each node should have 2-5 children for proper depth)
 - resources: MANDATORY array of 2-4 learning resources (see RESOURCE RULES below)
 
@@ -130,6 +195,14 @@ Ensure the roadmap covers:
 - STRICT RULE: Child nodes MUST be exactly one level deeper than their parent (e.g., Level 2 parent -> Level 3 children). Do NOT skip levels.
 
 ════════════════════════════════════════
+RESOURCE RULES — FOLLOW EXACTLY:
+════════════════════════════════════════
+RULE 1 — MINIMUM 2 RESOURCES: Every node MUST have at least 2 resources. Use fallback URLs if needed.
+RULE 2 — VERIFIABLE URLs: Only use URLs from known platforms (youtube, docs, coursera).
+RULE 3 — LANGUAGE LABELS: Keep titles original, append language in parentheses if different.
+RULE 4 — NO FABRICATED TASKS: Follow real-world steps.
+
+════════════════════════════════════════
 STRICT RESTRICTIONS — DO NOT VIOLATE:
 ════════════════════════════════════════
 ❌ Нельзя нарушать законодательство РК
@@ -140,51 +213,38 @@ STRICT RESTRICTIONS — DO NOT VIOLATE:
 Output explicitly ONLY valid JSON. No markdown wrappers.`;
 
   try {
-    console.log(`📡 Contacting Gemini 3 Flash...`);
-    
-    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
-    
-    // Set up safety settings if needed (optional)
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    let roadmapText = response.text().trim();
-    
-    console.log("✅ Received response from Gemini (length:", roadmapText.length, ")");
-
-    // Robust JSON cleaning
-    if (roadmapText.includes('```')) {
-      roadmapText = roadmapText.replace(/```(?:json)?\s*/g, '').replace(/\s*```/g, '');
-    }
-    
-    const startIdx = roadmapText.indexOf('{');
-    const endIdx = roadmapText.lastIndexOf('}');
-    if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-      roadmapText = roadmapText.substring(startIdx, endIdx + 1);
-    }
-
-    roadmapText = roadmapText.replace(/[\x00-\x1F\x7F]/g, (ch) => {
-      if (ch === '\n' || ch === '\r' || ch === '\t') return ch;
-      return '';
+    const response = await fetch("https://llm.alem.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.ALEM_AI_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gemma3", 
+        messages: [{ role: "user", content: prompt }]
+      })
     });
 
-    roadmapText = roadmapText.replace(/,\s*([\]}])/g, '$1');
-
-    try {
-      const roadmapJson = JSON.parse(roadmapText);
-      res.json(roadmapJson);
-      console.log("✨ Roadmap successfully generated and sent to client.");
-    } catch (parseError) {
-      console.error(`❌ JSON Parse Failed:`, parseError.message);
-      console.error("DEBUG: Raw result was:", roadmapText.substring(0, 500));
-      return res.status(500).json({ 
-        error: "Generation Failed", 
-        details: "AI returned invalid format. Please try again." 
-      });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || "API request failed with status: " + response.status);
     }
 
+    const data = await response.json();
+    let roadmapText = data.choices[0].message.content.trim();
+
+    // Strip markdown JSON wrappers if gemma3 adds them
+    if (roadmapText.startsWith('```json')) {
+      roadmapText = roadmapText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (roadmapText.startsWith('```')) {
+      roadmapText = roadmapText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+
+    const roadmapJson = JSON.parse(roadmapText);
+    res.json(roadmapJson);
+
   } catch (error) {
-    console.error(`❌ Roadmap Generation Error:`);
-    console.error("Message:", error.message);
+    console.error("Error generating roadmap:", error);
     res.status(500).json({ error: "Generation Failed", details: error.message });
   }
 });
