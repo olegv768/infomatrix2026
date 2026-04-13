@@ -63,7 +63,7 @@ export default function About({ onNavigate }) {
       image: 'Danial.jpg',
       bio: 'React, Node.js, Solana. 2nd place at Solana Day, sponsored by Decentrathon.'
     }
-  ]
+  ] // Updated team list
 
   const values = [
     {
