@@ -58,7 +58,7 @@ export default function About({ onNavigate }) {
       bio: 'Invented the roadmap and fully built the entire visual part of the website.'
     },
     {
-      name: 'Danial Kabylkan',
+      name: 'Daniyal Kabylkan',
       role: 'Backend Developer',
       image: 'Danial.jpg',
       bio: 'React, Node.js, Solana. 2nd place at Solana Day, sponsored by Decentrathon.'
