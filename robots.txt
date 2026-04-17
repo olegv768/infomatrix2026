@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /sitemap.xml
-Allow: /
-Disallow: /profile
-Disallow: /history
-
-Sitemap: https://levelupmap.xyz/sitemap.xml

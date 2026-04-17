@@ -1,70 +1,9 @@
 import Footer from '../components/Footer'
 import ScrollReveal from '../components/ScrollReveal'
 import FeatureCard from '../components/FeatureCard'
-import { useState, useEffect } from 'react'
 
-const TeamMember = ({ member, delay }) => {
-    const [isHovered, setIsHovered] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        setIsMobile(window.innerWidth < 768);
-        const handleResize = () => setIsMobile(window.innerWidth < 768);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    return (
-      <ScrollReveal delay={delay}>
-        <div
-          className={`p-6 rounded-2xl transition-all duration-500 text-center group flex flex-col items-center h-full hover-lift cursor-pointer ${
-            isHovered ? 'bg-violet-400/20 border-violet-400/30 shadow-xl shadow-violet-500/10' : 'bg-white/5 border-white/10'
-          } border`}
-          onMouseEnter={() => !isMobile && setIsHovered(true)}
-          onMouseLeave={() => !isMobile && setIsHovered(false)}
-          onClick={() => setIsHovered(!isHovered)}
-        >
-          <div className="relative inline-block mb-4">
-            <div className={`w-24 h-24 rounded-full overflow-hidden border-4 transition-all duration-500 ${
-                isHovered ? 'border-indigo-500 scale-105 shadow-xl shadow-indigo-500/20' : 'border-indigo-500/30'
-            }`}>
-              <img
-                src={member.image}
-                alt={member.name}
-                className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? 'scale-110' : ''}`}
-                style={member.style || {}}
-              />
-            </div>
-            {isHovered && (
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-green-500 border-4 border-slate-900 flex items-center justify-center animate-bounce-short">
-                    <i className="fa-solid fa-check text-white text-xs"></i>
-                </div>
-            )}
-          </div>
-          <h3 className={`text-xl font-semibold transition-colors ${isHovered ? 'text-white' : 'text-slate-200'}`}>{member.name}</h3>
-          <p className="text-indigo-400 mb-2">{member.role}</p>
-          <p className={`text-sm mb-4 transition-colors ${isHovered ? 'text-slate-200' : 'text-slate-400'}`}>{member.bio}</p>
-        </div>
-      </ScrollReveal>
-    );
-};
 
 export default function About({ onNavigate }) {
-  const team = [
-    {
-      name: 'Oleg Volosov',
-      role: 'Frontend developer / D3.js',
-      image: 'Oleg_v2.png',
-      bio: 'Invented the roadmap and fully built the entire visual part of the website.'
-    },
-    {
-      name: 'Danial Kabylkan',
-      role: 'Backend Developer',
-      image: 'Danial.jpg',
-      bio: 'React, Node.js, Solana. 2nd place at Solana Day, sponsored by Decentrathon.'
-    }
-  ] // Updated team list
-
   const values = [
     {
       icon: 'fa-lightbulb',
@@ -169,28 +108,6 @@ export default function About({ onNavigate }) {
                 {...value}
                 delay={index * 100}
               />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Team Section */}
-      <section className="py-32 sm:py-48 lg:py-64 px-8 sm:px-12 lg:px-20 flex items-center justify-center">
-        <div className="max-w-7xl mx-auto">
-          <div style={{ height: '45px' }}></div> {/* Forced spacing of 45px from top */}
-          <div className="text-center">
-            <ScrollReveal>
-              <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 tracking-tight font-['Plus_Jakarta_Sans']">Meet Our Team</h2>
-            </ScrollReveal>
-            <ScrollReveal delay={200}>
-              <p className="text-slate-400 text-lg">The passionate people behind LevelUp Map</p>
-            </ScrollReveal>
-          </div>
-          <div style={{ height: '35px' }}></div> {/* Forced spacing of 35px */}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {team.map((member, index) => (
-              <TeamMember key={index} member={member} delay={index * 150} />
             ))}
           </div>
         </div>
