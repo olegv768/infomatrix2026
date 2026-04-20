@@ -100,6 +100,30 @@ function App() {
         setSavedSelectedNode(null)
         setSavedCompletedNodes(new Set())
 
+        // Client-side content filtering for instant feedback
+        const prohibitedPatterns = [
+            {
+                regex: /медицин|лечен|болезн|таблетк|лекарств|диагноз|терапи|симптом|аптек|\bmedicine\b|\bmedical\b|\bdoctor\b|\btreatment\b|\bdisease\b|\bcure\b|\bdrug\b|\bpharmacy\b|\bsymptom\b|\bdiagnosis\b/i,
+                message: "Извините, мы не создаем дорожные карты по медицинским темам в целях безопасности. / Sorry, we do not generate roadmaps for medical topics for safety reasons."
+            },
+            {
+                regex: /казино|азартн|ставк|покер|рулетк|слот|букмекер|выигрыш|\bcasino\b|\bgambling\b|\bbetting\b|\bpoker\b|\broulette\b|\bslots\b|\bwagering\b|\bjackpot\b/i,
+                message: "Создание дорожных карт для азартных игр и казино запрещено. / Generating roadmaps for gambling and casinos is prohibited."
+            },
+            {
+                regex: /юрист|адвокат|закон|юридическ|судебн|прокурор|\blawyer\b|\blegal\b|\blaw\b|\battorney\b|\bcourt\b|\blitigation\b|\bprosecutor\b/i,
+                message: "Мы не предоставляем дорожные карты по юридическим вопросам. / We do not provide roadmaps for legal matters."
+            }
+        ];
+
+        for (const pattern of prohibitedPatterns) {
+            if (pattern.regex.test(goal)) {
+                setGenerationError(pattern.message);
+                setIsGenerating(false);
+                return;
+            }
+        }
+
         try {
             const apiBase = import.meta.env.VITE_API_URL || ''
             const apiUrl = import.meta.env.PROD

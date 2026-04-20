@@ -142,6 +142,34 @@ app.post("/roadmap", async (req, res) => {
     return res.status(400).json({ error: "Goal is required" });
   }
 
+  // Content Filtering for prohibited topics
+  const prohibitedPatterns = [
+    {
+      category: "Medicine",
+      regex: /медицин|лечен|болезн|таблетк|лекарств|диагноз|терапи|симптом|аптек|\bmedicine\b|\bmedical\b|\bdoctor\b|\btreatment\b|\bdisease\b|\bcure\b|\bdrug\b|\bpharmacy\b|\bsymptom\b|\bdiagnosis\b/i,
+      message: "Извините, мы не создаем дорожные карты по медицинским темам в целях безопасности. / Sorry, we do not generate roadmaps for medical topics for safety reasons."
+    },
+    {
+      category: "Casino/Gambling",
+      regex: /казино|азартн|ставк|покер|рулетк|слот|букмекер|выигрыш|\bcasino\b|\bgambling\b|\bbetting\b|\bpoker\b|\broulette\b|\bslots\b|\bwagering\b|\bjackpot\b/i,
+      message: "Создание дорожных карт для азартных игр и казино запрещено. / Generating roadmaps for gambling and casinos is prohibited."
+    },
+    {
+      category: "Legal",
+      regex: /юрист|адвокат|закон|юридическ|судебн|прокурор|\blawyer\b|\blegal\b|\blaw\b|\battorney\b|\bcourt\b|\blitigation\b|\bprosecutor\b/i,
+      message: "Мы не предоставляем дорожные карты по юридическим вопросам. / We do not provide roadmaps for legal matters."
+    }
+  ];
+
+  for (const pattern of prohibitedPatterns) {
+    if (pattern.regex.test(goal)) {
+      console.warn(`🛑 Blocked prohibited request (${pattern.category}): ${goal}`);
+      return res.status(403).json({ 
+        error: pattern.message 
+      });
+    }
+  }
+
   const prompt = `Create a comprehensive and detailed roadmap for achieving the goal: ${goal}
 
 CRITICAL INSTRUCTION: You MUST respond in the SAME LANGUAGE as the user's goal above. If the goal is in Russian, respond in Russian. If in English, respond in English. Match the user's language exactly.
