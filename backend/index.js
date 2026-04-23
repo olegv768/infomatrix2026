@@ -194,18 +194,18 @@ Rules:
 - id: only latin letters and numbers, no spaces
 - label: 2-5 words, short descriptive name (in user's language)
 - level: 0 (main goal), 1 (major phases), 2 (key milestones), 3 (specific tasks), 4 (micro-steps)
-- description: detailed, practical description of what to do and why (in user's language)
+- description: short, concise and practical description (max 2 sentences) (in user's language)
 - category: one of "basics", "practice", "advanced", "goal", "foundation", "intermediate"
 - timeEstimate: realistic time estimate (e.g., "1-2 weeks", "1 month", "2-3 months")
 - children: array of child node ids (each node should have 2-5 children for proper depth)
 - resources: MANDATORY array of 2-4 learning resources (see RESOURCE RULES below)
 
-Create 30-50 nodes with comprehensive logical structure:
+Create 40-60 nodes with comprehensive logical structure:
 - 1 node at level 0 (main Goal)
-- 4-6 nodes at level 1 (major phases/stages of learning)
-- 12-18 nodes at level 2 (key milestones and major topics)
-- 12-20 nodes at level 3 (specific tasks, subtopics, and skills)
-- 2-10 nodes at level 4 (optional micro-steps for complex topics)
+- 5-8 nodes at level 1 (major phases/stages of learning)
+- 15-20 nodes at level 2 (key milestones and major topics)
+- 15-25 nodes at level 3 (specific tasks, subtopics, and skills)
+- 5-15 nodes at level 4 (micro-steps for complex topics)
 
 Ensure the roadmap covers:
 - Foundational knowledge first
@@ -218,7 +218,7 @@ Ensure the roadmap covers:
 ════════════════════════════════════════
 RESOURCE RULES — FOLLOW EXACTLY:
 ════════════════════════════════════════
-RULE 1 — MINIMUM 2 RESOURCES: Every node MUST have at least 2 resources. Use fallback URLs if needed.
+RULE 1 — RESOURCE COUNT: Level 0 node MUST have exactly 2 resources. ALL OTHER nodes (levels 1-4) MUST have exactly 1 resource.
 RULE 2 — VERIFIABLE ABSOLUTE URLs: Every URL MUST start with https://. Use URLs from known platforms (youtube, docs, coursera).
 RULE 3 — NO HALLUCINATED IDs: If you are not 100% sure about a specific video or course ID, use a search result URL instead (e.g., https://www.youtube.com/results?search_query=...). This prevents 404 errors.
 RULE 4 — LANGUAGE LABELS: Keep titles original, append language in parentheses if different.
