@@ -140,7 +140,13 @@ export default function Generator({
       setIsRecording(true);
     } catch (err) {
       console.error("Error accessing microphone:", err);
-      setError("Microphone access denied or not supported");
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setError("Microphone access denied. Please enable it in browser settings.");
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setError("No microphone found on your device.");
+      } else {
+        setError("Microphone access failed or not supported in this browser");
+      }
     }
   };
 
@@ -158,7 +164,12 @@ export default function Generator({
       formData.append("audio", blob, "recording.wav");
       formData.append("lang", selectedSTTLang); // Pass the selected language
 
-      const response = await fetch("http://localhost:5001/transcribe", {
+      const apiBase = import.meta.env.VITE_API_URL || '';
+      const apiUrl = import.meta.env.PROD
+        ? `${apiBase}/transcribe`
+        : 'http://localhost:5001/transcribe';
+
+      const response = await fetch(apiUrl, {
         method: "POST",
         body: formData,
       });
@@ -886,7 +897,7 @@ export default function Generator({
               </div>
 
               {/* Voice & Lang Controls - Now Grouped with Input */}
-              <div className="hidden lg:flex items-center gap-2 px-2 py-1 bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-2xl shrink-0">
+              <div className="flex items-center gap-1.5 md:gap-2 px-1.5 md:px-2 py-1 bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-2xl shrink-0">
                 {/* Language Toggle */}
                 <button
                   onClick={() => setSelectedSTTLang(prev => prev === 'ru' ? 'kk' : prev === 'kk' ? 'en' : 'ru')}

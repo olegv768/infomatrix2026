@@ -90,10 +90,6 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
        return res.status(400).json({ error: "Audio recording is empty" });
     }
 
-    const tempFilePath = path.join(process.cwd(), "speech.wav");
-    // Write buffer to disk to ensure flawless stream formatting for ffmpeg on API side
-    fs.writeFileSync(tempFilePath, file.buffer);
-
     // Determine model and key based on lang
     const lang = req.body.lang || "ru";
     const model = lang === "kk" ? "speech-to-text-kk" : "speech-to-text";
@@ -101,7 +97,7 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
 
     const formData = new FormData();
     formData.append("model", model);
-    formData.append("file", fs.readFileSync(tempFilePath), {
+    formData.append("file", file.buffer, {
       filename: "speech.wav",
       contentType: "audio/wav",
     });
@@ -116,9 +112,6 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
       },
       timeout: 30000 
     });
-
-    // Cleanup temp file
-    if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
 
     console.log("✅ Transcription success:", response.data.text);
     res.json({ text: response.data.text });
