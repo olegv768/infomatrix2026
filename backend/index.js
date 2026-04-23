@@ -219,9 +219,10 @@ Ensure the roadmap covers:
 RESOURCE RULES — FOLLOW EXACTLY:
 ════════════════════════════════════════
 RULE 1 — MINIMUM 2 RESOURCES: Every node MUST have at least 2 resources. Use fallback URLs if needed.
-RULE 2 — VERIFIABLE URLs: Only use URLs from known platforms (youtube, docs, coursera).
-RULE 3 — LANGUAGE LABELS: Keep titles original, append language in parentheses if different.
-RULE 4 — NO FABRICATED TASKS: Follow real-world steps.
+RULE 2 — VERIFIABLE ABSOLUTE URLs: Every URL MUST start with https://. Use URLs from known platforms (youtube, docs, coursera).
+RULE 3 — NO HALLUCINATED IDs: If you are not 100% sure about a specific video or course ID, use a search result URL instead (e.g., https://www.youtube.com/results?search_query=...). This prevents 404 errors.
+RULE 4 — LANGUAGE LABELS: Keep titles original, append language in parentheses if different.
+RULE 5 — NO FABRICATED TASKS: Follow real-world steps.
 
 ════════════════════════════════════════
 STRICT RESTRICTIONS — DO NOT VIOLATE:

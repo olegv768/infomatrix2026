@@ -1362,7 +1362,7 @@ export default function Generator({
                         return (
                           <a
                             key={idx}
-                            href={resource.url}
+                            href={resource.url?.startsWith('http') ? resource.url : `https://${resource.url}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-5 p-5 bg-slate-900/40 rounded-2xl border border-white/5 hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:shadow-[0_5px_20px_rgba(99,102,241,0.15)] transition-all group"
