@@ -200,12 +200,14 @@ Rules:
 - children: array of child node ids (each node should have 2-5 children for proper depth)
 - resources: MANDATORY array of 2-4 learning resources (see RESOURCE RULES below)
 
-Create 40-60 nodes with comprehensive logical structure:
+CRITICAL: You MUST create between 25 and 35 nodes total. A roadmap with fewer than 20 nodes is UNACCEPTABLE.
+
+Node count requirements per level:
 - 1 node at level 0 (main Goal)
-- 5-8 nodes at level 1 (major phases/stages of learning)
-- 15-20 nodes at level 2 (key milestones and major topics)
-- 15-25 nodes at level 3 (specific tasks, subtopics, and skills)
-- 5-15 nodes at level 4 (micro-steps for complex topics)
+- 4-6 nodes at level 1 (major phases/stages of learning)
+- 8-12 nodes at level 2 (key milestones and major topics)
+- 8-12 nodes at level 3 (specific tasks, subtopics, and skills)
+- 4-6 nodes at level 4 (micro-steps for complex topics)
 
 Ensure the roadmap covers:
 - Foundational knowledge first
@@ -214,6 +216,8 @@ Ensure the roadmap covers:
 - Advanced topics and specializations
 - Each node should logically build on previous ones
 - STRICT RULE: Child nodes MUST be exactly one level deeper than their parent (e.g., Level 2 parent -> Level 3 children). Do NOT skip levels.
+- STRICT RULE: EVERY node at levels 0, 1, 2, and 3 MUST have at least 2-4 children. Only level 4 nodes can have empty children arrays.
+- STRICT RULE: Do NOT create a flat list of 5-7 steps. The roadmap must be a DEEP TREE with multiple levels of hierarchy.
 
 ════════════════════════════════════════
 RESOURCE RULES — FOLLOW EXACTLY:
@@ -243,7 +247,9 @@ Output explicitly ONLY valid JSON. No markdown wrappers.`;
       },
       body: JSON.stringify({
         model: "gemma3", 
-        messages: [{ role: "user", content: prompt }]
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 16384,
+        temperature: 0.7
       })
     });
 
