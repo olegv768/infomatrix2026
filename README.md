@@ -1,6 +1,6 @@
 # RoadmapAI - AI-Powered Learning Paths
 
-An interactive AI roadmap generator that creates personalized learning paths using Google Gemma AI.
+An interactive AI roadmap generator that creates personalized learning paths using Alem Gemma AI.
 
 ## 🚀 Live Demo
 [Check out the live website here!](https://levelupmap.xyz/)
@@ -44,7 +44,7 @@ cd backend
 npm install
 ```
 
-Create a `.env` file with your Google Gemma API key:
+Create a `.env` file with your Alem Gemma API key:
 
 ```
 API_KEY=your_google_gemma_api_key
@@ -78,7 +78,7 @@ The project uses a split deployment architecture for maximum stability:
 - **Build Command**: `npm install`
 - **Start Command**: `node index.js`
 - **Environment Variables**: 
-  - `API_KEY`: Your Google Gemma API key.
+  - `API_KEY`: Your Alem Gemma API key.
   - `NODE_ENV`: `production`
 
 ### 2. Frontend (deployed on Vercel)
@@ -92,7 +92,7 @@ The project uses a split deployment architecture for maximum stability:
 - **AI & Services (alem.plus)**:
   - **Speech-to-Text**: High-precision voice transcription.
   - **Kazakh STT**: Native support for Kazakh speech recognition.
-  - **Gemma 3**: Powered by Google's latest open-weight model via alem.plus.
+  - **Gemma 3**: Powered by Google's latest open-weight model via alem.ai.
 - **Frontend**: React, Vite, TailwindCSS, D3.js, Font Awesome
 - **Backend**: Node.js, Express.js
 - **Email/Contact**: Web3Forms

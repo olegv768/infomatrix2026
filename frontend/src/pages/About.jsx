@@ -140,7 +140,7 @@ export default function About({ onNavigate }) {
               </ScrollReveal>
               <ScrollReveal delay={400}>
                 <p>
-                  By combining the power of Google's Gemma AI with intuitive visualization, we've created a platform that turns ambitious goals into actionable, step-by-step plans.
+                  By combining the power of Alem's Gemma AI with intuitive visualization, we've created a platform that turns ambitious goals into actionable, step-by-step plans.
                 </p>
               </ScrollReveal>
             </div>
