@@ -52,12 +52,6 @@ const TeamMember = ({ member, delay }) => {
 export default function About({ onNavigate }) {
   const team = [
     {
-      name: 'Aslan Abdulayev',
-      role: 'Full-stack developer',
-      image: 'Aslan.jpg',
-      bio: 'He love for clean code. The website works because of its code.'
-    },
-    {
       name: 'Oleg Volosov',
       role: 'Frontend developer / D3.js',
       image: 'Oleg_v2.png',
