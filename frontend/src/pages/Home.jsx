@@ -113,7 +113,7 @@ export default function Home({ onNavigate }) {
           <div className="text-center mb-16 mt-16">
             <ScrollReveal>
               <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-4 font-['Outfit'] tracking-tight"
-                style={{ paddingBottom: '40px' }}>Why Choose LevelUp Map?</h2>
+                style={{ paddingBottom: '40px', marginLeft: '15px' }}>Why Choose LevelUp Map?</h2>
             </ScrollReveal>
           </div>
 

@@ -221,7 +221,7 @@ export default function Generator({
   const handleZoomOut = () => {
     if (zoomRef.current && svgRef.current) {
       const svg = d3.select(svgRef.current)
-      const newZoom = Math.max(zoom / 1.2, 0.3)
+      const newZoom = Math.max(zoom / 1.2, 0.2)
       zoomRef.current.scaleTo(svg.transition().duration(300), newZoom)
     }
   }
@@ -387,7 +387,7 @@ export default function Generator({
 
     const zoomBehavior = d3
       .zoom()
-      .scaleExtent([0.3, 3])
+      .scaleExtent([0.2, 3])
       .on('zoom', (event) => {
         container.attr('transform', event.transform)
         setZoom(event.transform.k)
@@ -407,12 +407,12 @@ export default function Generator({
       // Spread nodes vertically by level and horizontally by their position in that level
       const levelNodes = data.nodes.filter(n => n.level === d.level)
       const indexInLevel = levelNodes.findIndex(n => n.id === d.id)
-      const horizontalSpacing = isMobile ? 120 : 200
+      const horizontalSpacing = isMobile ? 180 : 300
 
       return {
         ...d,
         x: width / 2 + (indexInLevel - (levelNodes.length - 1) / 2) * horizontalSpacing + (Math.random() - 0.5) * 50,
-        y: height / 2 + (d.level * (isMobile ? 150 : 200)) - (isMobile ? 150 : 300) // Offset upward so it grows down
+        y: height / 2 + (d.level * (isMobile ? 225 : 300)) - (isMobile ? 225 : 450) // Offset upward so it grows down
       }
     })
     nodesRef.current = nodes
@@ -429,7 +429,7 @@ export default function Generator({
         d3
           .forceLink(links)
           .id((d) => d.id)
-          .distance(220)
+          .distance(330)
           .strength(0.25)
       )
       .force('charge', d3.forceManyBody().strength(-1200))
