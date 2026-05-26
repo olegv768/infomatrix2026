@@ -296,20 +296,21 @@ function App() {
     const renderPage = () => {
         // Dynamic SEO Update
         const titles = {
-            home: 'AI Roadmap Generator & Learning Path Planner | Level Up Map',
-            generator: 'Free AI Roadmap Generator — Create Your Study Plan | Level Up Map',
-            history: 'My AI Roadmaps — Progress History | Level Up Map',
-            about: 'About Level Up Map — The Ultimate AI Learning Planner',
-            contact: 'Contact Us — Level Up Map Built With AI',
+            home: 'AI Roadmap Generator & Learning Path Planner | Level Up Map (Левел Ап Мап)',
+            generator: 'Free AI Roadmap Generator — Create Your Study Plan | Level Up Map (Левел Ап Мап)',
+            history: 'My AI Roadmaps — Progress History | Level Up Map (Левел Ап Мап)',
+            about: 'About Level Up Map — AI Learning Planner | О нас',
+            contact: 'Contact Us — Level Up Map | Контакты',
         }
         const descriptions = {
-            home: 'Free AI roadmap generator. Create personalized, step-by-step career and learning paths instantly. Plan your studies and goals with Alem Gemma AI.',
-            generator: 'Enter any goal or skill, and our AI Roadmap Generator will create a comprehensive, step-by-step learning path complete with milestones and tasks.',
-            about: 'Learn more about the team behind Level Up Map and how we use AI to build the ultimate roadmap generator and study planner.',
-            contact: 'Reach out for support, feedback, or collaboration opportunities with the Level Up Map team.',
+            home: 'Free AI roadmap generator. Create personalized learning paths instantly. / Бесплатный генератор дорожных карт с ИИ (левел ап мап). Создайте индивидуальный план обучения.',
+            generator: 'Generate step-by-step learning paths for any goal with AI. / Создайте пошаговую интерактивную дорожную карту для любой цели обучения с помощью ИИ.',
+            history: 'Track your learning progress and view previously generated roadmaps. / Отслеживайте прогресс обучения и просматривайте созданные дорожные карты.',
+            about: 'Learn more about the team behind Level Up Map and our AI study planner. / Узнайте больше о создателях Level Up Map и нашей платформы.',
+            contact: 'Reach out for support, feedback, or collaboration opportunities. / Свяжитесь с нами по вопросам поддержки, обратной связи и сотрудничества.',
         }
 
-        document.title = titles[currentPage] || 'Level Up Map'
+        document.title = titles[currentPage] || 'Level Up Map (Левел Ап Мап)'
         const metaDesc = document.querySelector('meta[name="description"]')
         if (metaDesc) metaDesc.setAttribute('content', descriptions[currentPage] || descriptions.home)
 
