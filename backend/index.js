@@ -223,8 +223,8 @@ Ensure the roadmap covers:
 RESOURCE RULES — FOLLOW EXACTLY:
 ════════════════════════════════════════
 RULE 1 — RESOURCE COUNT: Level 0 node MUST have exactly 2 resources. ALL OTHER nodes (levels 1-4) MUST have exactly 1 resource.
-RULE 2 — VERIFIABLE ABSOLUTE URLs: Every URL MUST start with https://. Use URLs from known platforms (youtube, docs, coursera).
-RULE 3 — NO HALLUCINATED IDs: If you are not 100% sure about a specific video or course ID, use a search result URL instead (e.g., https://www.youtube.com/results?search_query=...). This prevents 404 errors.
+RULE 2 — VERIFIABLE ABSOLUTE URLs: Every URL MUST start with https://. Use URLs from known platforms (youtube, google, docs, coursera, wikipedia).
+RULE 3 — NO HALLUCINATED IDs & MULTILINGUAL SEARCH: If you are not 100% sure about a specific video or course ID, use a search result URL instead (e.g., https://www.youtube.com/results?search_query=... or https://www.google.com/search?q=...). This prevents 404 errors. IMPORTANT: The search query in the URL MUST be in the SAME LANGUAGE as the user's goal. If the goal is in Russian, the search query in the URL MUST be in Russian (e.g., use https://www.google.com/search?q=изучить+python or https://www.youtube.com/results?search_query=уроки+python). Do NOT use English search queries for Russian roadmaps.
 RULE 4 — LANGUAGE LABELS: Keep titles original, append language in parentheses if different.
 RULE 5 — NO FABRICATED TASKS: Follow real-world steps.
 

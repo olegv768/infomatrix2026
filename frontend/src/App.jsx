@@ -314,6 +314,10 @@ function App() {
         const metaDesc = document.querySelector('meta[name="description"]')
         if (metaDesc) metaDesc.setAttribute('content', descriptions[currentPage] || descriptions.home)
 
+        // Dynamic HTML Language Tag based on user's browser language
+        const userLang = navigator.language || navigator.userLanguage || 'en';
+        document.documentElement.lang = userLang.startsWith('ru') ? 'ru' : userLang.startsWith('kk') ? 'kk' : 'en';
+
         // Dynamic Canonical link
         let link = document.querySelector("link[rel='canonical']")
         if (!link) {
